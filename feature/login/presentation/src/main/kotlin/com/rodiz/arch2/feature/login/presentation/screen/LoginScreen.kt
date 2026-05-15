@@ -1,16 +1,20 @@
 package com.rodiz.arch2.feature.login.presentation.screen
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -19,9 +23,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -29,6 +36,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowInsetsControllerCompat
 import com.rodiz.arch2.core.designsystem.theme.Arch2Theme
 import com.rodiz.arch2.core.ui.components.BrandHeader
 import com.rodiz.arch2.core.ui.components.EmailField
@@ -47,6 +55,7 @@ fun LoginScreen(
     onAction: (LoginAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    LightStatusBarIconsWhileShown()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -57,14 +66,16 @@ fun LoginScreen(
             patternRes = R.drawable.ic_login_topographic,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(320.dp),
+                .height(320.dp)
+                .padding(bottom = 16.dp),
         )
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 28.dp)
-                .padding(top = 16.dp, bottom = 32.dp),
+                .padding(top = 16.dp, bottom = 32.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars),
             verticalArrangement = Arrangement.Top,
         ) {
             Text(
@@ -78,7 +89,7 @@ fun LoginScreen(
             Spacer(Modifier.height(6.dp))
             Box(
                 modifier = Modifier
-                    .size(width = 36.dp, height = 3.dp)
+                    .size(width = 136.dp, height = 3.dp)
                     .clip(RoundedCornerShape(2.dp))
                     .background(MaterialTheme.colorScheme.primary),
             )
@@ -180,6 +191,23 @@ fun LoginScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * Forces light status-bar icons (white on coral) while this screen is on top, and
+ * restores the default on dispose so light-background screens (Home) get dark icons.
+ */
+@Composable
+private fun LightStatusBarIconsWhileShown() {
+    val view = LocalView.current
+    if (view.isInEditMode) return
+    DisposableEffect(Unit) {
+        val window = (view.context as Activity).window
+        val controller = WindowInsetsControllerCompat(window, view)
+        val previous = controller.isAppearanceLightStatusBars
+        controller.isAppearanceLightStatusBars = false
+        onDispose { controller.isAppearanceLightStatusBars = previous }
     }
 }
 

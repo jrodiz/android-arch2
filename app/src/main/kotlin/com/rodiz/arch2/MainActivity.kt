@@ -3,9 +3,6 @@ package com.rodiz.arch2
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -29,16 +26,15 @@ class MainActivity : FragmentActivity() {
         enableEdgeToEdge()
         setContent {
             Arch2Theme {
-                Scaffold { padding ->
-                    NavDisplay(
-                        backStack = navigator.backStack,
-                        onBack = { navigator.goBack() },
-                        modifier = Modifier.padding(padding),
-                        entryProvider = entryProvider {
-                            entryProviderInstallers.forEach { install -> install() }
-                        },
-                    )
-                }
+                // No Scaffold here — each screen owns its inset handling so coral
+                // hero headers can paint behind the status bar.
+                NavDisplay(
+                    backStack = navigator.backStack,
+                    onBack = { navigator.goBack() },
+                    entryProvider = entryProvider {
+                        entryProviderInstallers.forEach { install -> install() }
+                    },
+                )
             }
         }
     }
