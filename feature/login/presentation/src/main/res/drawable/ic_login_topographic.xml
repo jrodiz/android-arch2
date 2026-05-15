@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="240dp"
+    android:viewportWidth="360"
+    android:viewportHeight="240">
+
+    <!-- Topographic contour-line stand-in. Hand-tuned bezier paths layered to
+         evoke a contour map without being a literal one. Strokes are white at
+         low alpha; the coral header tints them. Replace with a designer asset
+         later — no Compose code change required. -->
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.35"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M -20,60 C 60,30 140,90 220,55 C 290,25 340,75 380,50" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.35"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M -20,100 C 70,70 150,130 230,95 C 300,65 350,115 380,90" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.4"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M -20,140 C 80,110 160,170 240,135 C 310,105 350,150 380,130" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.35"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M -20,180 C 70,150 150,210 230,180 C 305,150 355,195 380,175" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.32"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:pathData="M -20,210 C 60,185 140,235 220,210 C 295,185 350,225 380,205" />
+
+    <!-- Nested closed contour blobs (the eye-of-the-storm shapes in the mockup) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.45"
+        android:strokeWidth="1.2"
+        android:fillColor="#00FFFFFF"
+        android:pathData="M 120,110 C 150,90 200,95 220,120 C 230,140 210,165 175,165 C 140,165 110,135 120,110 Z" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.4"
+        android:strokeWidth="1.2"
+        android:fillColor="#00FFFFFF"
+        android:pathData="M 135,118 C 160,102 195,108 210,128 C 218,145 200,160 175,160 C 150,160 128,138 135,118 Z" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.35"
+        android:strokeWidth="1.2"
+        android:fillColor="#00FFFFFF"
+        android:pathData="M 148,128 C 168,116 192,120 202,134 C 208,148 192,158 175,158 C 158,158 144,142 148,128 Z" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.45"
+        android:strokeWidth="1.2"
+        android:fillColor="#00FFFFFF"
+        android:pathData="M 260,75 C 280,68 305,76 312,92 C 315,108 300,118 280,116 C 260,114 248,90 260,75 Z" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.4"
+        android:strokeWidth="1.2"
+        android:fillColor="#00FFFFFF"
+        android:pathData="M 268,82 C 284,77 302,84 307,96 C 309,108 297,114 283,112 C 268,110 260,93 268,82 Z" />
+
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.42"
+        android:strokeWidth="1.2"
+        android:fillColor="#00FFFFFF"
+        android:pathData="M 40,170 C 55,160 78,166 84,180 C 86,194 72,202 56,200 C 40,198 32,180 40,170 Z" />
+
+</vector>
