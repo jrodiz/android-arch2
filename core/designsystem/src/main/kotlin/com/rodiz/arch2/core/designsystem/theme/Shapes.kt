@@ -26,9 +26,12 @@ val WaveBottomShape: Shape = object : Shape {
             moveTo(0f, 0f)
             lineTo(size.width, 0f)
             lineTo(size.width, size.height - waveDepth)
+            // Control point capped at size.height so the curve's belly stays
+            // inside the Box bounds; with CP below size.height the bezier was
+            // clipped flat at the lowest ~2% of the curve.
             quadraticBezierTo(
                 size.width * 0.55f,
-                size.height + waveDepth,
+                size.height,
                 0f,
                 size.height - waveDepth * 0.4f,
             )
