@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.arch.android.library)
-    alias(libs.plugins.arch.android.library.compose)
+    alias(libs.plugins.tinpet.android.library)
+    alias(libs.plugins.tinpet.android.library.compose)
 }
 
 android {

@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.rodiz.arch2.core.designsystem.theme.Arch2Theme
+import com.rodiz.arch2.core.designsystem.theme.TinPetTheme
 import com.rodiz.arch2.core.navigation.EntryProviderInstaller
 import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.discover.nav.DiscoverHome
@@ -44,7 +44,7 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Arch2Theme {
+            TinPetTheme {
                 val current by remember(navigator) {
                     derivedStateOf { navigator.backStack.lastOrNull() }
                 }

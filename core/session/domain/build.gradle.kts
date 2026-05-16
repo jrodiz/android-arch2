@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.arch.jvm.library)
+    alias(libs.plugins.tinpet.jvm.library)
 }
 
 dependencies {

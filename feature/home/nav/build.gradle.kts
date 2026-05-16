@@ -1,4 +1,4 @@
 plugins {
-    alias(libs.plugins.arch.jvm.library)
-    alias(libs.plugins.arch.kotlin.serialization)
+    alias(libs.plugins.tinpet.jvm.library)
+    alias(libs.plugins.tinpet.kotlin.serialization)
 }

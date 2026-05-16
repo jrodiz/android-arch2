@@ -15,7 +15,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Arch2"
+rootProject.name = "TinPet"
 
 include(":app")
 

@@ -1,9 +1,9 @@
 plugins {
-    alias(libs.plugins.arch.android.application)
+    alias(libs.plugins.tinpet.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.arch.android.hilt)
-    alias(libs.plugins.arch.kotlin.serialization)
-    alias(libs.plugins.arch.android.firebase)
+    alias(libs.plugins.tinpet.android.hilt)
+    alias(libs.plugins.tinpet.kotlin.serialization)
+    alias(libs.plugins.tinpet.android.firebase)
 }
 
 android {

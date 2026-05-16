@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.arch.android.feature)
-    alias(libs.plugins.arch.kotlin.serialization)
+    alias(libs.plugins.tinpet.android.feature)
+    alias(libs.plugins.tinpet.kotlin.serialization)
 }
 
 android {

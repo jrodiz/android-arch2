@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "com.rodiz.arch2.buildlogic"
+group = "com.rodiz.tinpet.buildlogic"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -20,39 +20,39 @@ dependencies {
 gradlePlugin {
     plugins {
         register("androidApplication") {
-            id = "arch.android.application"
+            id = "tinpet.android.application"
             implementationClass = "com.rodiz.arch2.convention.AndroidApplicationConventionPlugin"
         }
         register("androidLibrary") {
-            id = "arch.android.library"
+            id = "tinpet.android.library"
             implementationClass = "com.rodiz.arch2.convention.AndroidLibraryConventionPlugin"
         }
         register("androidLibraryCompose") {
-            id = "arch.android.library.compose"
+            id = "tinpet.android.library.compose"
             implementationClass = "com.rodiz.arch2.convention.AndroidLibraryComposeConventionPlugin"
         }
         register("androidFeature") {
-            id = "arch.android.feature"
+            id = "tinpet.android.feature"
             implementationClass = "com.rodiz.arch2.convention.AndroidFeatureConventionPlugin"
         }
         register("androidHilt") {
-            id = "arch.android.hilt"
+            id = "tinpet.android.hilt"
             implementationClass = "com.rodiz.arch2.convention.AndroidHiltConventionPlugin"
         }
         register("androidFirebase") {
-            id = "arch.android.firebase"
+            id = "tinpet.android.firebase"
             implementationClass = "com.rodiz.arch2.convention.AndroidFirebaseConventionPlugin"
         }
         register("jvmLibrary") {
-            id = "arch.jvm.library"
+            id = "tinpet.jvm.library"
             implementationClass = "com.rodiz.arch2.convention.JvmLibraryConventionPlugin"
         }
         register("kotlinSerialization") {
-            id = "arch.kotlin.serialization"
+            id = "tinpet.kotlin.serialization"
             implementationClass = "com.rodiz.arch2.convention.KotlinSerializationConventionPlugin"
         }
         register("androidTest") {
-            id = "arch.android.test"
+            id = "tinpet.android.test"
             implementationClass = "com.rodiz.arch2.convention.AndroidTestConventionPlugin"
         }
     }
