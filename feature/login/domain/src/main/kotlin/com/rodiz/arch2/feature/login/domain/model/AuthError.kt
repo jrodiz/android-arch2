@@ -7,5 +7,7 @@ sealed interface AuthError : AppError {
     data object NoNetwork : AuthError
     data object Timeout : AuthError
     data class Server(val code: Int) : AuthError
+    data object GoogleSignInCancelled : AuthError
+    data object GoogleSignInFailed : AuthError
     data object Unknown : AuthError
 }

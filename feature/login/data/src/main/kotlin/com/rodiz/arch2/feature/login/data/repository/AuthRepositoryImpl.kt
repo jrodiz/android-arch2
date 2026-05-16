@@ -1,7 +1,13 @@
 package com.rodiz.arch2.feature.login.data.repository
 
+import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
 import com.rodiz.arch2.core.common.result.Try
+import com.rodiz.arch2.core.firebase.UserProfileRepository
+import com.rodiz.arch2.core.firebase.model.UserProfile
 import com.rodiz.arch2.core.session.domain.Session
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.login.data.local.CredentialVault
@@ -12,6 +18,7 @@ import com.rodiz.arch2.feature.login.domain.model.Credentials
 import com.rodiz.arch2.feature.login.domain.repository.AuthRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -23,6 +30,8 @@ internal class AuthRepositoryImpl @Inject constructor(
     private val remote: FakeAuthRemoteDataSource,
     private val vault: CredentialVault,
     private val sessionRepository: SessionRepository,
+    private val firebaseAuth: FirebaseAuth,
+    private val userProfileRepository: UserProfileRepository,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) : AuthRepository {
 
@@ -34,6 +43,40 @@ internal class AuthRepositoryImpl @Inject constructor(
     override suspend fun loginWithStoredCredentials(): Try<Session, AuthError> = withContext(io) {
         val stored = vault.load() ?: return@withContext Try.Failure(AuthError.InvalidCredentials)
         performLogin(stored, persistForBiometric = false)
+    }
+
+    override suspend fun signInWithGoogle(idToken: String): Try<Session, AuthError> = withContext(io) {
+        try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val result = firebaseAuth.signInWithCredential(credential).await()
+            val user = result.user ?: return@withContext Try.Failure(AuthError.GoogleSignInFailed)
+            val firebaseToken = user.getIdToken(false).await().token.orEmpty()
+            val session = Session(
+                userId = user.uid,
+                token = firebaseToken,
+                displayName = user.displayName,
+                photoUrl = user.photoUrl?.toString(),
+            )
+            sessionRepository.save(session)
+            userProfileRepository.upsertOnSignIn(
+                UserProfile(
+                    uid = user.uid,
+                    email = user.email,
+                    displayName = user.displayName,
+                    photoUrl = user.photoUrl?.toString(),
+                    provider = "google",
+                ),
+            )
+            Try.Success(session)
+        } catch (e: FirebaseNetworkException) {
+            Try.Failure(AuthError.NoNetwork)
+        } catch (e: FirebaseAuthException) {
+            Try.Failure(AuthError.GoogleSignInFailed)
+        } catch (e: IOException) {
+            Try.Failure(AuthError.NoNetwork)
+        } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+            Try.Failure(AuthError.Unknown)
+        }
     }
 
     override suspend fun hasStoredCredentials(): Boolean = withContext(io) { vault.exists() }

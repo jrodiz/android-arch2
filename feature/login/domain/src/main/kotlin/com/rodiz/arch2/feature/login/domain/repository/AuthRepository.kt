@@ -8,5 +8,6 @@ import com.rodiz.arch2.feature.login.domain.model.Credentials
 interface AuthRepository {
     suspend fun login(credentials: Credentials): Try<Session, AuthError>
     suspend fun loginWithStoredCredentials(): Try<Session, AuthError>
+    suspend fun signInWithGoogle(idToken: String): Try<Session, AuthError>
     suspend fun hasStoredCredentials(): Boolean
 }

@@ -7,6 +7,7 @@ sealed interface LoginAction {
     data object Submit : LoginAction
     data object BiometricRequested : LoginAction
     data object BiometricSucceeded : LoginAction
+    data object GoogleSignInRequested : LoginAction
     data object ForgotPasswordTapped : LoginAction
     data object CreateAccountTapped : LoginAction
     data object DismissError : LoginAction

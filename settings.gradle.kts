@@ -26,6 +26,7 @@ include(":core:ui")
 include(":core:datastore")
 include(":core:session:domain")
 include(":core:session:data")
+include(":core:firebase")
 include(":core:testing")
 
 include(":feature:login:nav")
