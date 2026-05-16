@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home_welcome">Welcome, %1$s</string>
+    <string name="home_app_name">TinPet</string>
+    <string name="home_notifications_cd">Notifications</string>
+    <string name="home_composer_placeholder">What\'s on your mind?</string>
+    <string name="home_composer_avatar_cd">Your avatar</string>
+    <string name="home_composer_clicked">Post composer coming soon</string>
+    <string name="home_action_like">Like</string>
+    <string name="home_action_comment">Comment</string>
+    <string name="home_action_share">Share</string>
+    <string name="home_action_retry">Retry</string>
+    <string name="home_avatar_cd">Profile picture for %1$s</string>
+    <string name="home_image_cd">Photo in post by %1$s</string>
+    <string name="home_post_meta">%1$s · 🌐</string>
+    <string name="home_post_comments">%1$s comments</string>
+    <string name="home_post_shares">%1$s shares</string>
+    <string name="home_post_separator">·</string>
+    <string name="home_see_more">See more</string>
+    <string name="home_state_loading">Loading your feed…</string>
+    <string name="home_state_empty_title">No posts yet</string>
+    <string name="home_state_empty_body">Pull down to refresh, or check back later.</string>
+    <string name="home_state_error_title">Couldn\'t load feed</string>
 </resources>
