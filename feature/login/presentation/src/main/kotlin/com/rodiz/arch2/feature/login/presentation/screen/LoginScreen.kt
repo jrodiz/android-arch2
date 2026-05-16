@@ -1,6 +1,12 @@
 package com.rodiz.arch2.feature.login.presentation.screen
 
 import android.app.Activity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -108,68 +114,94 @@ fun LoginScreen(
                 Spacer(Modifier.height(16.dp))
             }
 
-            EmailField(
-                value = state.email,
-                onValueChange = { onAction(LoginAction.EmailChanged(it)) },
-                label = stringResource(R.string.login_email_label),
-                placeholder = stringResource(R.string.login_email_placeholder),
-                errorMessage = state.emailError?.localized(),
-            )
-
-            Spacer(Modifier.height(20.dp))
-
-            PasswordField(
-                value = state.password,
-                onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
-                label = stringResource(R.string.login_password_label),
-                placeholder = stringResource(R.string.login_password_placeholder),
-                visible = state.passwordVisible,
-                onToggleVisibility = { onAction(LoginAction.TogglePasswordVisibility) },
-                onImeDone = { onAction(LoginAction.Submit) },
-                errorMessage = state.passwordError?.localized(),
-                toggleContentDescription = stringResource(
-                    if (state.passwordVisible) R.string.login_password_hide else R.string.login_password_show,
-                ),
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically,
+            AnimatedVisibility(
+                visible = !state.emailFormExpanded,
+                enter = expandVertically(animationSpec = tween(durationMillis = 250)) +
+                    fadeIn(animationSpec = tween(durationMillis = 200)),
+                exit = shrinkVertically(animationSpec = tween(durationMillis = 200)) +
+                    fadeOut(animationSpec = tween(durationMillis = 150)),
             ) {
-                TextButton(onClick = { onAction(LoginAction.ForgotPasswordTapped) }) {
-                    Text(
-                        text = stringResource(R.string.login_forgot),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    )
-                }
+                PrimaryButton(
+                    text = stringResource(R.string.login_email_form_show),
+                    loading = false,
+                    enabled = !state.isSubmitting,
+                    onClick = { onAction(LoginAction.ShowEmailForm) },
+                    testTag = "login_email_form_show",
+                )
             }
 
-            Spacer(Modifier.height(40.dp))
+            AnimatedVisibility(
+                visible = state.emailFormExpanded,
+                enter = expandVertically(animationSpec = tween(durationMillis = 300)) +
+                    fadeIn(animationSpec = tween(durationMillis = 300)),
+                exit = shrinkVertically(animationSpec = tween(durationMillis = 250)) +
+                    fadeOut(animationSpec = tween(durationMillis = 200)),
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    EmailField(
+                        value = state.email,
+                        onValueChange = { onAction(LoginAction.EmailChanged(it)) },
+                        label = stringResource(R.string.login_email_label),
+                        placeholder = stringResource(R.string.login_email_placeholder),
+                        errorMessage = state.emailError?.localized(),
+                    )
 
-            PrimaryButton(
-                text = stringResource(R.string.login_submit),
-                loading = state.isSubmitting,
-                enabled = state.canSubmit,
-                onClick = { onAction(LoginAction.Submit) },
-                testTag = "login_submit",
-            )
+                    Spacer(Modifier.height(20.dp))
 
-            if (state.biometricAvailable) {
-                Spacer(Modifier.height(12.dp))
-                OutlinedButton(
-                    onClick = { onAction(LoginAction.BiometricRequested) },
-                    enabled = !state.isSubmitting,
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .testTag("login_biometric"),
-                ) {
-                    Text(stringResource(R.string.login_biometric))
+                    PasswordField(
+                        value = state.password,
+                        onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
+                        label = stringResource(R.string.login_password_label),
+                        placeholder = stringResource(R.string.login_password_placeholder),
+                        visible = state.passwordVisible,
+                        onToggleVisibility = { onAction(LoginAction.TogglePasswordVisibility) },
+                        onImeDone = { onAction(LoginAction.Submit) },
+                        errorMessage = state.passwordError?.localized(),
+                        toggleContentDescription = stringResource(
+                            if (state.passwordVisible) R.string.login_password_hide else R.string.login_password_show,
+                        ),
+                    )
+
+                    Spacer(Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        TextButton(onClick = { onAction(LoginAction.ForgotPasswordTapped) }) {
+                            Text(
+                                text = stringResource(R.string.login_forgot),
+                                color = MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(40.dp))
+
+                    PrimaryButton(
+                        text = stringResource(R.string.login_submit),
+                        loading = state.isSubmitting,
+                        enabled = state.canSubmit,
+                        onClick = { onAction(LoginAction.Submit) },
+                        testTag = "login_submit",
+                    )
+
+                    if (state.biometricAvailable) {
+                        Spacer(Modifier.height(12.dp))
+                        OutlinedButton(
+                            onClick = { onAction(LoginAction.BiometricRequested) },
+                            enabled = !state.isSubmitting,
+                            shape = MaterialTheme.shapes.large,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .testTag("login_biometric"),
+                        ) {
+                            Text(stringResource(R.string.login_biometric))
+                        }
+                    }
                 }
             }
 

@@ -20,6 +20,7 @@
     <string name="login_biometric_subtitle">Use biometric authentication to sign in</string>
     <string name="login_biometric_cancel">Cancel</string>
     <string name="login_error_dismiss">Dismiss error</string>
+    <string name="login_email_form_show">Login with email</string>
 
     <string name="login_error_invalid_credentials">Incorrect email or password.</string>
     <string name="login_error_no_network">No network connection. Check your internet and try again.</string>
