@@ -12,6 +12,8 @@ internal fun AuthError.localized(): String = when (this) {
     AuthError.NoNetwork -> stringResource(R.string.login_error_no_network)
     AuthError.Timeout -> stringResource(R.string.login_error_timeout)
     is AuthError.Server -> stringResource(R.string.login_error_server, code)
+    AuthError.GoogleSignInCancelled -> stringResource(R.string.login_google_cancelled)
+    AuthError.GoogleSignInFailed -> stringResource(R.string.login_google_failed)
     AuthError.Unknown -> stringResource(R.string.login_error_unknown)
 }
 

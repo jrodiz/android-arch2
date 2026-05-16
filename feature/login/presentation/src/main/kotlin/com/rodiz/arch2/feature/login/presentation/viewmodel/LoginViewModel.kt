@@ -4,12 +4,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodiz.arch2.core.common.result.Try
+import com.rodiz.arch2.feature.login.domain.model.AuthError
 import com.rodiz.arch2.feature.login.domain.model.Credentials
 import com.rodiz.arch2.feature.login.domain.repository.AuthRepository
 import com.rodiz.arch2.feature.login.domain.usecase.LoginUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.LoginWithBiometricUseCase
+import com.rodiz.arch2.feature.login.domain.usecase.SignInWithGoogleUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.ValidateEmailUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.ValidatePasswordUseCase
+import com.rodiz.arch2.feature.login.presentation.BuildConfig
+import com.rodiz.arch2.feature.login.presentation.DebugConstants
 import com.rodiz.arch2.feature.login.presentation.state.LoginAction
 import com.rodiz.arch2.feature.login.presentation.state.LoginEvent
 import com.rodiz.arch2.feature.login.presentation.state.LoginUiState
@@ -24,14 +28,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.rodiz.arch2.feature.login.presentation.BuildConfig
-import com.rodiz.arch2.feature.login.presentation.DebugConstants
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val loginUseCase: LoginUseCase,
     private val loginWithBiometricUseCase: LoginWithBiometricUseCase,
+    private val signInWithGoogleUseCase: SignInWithGoogleUseCase,
     private val validateEmail: ValidateEmailUseCase,
     private val validatePassword: ValidatePasswordUseCase,
     private val authRepository: AuthRepository,
@@ -70,10 +73,26 @@ class LoginViewModel @Inject constructor(
             LoginAction.Submit -> submit()
             LoginAction.BiometricRequested -> tryEmit(LoginEvent.PromptBiometric)
             LoginAction.BiometricSucceeded -> loginWithBiometric()
+            LoginAction.GoogleSignInRequested -> tryEmit(LoginEvent.PromptGoogleSignIn)
             LoginAction.ForgotPasswordTapped -> tryEmit(LoginEvent.NavigateForgot)
             LoginAction.CreateAccountTapped -> tryEmit(LoginEvent.NavigateCreate)
             LoginAction.DismissError -> _state.update { it.copy(transientError = null) }
+            LoginAction.ShowEmailForm -> _state.update { it.copy(emailFormExpanded = true) }
         }
+    }
+
+    /** Called by the route after Credential Manager returns a Google ID token. */
+    fun onGoogleIdToken(idToken: String) {
+        _state.update { it.copy(isSubmitting = true, transientError = null) }
+        viewModelScope.launch {
+            val result = signInWithGoogleUseCase(idToken)
+            handleResult(result)
+        }
+    }
+
+    /** Called by the route when Credential Manager fails or is cancelled. */
+    fun onGoogleSignInFailed(error: AuthError) {
+        _state.update { it.copy(isSubmitting = false, transientError = error) }
     }
 
     private fun onEmailChanged(value: String) {
@@ -120,7 +139,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun handleResult(result: Try<*, com.rodiz.arch2.feature.login.domain.model.AuthError>) {
+    private fun handleResult(result: Try<*, AuthError>) {
         when (result) {
             is Try.Success -> {
                 _state.update { it.copy(isSubmitting = false) }

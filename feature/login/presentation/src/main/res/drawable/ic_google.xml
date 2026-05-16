@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 4-color Google "G" — official asset shape, hand-traced as a vector drawable
+     so we don't pull in play-services-base just for the icon. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#4285F4"
+        android:pathData="M21.35,11.1H12.18v3.83h5.27c-0.23,1.36 -1.65,3.99 -5.27,3.99c-3.17,0 -5.76,-2.63 -5.76,-5.87s2.59,-5.87 5.76,-5.87c1.81,0 3.02,0.77 3.71,1.43l2.53,-2.44C16.81,4.62 14.7,3.7 12.18,3.7c-4.94,0 -8.94,4 -8.94,8.93s4,8.93 8.94,8.93c5.16,0 8.58,-3.62 8.58,-8.73C20.76,12.07 21.35,11.1 21.35,11.1z" />
+    <path
+        android:fillColor="#34A853"
+        android:pathData="M3.88,7.4l3.16,2.32C7.93,7.62 9.86,6.18 12.18,6.18c1.81,0 3.02,0.77 3.71,1.43l2.53,-2.44C16.81,4.62 14.7,3.7 12.18,3.7C8.65,3.7 5.6,5.66 3.88,7.4z" />
+    <path
+        android:fillColor="#FBBC05"
+        android:pathData="M12.18,21.56c2.51,0 4.62,-0.83 6.16,-2.26l-2.93,-2.27c-0.78,0.54 -1.85,0.93 -3.23,0.93c-2.48,0 -4.58,-1.6 -5.33,-3.83L3.7,16.51C5.42,19.5 8.55,21.56 12.18,21.56z" />
+    <path
+        android:fillColor="#EA4335"
+        android:pathData="M12.18,9.61c1.32,0 2.49,0.45 3.42,1.33l2.55,-2.55c-1.62,-1.51 -3.71,-2.39 -5.97,-2.39c-3.18,0 -5.91,1.82 -7.24,4.5l3.16,2.45C8.7,11.06 10.27,9.61 12.18,9.61z" />
+</vector>

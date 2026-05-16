@@ -12,6 +12,7 @@ data class LoginUiState(
     val isSubmitting: Boolean = false,
     val transientError: AuthError? = null,
     val biometricAvailable: Boolean = false,
+    val emailFormExpanded: Boolean = false,
 ) {
     val canSubmit: Boolean
         get() = email.isNotBlank() &&

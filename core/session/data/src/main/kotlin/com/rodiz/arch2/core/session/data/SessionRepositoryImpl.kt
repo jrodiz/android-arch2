@@ -20,6 +20,8 @@ internal class SessionRepositoryImpl @Inject constructor(
     private object Keys {
         val UserId = stringPreferencesKey("session_user_id")
         val Token = stringPreferencesKey("session_token")
+        val DisplayName = stringPreferencesKey("session_display_name")
+        val PhotoUrl = stringPreferencesKey("session_photo_url")
     }
 
     override fun observe(): Flow<Session?> = dataStore.data.map { it.toSession() }
@@ -30,6 +32,8 @@ internal class SessionRepositoryImpl @Inject constructor(
         dataStore.edit { prefs ->
             prefs[Keys.UserId] = session.userId
             prefs[Keys.Token] = session.token
+            session.displayName?.let { prefs[Keys.DisplayName] = it } ?: prefs.remove(Keys.DisplayName)
+            session.photoUrl?.let { prefs[Keys.PhotoUrl] = it } ?: prefs.remove(Keys.PhotoUrl)
         }
     }
 
@@ -37,12 +41,19 @@ internal class SessionRepositoryImpl @Inject constructor(
         dataStore.edit { prefs ->
             prefs.remove(Keys.UserId)
             prefs.remove(Keys.Token)
+            prefs.remove(Keys.DisplayName)
+            prefs.remove(Keys.PhotoUrl)
         }
     }
 
     private fun Preferences.toSession(): Session? {
         val id = this[Keys.UserId] ?: return null
         val token = this[Keys.Token] ?: return null
-        return Session(userId = id, token = token)
+        return Session(
+            userId = id,
+            token = token,
+            displayName = this[Keys.DisplayName],
+            photoUrl = this[Keys.PhotoUrl],
+        )
     }
 }

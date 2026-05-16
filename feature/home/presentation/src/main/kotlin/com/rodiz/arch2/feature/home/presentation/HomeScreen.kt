@@ -28,7 +28,12 @@ fun HomeRoute(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(stringResource(R.string.home_welcome, session?.userId.orEmpty()))
+        Text(
+            stringResource(
+                R.string.home_welcome,
+                session?.displayName ?: session?.userId.orEmpty(),
+            )
+        )
         Spacer(Modifier.height(24.dp))
         OutlinedButton(onClick = { viewModel.signOut(onSignedOut) }) {
             Text(stringResource(R.string.home_sign_out))

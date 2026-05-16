@@ -12,6 +12,10 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:session:domain"))
     implementation(project(":core:session:data"))
+    implementation(project(":core:firebase"))
     implementation(libs.androidx.security.crypto)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
 }

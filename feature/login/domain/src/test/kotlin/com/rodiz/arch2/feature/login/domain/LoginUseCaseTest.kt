@@ -46,6 +46,7 @@ class LoginUseCaseTest {
     ) : AuthRepository {
         override suspend fun login(credentials: Credentials) = loginResult
         override suspend fun loginWithStoredCredentials() = loginResult
+        override suspend fun signInWithGoogle(idToken: String) = loginResult
         override suspend fun hasStoredCredentials() = false
     }
 }

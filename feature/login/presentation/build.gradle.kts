@@ -8,6 +8,10 @@ android {
 
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Read from gradle.properties (or -P override). Blank when Firebase setup
+        // is incomplete — Google sign-in fails fast at runtime.
+        val webClientId = providers.gradleProperty("firebase.web.client.id").getOrElse("")
+        buildConfigField("String", "GCP_WEB_CLIENT_ID", "\"$webClientId\"")
     }
 
     buildFeatures {
@@ -27,6 +31,9 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.compose.material.icons)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.google.id)
 
     testImplementation(project(":core:testing"))
     testImplementation(libs.kotlinx.coroutines.test)

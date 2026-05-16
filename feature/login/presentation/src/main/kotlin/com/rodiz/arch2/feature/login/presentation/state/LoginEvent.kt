@@ -5,4 +5,5 @@ sealed interface LoginEvent {
     data object NavigateForgot : LoginEvent
     data object NavigateCreate : LoginEvent
     data object PromptBiometric : LoginEvent
+    data object PromptGoogleSignIn : LoginEvent
 }

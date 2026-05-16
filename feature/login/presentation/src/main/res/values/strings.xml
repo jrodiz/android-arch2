@@ -13,16 +13,22 @@
     <string name="login_sign_up">Sign up</string>
     <string name="login_create_account">Create account</string>
     <string name="login_biometric">Sign in with biometric</string>
+    <string name="login_or_divider">or</string>
+    <string name="login_continue_google">Continue with Google</string>
+    <string name="login_google_icon_description">Google</string>
     <string name="login_biometric_title">Confirm it\'s you</string>
     <string name="login_biometric_subtitle">Use biometric authentication to sign in</string>
     <string name="login_biometric_cancel">Cancel</string>
     <string name="login_error_dismiss">Dismiss error</string>
+    <string name="login_email_form_show">Login with email</string>
 
     <string name="login_error_invalid_credentials">Incorrect email or password.</string>
     <string name="login_error_no_network">No network connection. Check your internet and try again.</string>
     <string name="login_error_timeout">The request timed out. Please try again.</string>
     <string name="login_error_server">Server error (%1$d). Please try again later.</string>
     <string name="login_error_unknown">Something went wrong. Please try again.</string>
+    <string name="login_google_cancelled">Google sign-in was cancelled.</string>
+    <string name="login_google_failed">Couldn\'t sign in with Google. Try again.</string>
 
     <string name="login_validation_email_empty">Email is required.</string>
     <string name="login_validation_email_malformed">Enter a valid email address.</string>
