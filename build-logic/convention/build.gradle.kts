@@ -13,6 +13,8 @@ dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
+    implementation(libs.google.services.plugin)
+    implementation(libs.firebase.crashlytics.plugin)
 }
 
 gradlePlugin {
@@ -36,6 +38,10 @@ gradlePlugin {
         register("androidHilt") {
             id = "arch.android.hilt"
             implementationClass = "com.rodiz.arch2.convention.AndroidHiltConventionPlugin"
+        }
+        register("androidFirebase") {
+            id = "arch.android.firebase"
+            implementationClass = "com.rodiz.arch2.convention.AndroidFirebaseConventionPlugin"
         }
         register("jvmLibrary") {
             id = "arch.jvm.library"

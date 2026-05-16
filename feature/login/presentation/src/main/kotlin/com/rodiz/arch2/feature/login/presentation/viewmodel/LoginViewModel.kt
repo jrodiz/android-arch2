@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.rodiz.arch2.feature.login.presentation.BuildConfig
+import com.rodiz.arch2.feature.login.presentation.DebugConstants
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -37,7 +39,13 @@ class LoginViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         LoginUiState(
-            email = savedStateHandle.get<String>(KEY_EMAIL).orEmpty(),
+            // TODO: Remove pre-filled debug credentials before production
+            email = savedStateHandle.get<String>(KEY_EMAIL) ?: if (BuildConfig.DEBUG) {
+                DebugConstants.PREFILLED_EMAIL
+            } else {
+                ""
+            },
+            password = if (BuildConfig.DEBUG) DebugConstants.PREFILLED_PASSWORD else "",
         ),
     )
     val state: StateFlow<LoginUiState> = _state.asStateFlow()

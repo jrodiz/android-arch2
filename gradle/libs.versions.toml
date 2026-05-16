@@ -24,6 +24,9 @@ coil = "2.7.0"
 hilt = "2.52"
 kotlinxCoroutines = "1.8.1"
 kotlinxSerialization = "1.7.3"
+firebaseBom = "33.5.1"
+googleServices = "4.4.2"
+firebaseCrashlyticsPlugin = "3.0.2"
 
 junit4 = "4.13.2"
 junitJupiter = "5.11.3"
@@ -66,11 +69,17 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 
 # Convention plugin support (Gradle plugins exposed as libraries so build-logic can apply them via id())
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+google-services-plugin = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
+firebase-crashlytics-plugin = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "firebaseCrashlyticsPlugin" }
 
 # Testing
 junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
@@ -97,6 +106,7 @@ arch-android-library = { id = "arch.android.library" }
 arch-android-library-compose = { id = "arch.android.library.compose" }
 arch-android-feature = { id = "arch.android.feature" }
 arch-android-hilt = { id = "arch.android.hilt" }
+arch-android-firebase = { id = "arch.android.firebase" }
 arch-jvm-library = { id = "arch.jvm.library" }
 arch-kotlin-serialization = { id = "arch.kotlin.serialization" }
 arch-android-test = { id = "arch.android.test" }

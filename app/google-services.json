@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "527756133131",
+    "project_id": "arch2-cac87",
+    "storage_bucket": "arch2-cac87.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:527756133131:android:119343dec34041d8ee580e",
+        "android_client_info": {
+          "package_name": "com.rodiz.arch2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB81vRnoBjQD9mG9d_70xCCndcbo10Nn1k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:527756133131:android:1fb34eab68841cfdee580e",
+        "android_client_info": {
+          "package_name": "com.rodiz.arch2.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB81vRnoBjQD9mG9d_70xCCndcbo10Nn1k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
