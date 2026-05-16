@@ -3,6 +3,7 @@ package com.rodiz.arch2
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Explore
@@ -61,6 +62,7 @@ class MainActivity : FragmentActivity() {
                             )
                         }
                     },
+                    contentWindowInsets = WindowInsets(0),
                 ) { innerPadding ->
                     NavDisplay(
                         modifier = Modifier.padding(innerPadding),
