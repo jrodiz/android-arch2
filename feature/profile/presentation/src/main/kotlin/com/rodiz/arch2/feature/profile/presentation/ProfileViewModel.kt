@@ -1,4 +1,4 @@
-package com.rodiz.arch2.feature.home.presentation
+package com.rodiz.arch2.feature.profile.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,13 +8,21 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
-    sessionRepository: SessionRepository,
+class ProfileViewModel @Inject constructor(
+    private val sessionRepository: SessionRepository,
 ) : ViewModel() {
 
     val session: StateFlow<Session?> = sessionRepository.observe()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    fun signOut(onSignedOut: () -> Unit) {
+        viewModelScope.launch {
+            sessionRepository.clear()
+            onSignedOut()
+        }
+    }
 }

@@ -1,8 +1,8 @@
-package com.rodiz.arch2.feature.home.presentation
+package com.rodiz.arch2.feature.discover.presentation
 
 import androidx.navigation3.runtime.entry
 import com.rodiz.arch2.core.navigation.EntryProviderInstaller
-import com.rodiz.arch2.feature.home.nav.HomeHome
+import com.rodiz.arch2.feature.discover.nav.DiscoverHome
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,12 +11,12 @@ import dagger.multibindings.IntoSet
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-internal object HomeNavModule {
+internal object DiscoverNavModule {
     @Provides
     @IntoSet
-    fun provideHomeEntries(): EntryProviderInstaller = {
-        entry<HomeHome> {
-            HomeRoute()
+    fun provideDiscoverEntries(): EntryProviderInstaller = {
+        entry<DiscoverHome> {
+            DiscoverRoute()
         }
     }
 }

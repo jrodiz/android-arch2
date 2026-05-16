@@ -3,14 +3,13 @@ plugins {
 }
 
 android {
-    namespace = "com.rodiz.arch2.feature.home.presentation"
+    namespace = "com.rodiz.arch2.feature.discover.presentation"
 }
 
 dependencies {
-    implementation(project(":feature:home:nav"))
+    implementation(project(":feature:discover:nav"))
     implementation(project(":core:navigation"))
     implementation(project(":core:designsystem"))
-    implementation(project(":core:session:domain"))
 
     implementation(libs.androidx.compose.material.icons)
 }
