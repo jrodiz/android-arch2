@@ -9,7 +9,7 @@ This plan applies that visual design to the existing `LoginScreen` while preserv
 ### Confirmed decisions
 
 - **Remember Me checkbox:** skip it. The row becomes a single right-aligned "Forgot Password?" link. Always-remember semantics stay as designed.
-- **Theme scope:** update the global `Arch2Theme` to a coral brand palette. Material You dynamic color is disabled (would otherwise override coral on S+).
+- **Theme scope:** update the global `TinPetTheme` to a coral brand palette. Material You dynamic color is disabled (would otherwise override coral on S+).
 - **Topographic pattern:** vector drawable asset (`ic_login_topographic.xml`) under `:feature:login:presentation/res/drawable/`. Crisp at any size; easy to art-direct later.
 
 ---
@@ -48,7 +48,7 @@ Add a tuned `Typography` instance in a new `theme/Type.kt`:
 - `displayMedium` — used for "Sign in": `fontWeight = ExtraBold`, `fontSize = 44.sp`, `lineHeight = 52.sp`, `letterSpacing = (-1).sp`.
 - Keep other text styles at M3 defaults.
 
-Wire it into `MaterialTheme(typography = AppTypography, ...)` in `Arch2Theme`.
+Wire it into `MaterialTheme(typography = AppTypography, ...)` in `TinPetTheme`.
 
 ### 1.4 Shapes
 

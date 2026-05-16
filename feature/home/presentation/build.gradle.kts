@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.arch.android.feature)
+    alias(libs.plugins.tinpet.android.feature)
 }
 
 android {
@@ -8,8 +8,9 @@ android {
 
 dependencies {
     implementation(project(":feature:home:nav"))
-    implementation(project(":feature:login:nav"))
     implementation(project(":core:navigation"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:session:domain"))
+
+    implementation(libs.androidx.compose.material.icons)
 }

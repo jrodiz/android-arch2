@@ -46,7 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsControllerCompat
-import com.rodiz.arch2.core.designsystem.theme.Arch2Theme
+import com.rodiz.arch2.core.designsystem.theme.TinPetTheme
 import com.rodiz.arch2.core.ui.components.BrandHeader
 import com.rodiz.arch2.core.ui.components.EmailField
 import com.rodiz.arch2.core.ui.components.ErrorBanner
@@ -297,7 +297,7 @@ private fun LightStatusBarIconsWhileShown() {
 @Preview(name = "Login — empty", showBackground = true, heightDp = 900)
 @Composable
 private fun LoginScreenPreviewEmpty() {
-    Arch2Theme {
+    TinPetTheme {
         LoginScreen(state = LoginUiState(), onAction = {})
     }
 }
@@ -305,7 +305,7 @@ private fun LoginScreenPreviewEmpty() {
 @Preview(name = "Login — filled", showBackground = true, heightDp = 900)
 @Composable
 private fun LoginScreenPreviewFilled() {
-    Arch2Theme {
+    TinPetTheme {
         LoginScreen(
             state = LoginUiState(
                 email = "demo@email.com",
@@ -320,7 +320,7 @@ private fun LoginScreenPreviewFilled() {
 @Preview(name = "Login — error", showBackground = true, heightDp = 900)
 @Composable
 private fun LoginScreenPreviewError() {
-    Arch2Theme {
+    TinPetTheme {
         LoginScreen(
             state = LoginUiState(
                 email = "demo@email.com",

@@ -93,7 +93,7 @@ Each convention plugin lives in its own `.kt` file and is registered in `build-l
 
 ### 2.3 `:core:designsystem`
 
-- `theme/Arch2Theme.kt` — Material 3 theme, dynamic color, light/dark schemes.
+- `theme/TinPetTheme.kt` — Material 3 theme, dynamic color, light/dark schemes.
 - `theme/Type.kt`, `theme/Color.kt`.
 
 ### 2.4 `:core:ui`
@@ -240,7 +240,7 @@ Skipping `:feature:home:domain` / `:data` for the placeholder is fine — when h
 ## 5. `:app`
 
 - `App.kt` — `@HiltAndroidApp`.
-- `MainActivity.kt` — `FragmentActivity` (needed for BiometricPrompt) + `@AndroidEntryPoint`. Injects `Navigator` + `Set<@JvmSuppressWildcards EntryProviderInstaller>`. Calls `enableEdgeToEdge()`. Composes `Arch2Theme { Scaffold { NavDisplay(navigator.backStack, ...) } }`.
+- `MainActivity.kt` — `FragmentActivity` (needed for BiometricPrompt) + `@AndroidEntryPoint`. Injects `Navigator` + `Set<@JvmSuppressWildcards EntryProviderInstaller>`. Calls `enableEdgeToEdge()`. Composes `TinPetTheme { Scaffold { NavDisplay(navigator.backStack, ...) } }`.
 - `di/StartDestinationModule.kt`:
 
   ```kotlin
@@ -463,9 +463,9 @@ Resolution:
 
 ### 13.6 `:app` module specifics
 
-- Removed `arch.android.library.compose` from `:app/build.gradle.kts` — that convention is library-only. The application module applies `arch.android.application` + `kotlin.compose` directly and depends on the Compose BOM explicitly.
+- Removed `tinpet.android.library.compose` from `:app/build.gradle.kts` — that convention is library-only. The application module applies `tinpet.android.application` + `kotlin.compose` directly and depends on the Compose BOM explicitly.
 - Removed `android:icon="@mipmap/ic_launcher"` from `AndroidManifest.xml` — no launcher icon assets exist yet; referencing a missing resource breaks the build. Generate icons via Image Asset Studio, then re-add.
-- `MainActivity` extends `FragmentActivity` (required for `BiometricPrompt`); `:app` depends on `androidx.appcompat:appcompat` so `Theme.AppCompat.DayNight.NoActionBar` (used by `Theme.Arch2.Splash`) resolves.
+- `MainActivity` extends `FragmentActivity` (required for `BiometricPrompt`); `:app` depends on `androidx.appcompat:appcompat` so `Theme.AppCompat.DayNight.NoActionBar` (used by `Theme.TinPet.Splash`) resolves.
 
 ### 13.7 Verification (executed)
 

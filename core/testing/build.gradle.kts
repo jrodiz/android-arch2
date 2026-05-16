@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.arch.android.library)
+    alias(libs.plugins.tinpet.android.library)
 }
 
 android {

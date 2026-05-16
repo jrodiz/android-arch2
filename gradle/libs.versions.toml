@@ -109,12 +109,12 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 
 # Convention plugins from build-logic
-arch-android-application = { id = "arch.android.application" }
-arch-android-library = { id = "arch.android.library" }
-arch-android-library-compose = { id = "arch.android.library.compose" }
-arch-android-feature = { id = "arch.android.feature" }
-arch-android-hilt = { id = "arch.android.hilt" }
-arch-android-firebase = { id = "arch.android.firebase" }
-arch-jvm-library = { id = "arch.jvm.library" }
-arch-kotlin-serialization = { id = "arch.kotlin.serialization" }
-arch-android-test = { id = "arch.android.test" }
+tinpet-android-application = { id = "tinpet.android.application" }
+tinpet-android-library = { id = "tinpet.android.library" }
+tinpet-android-library-compose = { id = "tinpet.android.library.compose" }
+tinpet-android-feature = { id = "tinpet.android.feature" }
+tinpet-android-hilt = { id = "tinpet.android.hilt" }
+tinpet-android-firebase = { id = "tinpet.android.firebase" }
+tinpet-jvm-library = { id = "tinpet.jvm.library" }
+tinpet-kotlin-serialization = { id = "tinpet.kotlin.serialization" }
+tinpet-android-test = { id = "tinpet.android.test" }

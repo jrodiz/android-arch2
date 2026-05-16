@@ -1,9 +1,9 @@
 plugins {
-    alias(libs.plugins.arch.android.application)
+    alias(libs.plugins.tinpet.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.arch.android.hilt)
-    alias(libs.plugins.arch.kotlin.serialization)
-    alias(libs.plugins.arch.android.firebase)
+    alias(libs.plugins.tinpet.android.hilt)
+    alias(libs.plugins.tinpet.kotlin.serialization)
+    alias(libs.plugins.tinpet.android.firebase)
 }
 
 android {
@@ -53,6 +53,12 @@ dependencies {
     implementation(project(":feature:home:nav"))
     implementation(project(":feature:home:presentation"))
 
+    implementation(project(":feature:discover:nav"))
+    implementation(project(":feature:discover:presentation"))
+
+    implementation(project(":feature:profile:nav"))
+    implementation(project(":feature:profile:presentation"))
+
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.appcompat)
@@ -64,6 +70,7 @@ dependencies {
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)

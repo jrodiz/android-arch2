@@ -118,8 +118,8 @@ object FirebaseModule {
 
 ```kotlin
 plugins {
-    alias(libs.plugins.arch.android.library)
-    alias(libs.plugins.arch.android.hilt)
+    alias(libs.plugins.tinpet.android.library)
+    alias(libs.plugins.tinpet.android.hilt)
 }
 android { namespace = "com.rodiz.arch2.core.firebase" }
 dependencies {

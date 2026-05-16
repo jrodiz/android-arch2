@@ -11,7 +11,7 @@
         android:fullBackupContent="false"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Arch2.Splash">
+        android:theme="@style/Theme.TinPet.Splash">
 
         <activity
             android:name=".MainActivity"

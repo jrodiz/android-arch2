@@ -13,9 +13,9 @@ import org.gradle.kotlin.dsl.getByType
 class AndroidFeatureConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         with(pluginManager) {
-            apply("arch.android.library")
-            apply("arch.android.library.compose")
-            apply("arch.android.hilt")
+            apply("tinpet.android.library")
+            apply("tinpet.android.library.compose")
+            apply("tinpet.android.hilt")
         }
 
         val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
