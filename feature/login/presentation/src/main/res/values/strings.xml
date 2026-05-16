@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="login_title">Sign in</string>
+    <string name="login_tab_sign_in">Sign In</string>
+    <string name="login_tab_sign_up">Sign Up</string>
     <string name="login_email_label">Email</string>
     <string name="login_email_placeholder">demo@email.com</string>
     <string name="login_password_label">Password</string>
@@ -8,10 +9,8 @@
     <string name="login_password_show">Show password</string>
     <string name="login_password_hide">Hide password</string>
     <string name="login_submit">Login</string>
+    <string name="login_register_submit">Register</string>
     <string name="login_forgot">Forgot Password?</string>
-    <string name="login_no_account_prefix">Don\'t have an Account?</string>
-    <string name="login_sign_up">Sign up</string>
-    <string name="login_create_account">Create account</string>
     <string name="login_biometric">Sign in with biometric</string>
     <string name="login_or_divider">or</string>
     <string name="login_continue_google">Continue with Google</string>
@@ -20,7 +19,7 @@
     <string name="login_biometric_subtitle">Use biometric authentication to sign in</string>
     <string name="login_biometric_cancel">Cancel</string>
     <string name="login_error_dismiss">Dismiss error</string>
-    <string name="login_email_form_show">Login with email</string>
+    <string name="register_coming_soon">Registration is coming soon — try Sign In or Google for now.</string>
 
     <string name="login_error_invalid_credentials">Incorrect email or password.</string>
     <string name="login_error_no_network">No network connection. Check your internet and try again.</string>
@@ -36,6 +35,5 @@
     <string name="login_validation_password_short">Password must be at least %1$d characters.</string>
 
     <string name="forgot_stub_title">Forgot password (coming soon)</string>
-    <string name="create_account_stub_title">Create account (coming soon)</string>
     <string name="common_back">Back</string>
 </resources>

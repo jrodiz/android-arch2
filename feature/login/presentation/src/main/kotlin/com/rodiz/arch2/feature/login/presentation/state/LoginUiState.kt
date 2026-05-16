@@ -4,6 +4,7 @@ import com.rodiz.arch2.feature.login.domain.model.AuthError
 import com.rodiz.arch2.feature.login.domain.model.ValidationError
 
 data class LoginUiState(
+    val mode: LoginMode = LoginMode.SignIn,
     val email: String = "",
     val password: String = "",
     val passwordVisible: Boolean = false,
@@ -12,7 +13,6 @@ data class LoginUiState(
     val isSubmitting: Boolean = false,
     val transientError: AuthError? = null,
     val biometricAvailable: Boolean = false,
-    val emailFormExpanded: Boolean = false,
 ) {
     val canSubmit: Boolean
         get() = email.isNotBlank() &&

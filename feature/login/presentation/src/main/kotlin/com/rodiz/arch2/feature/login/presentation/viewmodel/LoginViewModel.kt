@@ -16,6 +16,7 @@ import com.rodiz.arch2.feature.login.presentation.BuildConfig
 import com.rodiz.arch2.feature.login.presentation.DebugConstants
 import com.rodiz.arch2.feature.login.presentation.state.LoginAction
 import com.rodiz.arch2.feature.login.presentation.state.LoginEvent
+import com.rodiz.arch2.feature.login.presentation.state.LoginMode
 import com.rodiz.arch2.feature.login.presentation.state.LoginUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
@@ -67,6 +68,7 @@ class LoginViewModel @Inject constructor(
 
     fun onAction(action: LoginAction) {
         when (action) {
+            is LoginAction.ModeSelected -> _state.update { it.copy(mode = action.mode, transientError = null) }
             is LoginAction.EmailChanged -> onEmailChanged(action.value)
             is LoginAction.PasswordChanged -> onPasswordChanged(action.value)
             LoginAction.TogglePasswordVisibility -> _state.update { it.copy(passwordVisible = !it.passwordVisible) }
@@ -75,9 +77,7 @@ class LoginViewModel @Inject constructor(
             LoginAction.BiometricSucceeded -> loginWithBiometric()
             LoginAction.GoogleSignInRequested -> tryEmit(LoginEvent.PromptGoogleSignIn)
             LoginAction.ForgotPasswordTapped -> tryEmit(LoginEvent.NavigateForgot)
-            LoginAction.CreateAccountTapped -> tryEmit(LoginEvent.NavigateCreate)
             LoginAction.DismissError -> _state.update { it.copy(transientError = null) }
-            LoginAction.ShowEmailForm -> _state.update { it.copy(emailFormExpanded = true) }
         }
     }
 
@@ -122,6 +122,11 @@ class LoginViewModel @Inject constructor(
         val passwordError = validatePassword(current.password)
         if (emailError != null || passwordError != null) {
             _state.update { it.copy(emailError = emailError, passwordError = passwordError) }
+            return
+        }
+        if (current.mode == LoginMode.SignUp) {
+            // Registration backend isn't wired yet; surface a transient notice and stay on the form.
+            tryEmit(LoginEvent.ShowRegisterComingSoon)
             return
         }
         _state.update { it.copy(isSubmitting = true, transientError = null) }

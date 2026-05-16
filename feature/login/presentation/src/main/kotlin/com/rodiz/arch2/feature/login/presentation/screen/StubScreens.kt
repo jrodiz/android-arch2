@@ -27,16 +27,3 @@ fun ForgotPasswordStubScreen(onBack: () -> Unit) {
         OutlinedButton(onClick = onBack) { Text(stringResource(R.string.common_back)) }
     }
 }
-
-@Composable
-fun CreateAccountStubScreen(onBack: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(stringResource(R.string.create_account_stub_title))
-        Spacer(Modifier.height(16.dp))
-        OutlinedButton(onClick = onBack) { Text(stringResource(R.string.common_back)) }
-    }
-}

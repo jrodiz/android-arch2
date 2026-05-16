@@ -1,14 +1,9 @@
 package com.rodiz.arch2.feature.login.presentation.screen
 
 import android.app.Activity
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +31,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -56,6 +52,7 @@ import com.rodiz.arch2.feature.login.domain.model.AuthError
 import com.rodiz.arch2.feature.login.domain.model.ValidationError
 import com.rodiz.arch2.feature.login.presentation.R
 import com.rodiz.arch2.feature.login.presentation.state.LoginAction
+import com.rodiz.arch2.feature.login.presentation.state.LoginMode
 import com.rodiz.arch2.feature.login.presentation.state.LoginUiState
 
 @Composable
@@ -87,20 +84,9 @@ fun LoginScreen(
                 .windowInsetsPadding(WindowInsets.navigationBars),
             verticalArrangement = Arrangement.Top,
         ) {
-            Text(
-                text = stringResource(R.string.login_title),
-                style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .testTag("login_title")
-                    .semantics { heading() },
-            )
-            Spacer(Modifier.height(6.dp))
-            Box(
-                modifier = Modifier
-                    .size(width = 136.dp, height = 3.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(MaterialTheme.colorScheme.primary),
+            ModeTabs(
+                selected = state.mode,
+                onSelected = { onAction(LoginAction.ModeSelected(it)) },
             )
 
             Spacer(Modifier.height(28.dp))
@@ -114,94 +100,72 @@ fun LoginScreen(
                 Spacer(Modifier.height(16.dp))
             }
 
-            AnimatedVisibility(
-                visible = !state.emailFormExpanded,
-                enter = expandVertically(animationSpec = tween(durationMillis = 250)) +
-                    fadeIn(animationSpec = tween(durationMillis = 200)),
-                exit = shrinkVertically(animationSpec = tween(durationMillis = 200)) +
-                    fadeOut(animationSpec = tween(durationMillis = 150)),
-            ) {
-                PrimaryButton(
-                    text = stringResource(R.string.login_email_form_show),
-                    loading = false,
-                    enabled = !state.isSubmitting,
-                    onClick = { onAction(LoginAction.ShowEmailForm) },
-                    testTag = "login_email_form_show",
-                )
+            EmailField(
+                value = state.email,
+                onValueChange = { onAction(LoginAction.EmailChanged(it)) },
+                label = stringResource(R.string.login_email_label),
+                placeholder = stringResource(R.string.login_email_placeholder),
+                errorMessage = state.emailError?.localized(),
+            )
+
+            Spacer(Modifier.height(20.dp))
+
+            PasswordField(
+                value = state.password,
+                onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
+                label = stringResource(R.string.login_password_label),
+                placeholder = stringResource(R.string.login_password_placeholder),
+                visible = state.passwordVisible,
+                onToggleVisibility = { onAction(LoginAction.TogglePasswordVisibility) },
+                onImeDone = { onAction(LoginAction.Submit) },
+                errorMessage = state.passwordError?.localized(),
+                toggleContentDescription = stringResource(
+                    if (state.passwordVisible) R.string.login_password_hide else R.string.login_password_show,
+                ),
+            )
+
+            if (state.mode == LoginMode.SignIn) {
+                Spacer(Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TextButton(onClick = { onAction(LoginAction.ForgotPasswordTapped) }) {
+                        Text(
+                            text = stringResource(R.string.login_forgot),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        )
+                    }
+                }
+                Spacer(Modifier.height(28.dp))
+            } else {
+                Spacer(Modifier.height(40.dp))
             }
 
-            AnimatedVisibility(
-                visible = state.emailFormExpanded,
-                enter = expandVertically(animationSpec = tween(durationMillis = 300)) +
-                    fadeIn(animationSpec = tween(durationMillis = 300)),
-                exit = shrinkVertically(animationSpec = tween(durationMillis = 250)) +
-                    fadeOut(animationSpec = tween(durationMillis = 200)),
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    EmailField(
-                        value = state.email,
-                        onValueChange = { onAction(LoginAction.EmailChanged(it)) },
-                        label = stringResource(R.string.login_email_label),
-                        placeholder = stringResource(R.string.login_email_placeholder),
-                        errorMessage = state.emailError?.localized(),
-                    )
+            PrimaryButton(
+                text = stringResource(
+                    if (state.mode == LoginMode.SignIn) R.string.login_submit else R.string.login_register_submit,
+                ),
+                loading = state.isSubmitting,
+                enabled = state.canSubmit,
+                onClick = { onAction(LoginAction.Submit) },
+                testTag = "login_submit",
+            )
 
-                    Spacer(Modifier.height(20.dp))
-
-                    PasswordField(
-                        value = state.password,
-                        onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
-                        label = stringResource(R.string.login_password_label),
-                        placeholder = stringResource(R.string.login_password_placeholder),
-                        visible = state.passwordVisible,
-                        onToggleVisibility = { onAction(LoginAction.TogglePasswordVisibility) },
-                        onImeDone = { onAction(LoginAction.Submit) },
-                        errorMessage = state.passwordError?.localized(),
-                        toggleContentDescription = stringResource(
-                            if (state.passwordVisible) R.string.login_password_hide else R.string.login_password_show,
-                        ),
-                    )
-
-                    Spacer(Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        TextButton(onClick = { onAction(LoginAction.ForgotPasswordTapped) }) {
-                            Text(
-                                text = stringResource(R.string.login_forgot),
-                                color = MaterialTheme.colorScheme.primary,
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                            )
-                        }
-                    }
-
-                    Spacer(Modifier.height(40.dp))
-
-                    PrimaryButton(
-                        text = stringResource(R.string.login_submit),
-                        loading = state.isSubmitting,
-                        enabled = state.canSubmit,
-                        onClick = { onAction(LoginAction.Submit) },
-                        testTag = "login_submit",
-                    )
-
-                    if (state.biometricAvailable) {
-                        Spacer(Modifier.height(12.dp))
-                        OutlinedButton(
-                            onClick = { onAction(LoginAction.BiometricRequested) },
-                            enabled = !state.isSubmitting,
-                            shape = MaterialTheme.shapes.large,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                                .testTag("login_biometric"),
-                        ) {
-                            Text(stringResource(R.string.login_biometric))
-                        }
-                    }
+            if (state.mode == LoginMode.SignIn && state.biometricAvailable) {
+                Spacer(Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = { onAction(LoginAction.BiometricRequested) },
+                    enabled = !state.isSubmitting,
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .testTag("login_biometric"),
+                ) {
+                    Text(stringResource(R.string.login_biometric))
                 }
             }
 
@@ -229,28 +193,69 @@ fun LoginScreen(
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                 )
             }
-
-            Spacer(Modifier.height(24.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = stringResource(R.string.login_no_account_prefix),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                TextButton(onClick = { onAction(LoginAction.CreateAccountTapped) }) {
-                    Text(
-                        text = stringResource(R.string.login_sign_up),
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    )
-                }
-            }
         }
+    }
+}
+
+@Composable
+private fun ModeTabs(
+    selected: LoginMode,
+    onSelected: (LoginMode) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(28.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ModeTab(
+            label = stringResource(R.string.login_tab_sign_in),
+            isSelected = selected == LoginMode.SignIn,
+            onClick = { onSelected(LoginMode.SignIn) },
+            testTag = "login_tab_sign_in",
+        )
+        ModeTab(
+            label = stringResource(R.string.login_tab_sign_up),
+            isSelected = selected == LoginMode.SignUp,
+            onClick = { onSelected(LoginMode.SignUp) },
+            testTag = "login_tab_sign_up",
+        )
+    }
+}
+
+@Composable
+private fun ModeTab(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    testTag: String,
+) {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp)
+            .testTag(testTag),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+            color = if (isSelected) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            modifier = if (isSelected) Modifier.semantics { heading() } else Modifier,
+        )
+        Spacer(Modifier.height(6.dp))
+        Box(
+            modifier = Modifier
+                .size(width = 96.dp, height = 3.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(
+                    if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                ),
+        )
     }
 }
 
@@ -294,11 +299,22 @@ private fun LightStatusBarIconsWhileShown() {
     }
 }
 
-@Preview(name = "Login — empty", showBackground = true, heightDp = 900)
+@Preview(name = "Login — Sign In", showBackground = true, heightDp = 900)
 @Composable
-private fun LoginScreenPreviewEmpty() {
+private fun LoginScreenPreviewSignIn() {
     TinPetTheme {
         LoginScreen(state = LoginUiState(), onAction = {})
+    }
+}
+
+@Preview(name = "Login — Sign Up", showBackground = true, heightDp = 900)
+@Composable
+private fun LoginScreenPreviewSignUp() {
+    TinPetTheme {
+        LoginScreen(
+            state = LoginUiState(mode = LoginMode.SignUp),
+            onAction = {},
+        )
     }
 }
 

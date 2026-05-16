@@ -16,6 +16,7 @@ import com.rodiz.arch2.feature.login.domain.usecase.ValidateEmailUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.ValidatePasswordUseCase
 import com.rodiz.arch2.feature.login.presentation.state.LoginAction
 import com.rodiz.arch2.feature.login.presentation.state.LoginEvent
+import com.rodiz.arch2.feature.login.presentation.state.LoginMode
 import com.rodiz.arch2.feature.login.presentation.viewmodel.LoginViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -168,6 +169,37 @@ class LoginViewModelTest {
         first.onAction(LoginAction.EmailChanged("user@example.com"))
         val recreated = newViewModel(savedStateHandle = savedState)
         assertEquals("user@example.com", recreated.state.value.email)
+    }
+
+    @Test
+    fun `ModeSelected updates state mode and clears transientError`() = runTest(testDispatcher) {
+        val repo = FakeAuthRepo(loginResult = Try.Failure(AuthError.NoNetwork))
+        val vm = newViewModel(repo = repo)
+        vm.onAction(LoginAction.EmailChanged("user@example.com"))
+        vm.onAction(LoginAction.PasswordChanged("password1"))
+        vm.onAction(LoginAction.Submit)
+        advanceUntilIdle()
+        assertNotNull(vm.state.value.transientError)
+
+        vm.onAction(LoginAction.ModeSelected(LoginMode.SignUp))
+        assertEquals(LoginMode.SignUp, vm.state.value.mode)
+        assertNull(vm.state.value.transientError)
+    }
+
+    @Test
+    fun `submit in SignUp mode emits ShowRegisterComingSoon and skips loginUseCase`() = runTest(testDispatcher) {
+        val repo = FakeAuthRepo(loginResult = Try.Success(Session("u", "t")))
+        val vm = newViewModel(repo = repo)
+        vm.onAction(LoginAction.ModeSelected(LoginMode.SignUp))
+        vm.onAction(LoginAction.EmailChanged("user@example.com"))
+        vm.onAction(LoginAction.PasswordChanged("password1"))
+
+        vm.events.test {
+            vm.onAction(LoginAction.Submit)
+            advanceUntilIdle()
+            assertEquals(LoginEvent.ShowRegisterComingSoon, awaitItem())
+        }
+        assertFalse(vm.state.value.isSubmitting)
     }
 
     @Test

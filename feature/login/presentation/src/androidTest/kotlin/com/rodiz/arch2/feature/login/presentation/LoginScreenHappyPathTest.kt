@@ -35,6 +35,7 @@ class LoginScreenHappyPathTest {
                 state = state,
                 onAction = { action ->
                     when (action) {
+                        is LoginAction.ModeSelected -> state = state.copy(mode = action.mode)
                         is LoginAction.EmailChanged -> state = state.copy(
                             email = action.value,
                             emailError = if (action.value.contains('@') && action.value.contains('.')) null
@@ -46,14 +47,12 @@ class LoginScreenHappyPathTest {
                         )
                         LoginAction.Submit -> submitDispatched = true
                         LoginAction.TogglePasswordVisibility -> state = state.copy(passwordVisible = !state.passwordVisible)
-                        LoginAction.ShowEmailForm -> state = state.copy(emailFormExpanded = true)
                         else -> Unit
                     }
                 },
             )
         }
 
-        compose.onNodeWithTag("login_email_form_show").performClick()
         compose.onNodeWithTag("login_submit").assertIsNotEnabled()
         compose.onNodeWithTag("email_field").performTextInput("user@example.com")
         compose.onNodeWithTag("password_field").performTextInput("password1")

@@ -4,10 +4,8 @@ import androidx.navigation3.runtime.entry
 import com.rodiz.arch2.core.navigation.EntryProviderInstaller
 import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.home.nav.HomeHome
-import com.rodiz.arch2.feature.login.nav.CreateAccount
 import com.rodiz.arch2.feature.login.nav.ForgotPassword
 import com.rodiz.arch2.feature.login.nav.LoginHome
-import com.rodiz.arch2.feature.login.presentation.screen.CreateAccountStubScreen
 import com.rodiz.arch2.feature.login.presentation.screen.ForgotPasswordStubScreen
 import com.rodiz.arch2.feature.login.presentation.screen.LoginRoute
 import dagger.Module
@@ -27,14 +25,10 @@ internal object LoginNavModule {
             LoginRoute(
                 onNavigateHome = { navigator.replaceAll(HomeHome) },
                 onForgot = { navigator.goTo(ForgotPassword) },
-                onCreate = { navigator.goTo(CreateAccount) },
             )
         }
         entry<ForgotPassword> {
             ForgotPasswordStubScreen(onBack = { navigator.goBack() })
-        }
-        entry<CreateAccount> {
-            CreateAccountStubScreen(onBack = { navigator.goBack() })
         }
     }
 }
