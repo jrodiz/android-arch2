@@ -35,6 +35,8 @@ include(":feature:login:data")
 include(":feature:login:presentation")
 
 include(":feature:home:nav")
+include(":feature:home:domain")
+include(":feature:home:data")
 include(":feature:home:presentation")
 
 include(":feature:discover:nav")

@@ -24,6 +24,7 @@ androidxTestExt = "1.2.1"
 coil = "2.7.0"
 hilt = "2.52"
 kotlinxCoroutines = "1.8.1"
+kotlinxDatetime = "0.6.1"
 kotlinxSerialization = "1.7.3"
 firebaseBom = "33.5.1"
 googleServices = "4.4.2"
@@ -72,6 +73,7 @@ hilt-testing = { group = "com.google.dagger", name = "hilt-android-testing", ver
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
