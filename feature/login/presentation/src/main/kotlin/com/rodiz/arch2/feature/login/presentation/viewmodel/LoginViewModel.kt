@@ -78,6 +78,7 @@ class LoginViewModel @Inject constructor(
             LoginAction.GoogleSignInRequested -> tryEmit(LoginEvent.PromptGoogleSignIn)
             LoginAction.ForgotPasswordTapped -> tryEmit(LoginEvent.NavigateForgot)
             LoginAction.DismissError -> _state.update { it.copy(transientError = null) }
+            LoginAction.ShowEmailForm -> _state.update { it.copy(emailFormExpanded = true) }
         }
     }
 
