@@ -4,7 +4,6 @@ import com.rodiz.arch2.feature.login.domain.model.AuthError
 import com.rodiz.arch2.feature.login.domain.model.ValidationError
 
 data class LoginUiState(
-    val mode: LoginMode = LoginMode.SignIn,
     val email: String = "",
     val password: String = "",
     val passwordVisible: Boolean = false,

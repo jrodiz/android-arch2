@@ -35,7 +35,6 @@ class LoginScreenHappyPathTest {
                 state = state,
                 onAction = { action ->
                     when (action) {
-                        is LoginAction.ModeSelected -> state = state.copy(mode = action.mode)
                         is LoginAction.EmailChanged -> state = state.copy(
                             email = action.value,
                             emailError = if (action.value.contains('@') && action.value.contains('.')) null

@@ -7,3 +7,6 @@ data object LoginHome
 
 @Serializable
 data object ForgotPassword
+
+@Serializable
+data object SignUpHome

@@ -6,52 +6,53 @@ import com.rodiz.arch2.feature.login.domain.model.AuthError
 import com.rodiz.arch2.feature.login.domain.model.Credentials
 import com.rodiz.arch2.feature.login.domain.model.SignUpRequest
 import com.rodiz.arch2.feature.login.domain.repository.AuthRepository
-import com.rodiz.arch2.feature.login.domain.usecase.SignInWithGoogleUseCase
+import com.rodiz.arch2.feature.login.domain.usecase.RegisterUseCase
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class SignInWithGoogleUseCaseTest {
+class RegisterUseCaseTest {
 
-    private val idToken = "fake.google.id.token"
+    private val request = SignUpRequest(
+        firstName = "Steve",
+        lastName = "Rogers",
+        email = "steve@example.com",
+        password = "password1",
+    )
 
     @Test
     fun `success result is propagated`() = runTest {
-        val session = Session(
-            userId = "google-uid",
-            token = "fb-id-token",
-            displayName = "Joe Demo",
-            photoUrl = "https://example/photo.jpg",
-        )
-        val repo = FakeAuthRepo(googleResult = Try.Success(session))
+        val session = Session(userId = "u1", token = "t1", displayName = "Steve Rogers")
+        val repo = FakeAuthRepo(registerResult = Try.Success(session))
 
-        val result = SignInWithGoogleUseCase(repo).invoke(idToken)
+        val result = RegisterUseCase(repo).invoke(request)
 
         assertEquals(Try.Success(session), result)
     }
 
     @Test
-    fun `each AuthError from Google flow is propagated unchanged`() = runTest {
+    fun `each AuthError from register flow is propagated unchanged`() = runTest {
         val errors: List<AuthError> = listOf(
-            AuthError.GoogleSignInCancelled,
-            AuthError.GoogleSignInFailed,
+            AuthError.EmailAlreadyInUse,
+            AuthError.WeakPassword,
+            AuthError.AvatarUploadFailed,
             AuthError.NoNetwork,
             AuthError.Unknown,
         )
         errors.forEach { error ->
-            val repo = FakeAuthRepo(googleResult = Try.Failure(error))
-            val result = SignInWithGoogleUseCase(repo).invoke(idToken)
+            val repo = FakeAuthRepo(registerResult = Try.Failure(error))
+            val result = RegisterUseCase(repo).invoke(request)
             assertEquals(Try.Failure(error), result, "AuthError ${'$'}error should propagate")
         }
     }
 
     private class FakeAuthRepo(
-        val googleResult: Try<Session, AuthError>,
+        val registerResult: Try<Session, AuthError>,
     ) : AuthRepository {
         override suspend fun login(credentials: Credentials) = error("not used")
         override suspend fun loginWithStoredCredentials() = error("not used")
-        override suspend fun signInWithGoogle(idToken: String) = googleResult
-        override suspend fun register(request: SignUpRequest) = error("not used")
+        override suspend fun signInWithGoogle(idToken: String) = error("not used")
+        override suspend fun register(request: SignUpRequest) = registerResult
         override suspend fun hasStoredCredentials() = false
     }
 }

@@ -14,6 +14,9 @@ internal fun AuthError.localized(): String = when (this) {
     is AuthError.Server -> stringResource(R.string.login_error_server, code)
     AuthError.GoogleSignInCancelled -> stringResource(R.string.login_google_cancelled)
     AuthError.GoogleSignInFailed -> stringResource(R.string.login_google_failed)
+    AuthError.EmailAlreadyInUse -> stringResource(R.string.signup_error_email_in_use)
+    AuthError.WeakPassword -> stringResource(R.string.signup_error_weak_password)
+    AuthError.AvatarUploadFailed -> stringResource(R.string.signup_warning_avatar_upload_failed)
     AuthError.Unknown -> stringResource(R.string.login_error_unknown)
 }
 
@@ -23,4 +26,8 @@ internal fun ValidationError.localized(): String = when (this) {
     ValidationError.EmailMalformed -> stringResource(R.string.login_validation_email_malformed)
     ValidationError.PasswordEmpty -> stringResource(R.string.login_validation_password_empty)
     is ValidationError.PasswordTooShort -> stringResource(R.string.login_validation_password_short, minLength)
+    ValidationError.FirstNameEmpty -> stringResource(R.string.signup_validation_first_name_empty)
+    ValidationError.LastNameEmpty -> stringResource(R.string.signup_validation_last_name_empty)
+    is ValidationError.NameTooLong -> stringResource(R.string.signup_validation_name_too_long, maxLength)
+    ValidationError.ConfirmPasswordMismatch -> stringResource(R.string.signup_validation_confirm_mismatch)
 }

@@ -29,6 +29,8 @@ fun PasswordField(
     errorMessage: String?,
     toggleContentDescription: String,
     modifier: Modifier = Modifier,
+    imeAction: ImeAction = ImeAction.Done,
+    testTag: String = "password_field",
 ) {
     BrandTextField(
         value = value,
@@ -40,7 +42,7 @@ fun PasswordField(
         visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Done,
+            imeAction = imeAction,
             autoCorrectEnabled = false,
         ),
         keyboardActions = KeyboardActions(onDone = { onImeDone() }),
@@ -54,6 +56,6 @@ fun PasswordField(
             }
         },
         modifier = modifier,
-        fieldModifier = Modifier.testTag("password_field"),
+        fieldModifier = Modifier.testTag(testTag),
     )
 }

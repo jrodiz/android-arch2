@@ -9,5 +9,8 @@ sealed interface AuthError : AppError {
     data class Server(val code: Int) : AuthError
     data object GoogleSignInCancelled : AuthError
     data object GoogleSignInFailed : AuthError
+    data object EmailAlreadyInUse : AuthError
+    data object WeakPassword : AuthError
+    data object AvatarUploadFailed : AuthError
     data object Unknown : AuthError
 }

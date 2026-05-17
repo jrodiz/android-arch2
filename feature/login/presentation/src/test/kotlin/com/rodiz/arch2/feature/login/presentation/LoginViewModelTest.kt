@@ -7,6 +7,7 @@ import com.rodiz.arch2.core.session.domain.Session
 import com.rodiz.arch2.core.testing.MainDispatcherExtension
 import com.rodiz.arch2.feature.login.domain.model.AuthError
 import com.rodiz.arch2.feature.login.domain.model.Credentials
+import com.rodiz.arch2.feature.login.domain.model.SignUpRequest
 import com.rodiz.arch2.feature.login.domain.model.ValidationError
 import com.rodiz.arch2.feature.login.domain.repository.AuthRepository
 import com.rodiz.arch2.feature.login.domain.usecase.LoginUseCase
@@ -16,7 +17,6 @@ import com.rodiz.arch2.feature.login.domain.usecase.ValidateEmailUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.ValidatePasswordUseCase
 import com.rodiz.arch2.feature.login.presentation.state.LoginAction
 import com.rodiz.arch2.feature.login.presentation.state.LoginEvent
-import com.rodiz.arch2.feature.login.presentation.state.LoginMode
 import com.rodiz.arch2.feature.login.presentation.viewmodel.LoginViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -172,32 +172,11 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `ModeSelected updates state mode and clears transientError`() = runTest(testDispatcher) {
-        val repo = FakeAuthRepo(loginResult = Try.Failure(AuthError.NoNetwork))
-        val vm = newViewModel(repo = repo)
-        vm.onAction(LoginAction.EmailChanged("user@example.com"))
-        vm.onAction(LoginAction.PasswordChanged("password1"))
-        vm.onAction(LoginAction.Submit)
-        advanceUntilIdle()
-        assertNotNull(vm.state.value.transientError)
-
-        vm.onAction(LoginAction.ModeSelected(LoginMode.SignUp))
-        assertEquals(LoginMode.SignUp, vm.state.value.mode)
-        assertNull(vm.state.value.transientError)
-    }
-
-    @Test
-    fun `submit in SignUp mode emits ShowRegisterComingSoon and skips loginUseCase`() = runTest(testDispatcher) {
-        val repo = FakeAuthRepo(loginResult = Try.Success(Session("u", "t")))
-        val vm = newViewModel(repo = repo)
-        vm.onAction(LoginAction.ModeSelected(LoginMode.SignUp))
-        vm.onAction(LoginAction.EmailChanged("user@example.com"))
-        vm.onAction(LoginAction.PasswordChanged("password1"))
-
+    fun `SignUpTabTapped emits NavigateSignUp without touching state`() = runTest(testDispatcher) {
+        val vm = newViewModel()
         vm.events.test {
-            vm.onAction(LoginAction.Submit)
-            advanceUntilIdle()
-            assertEquals(LoginEvent.ShowRegisterComingSoon, awaitItem())
+            vm.onAction(LoginAction.SignUpTabTapped)
+            assertEquals(LoginEvent.NavigateSignUp, awaitItem())
         }
         assertFalse(vm.state.value.isSubmitting)
     }
@@ -231,11 +210,13 @@ class LoginViewModelTest {
     private class FakeAuthRepo(
         val loginResult: Try<Session, AuthError> = Try.Success(Session("u", "t")),
         val googleResult: Try<Session, AuthError> = loginResult,
+        val registerResult: Try<Session, AuthError> = loginResult,
         val hasStored: Boolean = false,
     ) : AuthRepository {
         override suspend fun login(credentials: Credentials) = loginResult
         override suspend fun loginWithStoredCredentials() = loginResult
         override suspend fun signInWithGoogle(idToken: String) = googleResult
+        override suspend fun register(request: SignUpRequest) = registerResult
         override suspend fun hasStoredCredentials() = hasStored
     }
 }

@@ -1,7 +1,7 @@
 package com.rodiz.arch2.feature.login.presentation.state
 
 sealed interface LoginAction {
-    data class ModeSelected(val mode: LoginMode) : LoginAction
+    data object SignUpTabTapped : LoginAction
     data class EmailChanged(val value: String) : LoginAction
     data class PasswordChanged(val value: String) : LoginAction
     data object TogglePasswordVisibility : LoginAction

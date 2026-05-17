@@ -9,7 +9,6 @@
     <string name="login_password_show">Show password</string>
     <string name="login_password_hide">Hide password</string>
     <string name="login_submit">Login</string>
-    <string name="login_register_submit">Register</string>
     <string name="login_forgot">Forgot Password?</string>
     <string name="login_biometric">Sign in with biometric</string>
     <string name="login_or_divider">or</string>
@@ -20,7 +19,6 @@
     <string name="login_biometric_cancel">Cancel</string>
     <string name="login_error_dismiss">Dismiss error</string>
     <string name="login_email_form_show">Login with email</string>
-    <string name="register_coming_soon">Registration is coming soon — try Sign In or Google for now.</string>
 
     <string name="login_error_invalid_credentials">Incorrect email or password.</string>
     <string name="login_error_no_network">No network connection. Check your internet and try again.</string>
@@ -34,6 +32,27 @@
     <string name="login_validation_email_malformed">Enter a valid email address.</string>
     <string name="login_validation_password_empty">Password is required.</string>
     <string name="login_validation_password_short">Password must be at least %1$d characters.</string>
+
+    <string name="signup_title">Sign up</string>
+    <string name="signup_first_name">First name</string>
+    <string name="signup_first_name_placeholder">e.g. Steve</string>
+    <string name="signup_last_name">Last name</string>
+    <string name="signup_last_name_placeholder">e.g. Rogers</string>
+    <string name="signup_confirm_password">Confirm password</string>
+    <string name="signup_submit">Register</string>
+    <string name="signup_avatar_picker_cd">Choose profile photo</string>
+    <string name="signup_avatar_picker_label">Add a profile photo (optional)</string>
+    <string name="signup_avatar_clear">Remove photo</string>
+    <string name="signup_avatar_source_title">Add a profile photo</string>
+    <string name="signup_avatar_source_gallery">Choose from gallery</string>
+    <string name="signup_avatar_source_camera">Take a photo</string>
+    <string name="signup_warning_avatar_upload_failed">Profile created, but we couldn\'t upload your photo. You can try again from your profile.</string>
+    <string name="signup_validation_first_name_empty">First name is required.</string>
+    <string name="signup_validation_last_name_empty">Last name is required.</string>
+    <string name="signup_validation_name_too_long">Name can\'t be longer than %1$d characters.</string>
+    <string name="signup_validation_confirm_mismatch">Passwords don\'t match.</string>
+    <string name="signup_error_email_in_use">An account with that email already exists.</string>
+    <string name="signup_error_weak_password">That password is too weak — pick a stronger one.</string>
 
     <string name="forgot_stub_title">Forgot password (coming soon)</string>
     <string name="common_back">Back</string>

@@ -34,6 +34,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services)
     implementation(libs.google.id)
+    implementation(libs.coil.compose)
 
     testImplementation(project(":core:testing"))
     testImplementation(libs.kotlinx.coroutines.test)

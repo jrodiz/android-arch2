@@ -1,7 +1,6 @@
 package com.rodiz.arch2.feature.login.presentation.screen
 
 import android.app.Activity
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,6 +26,7 @@ import kotlinx.coroutines.launch
 fun LoginRoute(
     onNavigateHome: () -> Unit,
     onForgot: () -> Unit,
+    onSignUp: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -36,15 +36,13 @@ fun LoginRoute(
     val biometricTitle = stringResource(R.string.login_biometric_title)
     val biometricSubtitle = stringResource(R.string.login_biometric_subtitle)
     val biometricCancel = stringResource(R.string.login_biometric_cancel)
-    val registerComingSoon = stringResource(R.string.register_coming_soon)
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
                 LoginEvent.NavigateHome -> onNavigateHome()
                 LoginEvent.NavigateForgot -> onForgot()
-                LoginEvent.ShowRegisterComingSoon ->
-                    Toast.makeText(context, registerComingSoon, Toast.LENGTH_SHORT).show()
+                LoginEvent.NavigateSignUp -> onSignUp()
                 LoginEvent.PromptBiometric -> {
                     val activity = context as? FragmentActivity ?: return@collect
                     coroutineScope.launch {

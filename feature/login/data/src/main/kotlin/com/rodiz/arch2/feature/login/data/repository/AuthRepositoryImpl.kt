@@ -1,9 +1,14 @@
 package com.rodiz.arch2.feature.login.data.repository
 
+import android.net.Uri
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
 import com.rodiz.arch2.core.common.result.Try
 import com.rodiz.arch2.core.firebase.UserProfileRepository
@@ -12,9 +17,11 @@ import com.rodiz.arch2.core.session.domain.Session
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.login.data.local.CredentialVault
 import com.rodiz.arch2.feature.login.data.mapper.toSession
+import com.rodiz.arch2.feature.login.data.remote.AvatarUploader
 import com.rodiz.arch2.feature.login.data.remote.FakeAuthRemoteDataSource
 import com.rodiz.arch2.feature.login.domain.model.AuthError
 import com.rodiz.arch2.feature.login.domain.model.Credentials
+import com.rodiz.arch2.feature.login.domain.model.SignUpRequest
 import com.rodiz.arch2.feature.login.domain.repository.AuthRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.TimeoutCancellationException
@@ -32,6 +39,7 @@ internal class AuthRepositoryImpl @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val firebaseAuth: FirebaseAuth,
     private val userProfileRepository: UserProfileRepository,
+    private val avatarUploader: AvatarUploader,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) : AuthRepository {
 
@@ -72,6 +80,62 @@ internal class AuthRepositoryImpl @Inject constructor(
             Try.Failure(AuthError.NoNetwork)
         } catch (e: FirebaseAuthException) {
             Try.Failure(AuthError.GoogleSignInFailed)
+        } catch (e: IOException) {
+            Try.Failure(AuthError.NoNetwork)
+        } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+            Try.Failure(AuthError.Unknown)
+        }
+    }
+
+    override suspend fun register(request: SignUpRequest): Try<Session, AuthError> = withContext(io) {
+        try {
+            val authResult = firebaseAuth
+                .createUserWithEmailAndPassword(request.email.trim(), request.password)
+                .await()
+            val user = authResult.user ?: return@withContext Try.Failure(AuthError.Unknown)
+
+            val avatarUrl: String? = request.avatarUri?.let { raw ->
+                avatarUploader.upload(user.uid, Uri.parse(raw)).getOrNull()
+            }
+            val avatarUploadFailed = request.avatarUri != null && avatarUrl == null
+
+            user.updateProfile(
+                UserProfileChangeRequest.Builder()
+                    .setDisplayName(request.displayName)
+                    .setPhotoUri(avatarUrl?.let(Uri::parse))
+                    .build(),
+            ).await()
+
+            val session = Session(
+                userId = user.uid,
+                token = user.getIdToken(false).await().token.orEmpty(),
+                displayName = request.displayName,
+                photoUrl = avatarUrl,
+            )
+            sessionRepository.save(session)
+            userProfileRepository.upsertOnSignIn(
+                UserProfile(
+                    uid = user.uid,
+                    email = request.email.trim(),
+                    displayName = request.displayName,
+                    photoUrl = avatarUrl,
+                    provider = "password",
+                ),
+            )
+
+            if (avatarUploadFailed) {
+                Try.Failure(AuthError.AvatarUploadFailed)
+            } else {
+                Try.Success(session)
+            }
+        } catch (e: FirebaseAuthUserCollisionException) {
+            Try.Failure(AuthError.EmailAlreadyInUse)
+        } catch (e: FirebaseAuthWeakPasswordException) {
+            Try.Failure(AuthError.WeakPassword)
+        } catch (e: FirebaseAuthInvalidCredentialsException) {
+            Try.Failure(AuthError.InvalidCredentials)
+        } catch (e: FirebaseNetworkException) {
+            Try.Failure(AuthError.NoNetwork)
         } catch (e: IOException) {
             Try.Failure(AuthError.NoNetwork)
         } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {

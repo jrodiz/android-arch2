@@ -4,6 +4,7 @@ import com.rodiz.arch2.core.common.result.Try
 import com.rodiz.arch2.core.session.domain.Session
 import com.rodiz.arch2.feature.login.domain.model.AuthError
 import com.rodiz.arch2.feature.login.domain.model.Credentials
+import com.rodiz.arch2.feature.login.domain.model.SignUpRequest
 import com.rodiz.arch2.feature.login.domain.repository.AuthRepository
 import com.rodiz.arch2.feature.login.domain.usecase.LoginUseCase
 import kotlinx.coroutines.test.runTest
@@ -47,6 +48,7 @@ class LoginUseCaseTest {
         override suspend fun login(credentials: Credentials) = loginResult
         override suspend fun loginWithStoredCredentials() = loginResult
         override suspend fun signInWithGoogle(idToken: String) = loginResult
+        override suspend fun register(request: SignUpRequest) = loginResult
         override suspend fun hasStoredCredentials() = false
     }
 }
