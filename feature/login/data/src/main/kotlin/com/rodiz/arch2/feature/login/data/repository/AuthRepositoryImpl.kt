@@ -149,23 +149,32 @@ internal class AuthRepositoryImpl @Inject constructor(
         credentials: Credentials,
         persistForBiometric: Boolean,
     ): Try<Session, AuthError> = try {
-        val dto = remote.login(credentials.email, credentials.password)
-        val session = dto.toSession()
+        val result = firebaseAuth
+            .signInWithEmailAndPassword(credentials.email.trim(), credentials.password)
+            .await()
+        val user = result.user ?: return Try.Failure(AuthError.Unknown)
+        val token = user.getIdToken(false).await().token.orEmpty()
+        val session = Session(
+            userId = user.uid,
+            token = token,
+            displayName = user.displayName,
+            photoUrl = user.photoUrl?.toString(),
+        )
         sessionRepository.save(session)
         if (persistForBiometric) vault.store(credentials)
         Try.Success(session)
+    } catch (e: FirebaseAuthInvalidCredentialsException) {
+        Try.Failure(AuthError.InvalidCredentials)
+    } catch (e: FirebaseAuthException) {
+        Try.Failure(AuthError.InvalidCredentials)
+    } catch (e: FirebaseNetworkException) {
+        Try.Failure(AuthError.NoNetwork)
     } catch (e: SocketTimeoutException) {
         Try.Failure(AuthError.Timeout)
     } catch (e: TimeoutCancellationException) {
         Try.Failure(AuthError.Timeout)
     } catch (e: IOException) {
         Try.Failure(AuthError.NoNetwork)
-    } catch (e: HttpException) {
-        when (e.code) {
-            401 -> Try.Failure(AuthError.InvalidCredentials)
-            in 500..599 -> Try.Failure(AuthError.Server(e.code))
-            else -> Try.Failure(AuthError.Unknown)
-        }
     } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
         Try.Failure(AuthError.Unknown)
     }

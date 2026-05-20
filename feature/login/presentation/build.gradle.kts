@@ -22,7 +22,8 @@ android {
 dependencies {
     implementation(project(":feature:login:nav"))
     implementation(project(":feature:login:domain"))
-    implementation(project(":feature:home:nav"))
+    implementation(project(":feature:deck:nav"))
+    implementation(project(":feature:notifications:nav"))
     implementation(project(":core:navigation"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:ui"))

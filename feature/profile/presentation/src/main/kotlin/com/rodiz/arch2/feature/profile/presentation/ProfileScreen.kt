@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,6 +13,8 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Pets
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -28,6 +31,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun ProfileRoute(
     onSignedOut: () -> Unit,
+    onOpenMyPets: () -> Unit,
+    onOpenSettings: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val session by viewModel.session.collectAsStateWithLifecycle()
@@ -60,7 +65,26 @@ fun ProfileRoute(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(24.dp))
-        OutlinedButton(onClick = { viewModel.signOut(onSignedOut) }) {
+        FilledTonalButton(
+            onClick = onOpenMyPets,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Icon(Icons.Outlined.Pets, contentDescription = null)
+            Spacer(Modifier.size(8.dp))
+            Text("My Pets")
+        }
+        Spacer(Modifier.height(12.dp))
+        FilledTonalButton(
+            onClick = onOpenSettings,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Settings")
+        }
+        Spacer(Modifier.height(12.dp))
+        OutlinedButton(
+            onClick = { viewModel.signOut(onSignedOut) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             Text(stringResource(R.string.profile_sign_out))
         }
     }

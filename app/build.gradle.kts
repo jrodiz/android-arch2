@@ -53,6 +53,36 @@ dependencies {
     implementation(project(":feature:profile:nav"))
     implementation(project(":feature:profile:presentation"))
 
+    implementation(project(":feature:pet:nav"))
+    implementation(project(":feature:pet:data"))
+    implementation(project(":feature:pet:presentation"))
+
+    implementation(project(":feature:deck:nav"))
+    implementation(project(":feature:deck:data"))
+    implementation(project(":feature:deck:presentation"))
+
+    implementation(project(":feature:likes:nav"))
+    implementation(project(":feature:likes:data"))
+    implementation(project(":feature:likes:presentation"))
+
+    implementation(project(":feature:match:nav"))
+    implementation(project(":feature:match:data"))
+    implementation(project(":feature:match:presentation"))
+
+    implementation(project(":feature:chat:nav"))
+    implementation(project(":feature:chat:data"))
+    implementation(project(":feature:chat:presentation"))
+
+    implementation(project(":feature:settings:nav"))
+    implementation(project(":feature:settings:data"))
+    implementation(project(":feature:settings:presentation"))
+
+    implementation(project(":feature:notifications:nav"))
+    implementation(project(":feature:notifications:presentation"))
+
+    // MainActivity references NotificationRationale to wire the tinpet://notify deep link.
+    // (Already covered by :feature:notifications:nav above; no extra dep needed.)
+
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.appcompat)

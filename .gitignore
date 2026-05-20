@@ -84,6 +84,9 @@ Thumbs.db
 
 # Kotlin and KSP generated files
 kspCaches/
+.kotlin/
+*/.kotlin/
+*/*/.kotlin/
 
 # Cache properties
 cache.properties

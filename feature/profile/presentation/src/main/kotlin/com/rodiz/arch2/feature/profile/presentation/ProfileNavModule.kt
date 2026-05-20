@@ -4,7 +4,9 @@ import androidx.navigation3.runtime.entry
 import com.rodiz.arch2.core.navigation.EntryProviderInstaller
 import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.login.nav.LoginHome
+import com.rodiz.arch2.feature.pet.nav.MyPets
 import com.rodiz.arch2.feature.profile.nav.ProfileHome
+import com.rodiz.arch2.feature.settings.nav.SettingsHome
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,7 +20,11 @@ internal object ProfileNavModule {
     @IntoSet
     fun provideProfileEntries(navigator: Navigator): EntryProviderInstaller = {
         entry<ProfileHome> {
-            ProfileRoute(onSignedOut = { navigator.replaceAll(LoginHome) })
+            ProfileRoute(
+                onSignedOut = { navigator.replaceAll(LoginHome) },
+                onOpenMyPets = { navigator.goTo(MyPets) },
+                onOpenSettings = { navigator.goTo(SettingsHome) },
+            )
         }
     }
 }

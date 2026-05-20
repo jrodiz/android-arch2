@@ -2,7 +2,7 @@ package com.rodiz.arch2.di
 
 import com.rodiz.arch2.core.navigation.StartDestination
 import com.rodiz.arch2.core.session.domain.SessionRepository
-import com.rodiz.arch2.feature.home.nav.HomeHome
+import com.rodiz.arch2.feature.deck.nav.DeckHome
 import com.rodiz.arch2.feature.login.nav.LoginHome
 import dagger.Module
 import dagger.Provides
@@ -24,6 +24,6 @@ object StartDestinationModule {
         // here. This is the single intentional runBlocking call in production
         // code and stays isolated to startup.
         val session = runBlocking { sessionRepository.current() }
-        return if (session != null) HomeHome else LoginHome
+        return if (session != null) DeckHome else LoginHome
     }
 }

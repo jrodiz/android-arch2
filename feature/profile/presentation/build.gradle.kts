@@ -9,6 +9,8 @@ android {
 dependencies {
     implementation(project(":feature:profile:nav"))
     implementation(project(":feature:login:nav"))
+    implementation(project(":feature:pet:nav"))
+    implementation(project(":feature:settings:nav"))
     implementation(project(":core:navigation"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:session:domain"))
