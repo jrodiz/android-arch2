@@ -50,14 +50,6 @@ dependencies {
     implementation(project(":feature:login:data"))
     implementation(project(":feature:login:presentation"))
 
-    implementation(project(":feature:home:nav"))
-    implementation(project(":feature:home:domain"))
-    implementation(project(":feature:home:data"))
-    implementation(project(":feature:home:presentation"))
-
-    implementation(project(":feature:discover:nav"))
-    implementation(project(":feature:discover:presentation"))
-
     implementation(project(":feature:profile:nav"))
     implementation(project(":feature:profile:presentation"))
 

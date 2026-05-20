@@ -34,13 +34,5 @@ include(":feature:login:domain")
 include(":feature:login:data")
 include(":feature:login:presentation")
 
-include(":feature:home:nav")
-include(":feature:home:domain")
-include(":feature:home:data")
-include(":feature:home:presentation")
-
-include(":feature:discover:nav")
-include(":feature:discover:presentation")
-
 include(":feature:profile:nav")
 include(":feature:profile:presentation")
