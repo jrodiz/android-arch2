@@ -1,0 +1,104 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Each user owns their own profile doc keyed by their auth uid.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Pets are public to signed-in users (the deck needs to see other owners' pets).
+    // Only the owner can create/update; hard-deletes are blocked — the app soft-deletes
+    // via state transitions (ACTIVE → ARCHIVED → PURGED).
+    match /pets/{petId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid;
+      allow update: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid
+                    && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // Likes are world-readable for signed-in users so the deck can do client-side
+    // reciprocity checks. Each like is created/deleted only by its author.
+    match /likes/{likeId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.fromOwnerId == request.auth.uid;
+      allow delete: if request.auth != null
+                    && resource.data.fromOwnerId == request.auth.uid;
+    }
+
+    // Deck passes — private per user; prevents re-showing already-passed pets.
+    match /passes/{passId} {
+      allow read:   if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Likes-you-tab "I passed on this incoming like" markers — private per recipient.
+    match /passedLikes/{passId} {
+      allow read:   if request.auth != null
+                    && resource.data.toOwnerId == request.auth.uid;
+      allow create: if request.auth != null
+                    && request.resource.data.toOwnerId == request.auth.uid;
+      allow delete: if request.auth != null
+                    && resource.data.toOwnerId == request.auth.uid;
+    }
+
+    // Matches are scoped to two participants. Either side can read/write the match
+    // doc; either side can delete it (unmatch). Messages are a subcollection beneath.
+    //
+    // Read allows `resource == null` because the deck's pollForMatch (and any
+    // other "did a match get created yet?" lookup) does a one-shot get on the
+    // deterministic matches/{a_b} id. A missing doc must return "not found",
+    // not PERMISSION_DENIED. The null branch leaks nothing — no data to read.
+    match /matches/{matchId} {
+      allow read:   if request.auth != null
+                    && (resource == null
+                        || request.auth.uid in resource.data.participants);
+      allow create: if request.auth != null
+                    && request.auth.uid in request.resource.data.participants;
+      allow update: if request.auth != null
+                    && request.auth.uid in resource.data.participants;
+      allow delete: if request.auth != null
+                    && request.auth.uid in resource.data.participants;
+
+      match /messages/{messageId} {
+        allow read:   if request.auth != null
+                      && request.auth.uid in get(/databases/$(database)/documents/matches/$(matchId)).data.participants;
+        allow create: if request.auth != null
+                      && request.resource.data.fromOwnerId == request.auth.uid
+                      && request.auth.uid in get(/databases/$(database)/documents/matches/$(matchId)).data.participants;
+        // After create, only `readBy` is patchable — locks out edits/deletes of message text.
+        allow update: if request.auth != null
+                      && request.auth.uid in get(/databases/$(database)/documents/matches/$(matchId)).data.participants
+                      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy']);
+        allow delete: if false;
+      }
+    }
+
+    // Pending account deletions — private per user.
+    match /accountDeletions/{uid} {
+      allow read:   if request.auth != null && uid == request.auth.uid;
+      allow write:  if request.auth != null && uid == request.auth.uid;
+    }
+
+    // FCM tokens are write-only from clients (Cloud Functions read them with admin
+    // privileges to fan out push notifications).
+    match /fcmTokens/{tokenId} {
+      allow read:   if false;
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid;
+      allow update: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+      allow delete: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+    }
+  }
+}

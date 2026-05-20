@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Pet photos: any signed-in user can read (deck shows other owners' pets).
+    // Writes are allowed for any authenticated user with size + image content-type
+    // guards. We can't gate on "ownerId of the pet doc" here because photos are
+    // uploaded BEFORE the pet doc is written (FirestorePetRepository.addPet
+    // uploads first, then writes the doc atomically with the download URLs).
+    // The matching pet doc creation in Firestore is gated separately by
+    // firestore.rules `pets.create` (ownerId == auth.uid), so orphan uploads
+    // can't be referenced by anyone but the uploader — cleaned by purgeArchivedPets.
+    match /pets/{petId}/photos/{photoName} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Owner avatars (used by Sign Up flow): owner-only namespace.
+    match /owners/{uid}/{filename} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null
+                   && uid == request.auth.uid
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}
