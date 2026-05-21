@@ -3,7 +3,10 @@ package com.rodiz.arch2.feature.deck.data
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
+import com.google.firebase.firestore.Query
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
+import com.rodiz.arch2.core.common.geo.Haversine
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.deck.domain.model.DeckCard
 import com.rodiz.arch2.feature.deck.domain.model.DeckSnapshot
@@ -59,17 +62,18 @@ internal class FirestoreDeckRepository @Inject constructor(
             petRepo.observeAllActivePets(),
             observePausedOwnerIds(),
             observeBlockHideSet(uid),
-        ) { pets, paused, blocked ->
+            observeOwnerLocations(),
+        ) { pets, paused, blocked, locations ->
             val hideOwners = paused + blocked
-            // One-shot diagnostic — first emission only, so logcat stays clean.
-            // Surfaces a uid/ownerId mismatch (e.g. stale handle pets from before
-            // the auth-uid fix) immediately instead of via a console trip.
+            val myLoc = locations[uid]
+            val maxKm = filters.maxDistanceKm.toDouble()
             if (!loggedOnce) {
                 loggedOnce = true
                 Log.d(
                     "TinPet.Deck",
                     "observeDeck uid=$uid pets=${pets.size} " +
                         "paused=${paused.size} blocked=${blocked.size} " +
+                        "locations=${locations.size} myLoc=${myLoc != null} maxKm=$maxKm " +
                         "sampleOwnerIds=${pets.take(3).map { it.ownerId }}",
                 )
             }
@@ -80,11 +84,46 @@ internal class FirestoreDeckRepository @Inject constructor(
                 .filter { it.id.value !in sessionSwiped }
                 .filter { it.species.category in filters.speciesCategories }
                 .filter { it.intents.any { intent -> intent in filters.intents } }
+                .filter { pet -> withinDistance(myLoc, locations[pet.ownerId], maxKm) }
                 .map { DeckCard(it) }
             val state = if (cards.isEmpty()) DeckState.EXHAUSTED else DeckState.READY
             DeckSnapshot(cards, state)
         }.collect { emit(it) }
     }.flowOn(io)
+
+    // Distance gate. If we don't know my location yet we don't filter — better to
+    // show pets than to leave the deck empty during first-time setup. If we know
+    // mine but theirs is missing, we exclude them: otherwise distance-based matching
+    // means nothing.
+    private fun withinDistance(
+        mine: FirestoreGeoPoint?,
+        theirs: FirestoreGeoPoint?,
+        maxKm: Double,
+    ): Boolean {
+        if (mine == null) return true
+        if (theirs == null) return false
+        val km = Haversine.distanceKm(mine.latitude, mine.longitude, theirs.latitude, theirs.longitude)
+        return km <= maxKm
+    }
+
+    // Live map of every owner who has set a location → their Firestore GeoPoint.
+    // Uses orderBy("geohash") to implicitly skip owners that haven't set one.
+    private fun observeOwnerLocations(): Flow<Map<String, FirestoreGeoPoint>> = callbackFlow {
+        val registration = ownersCol
+            .orderBy("geohash", Query.Direction.ASCENDING)
+            .addSnapshotListener { snap, err ->
+                if (err != null) {
+                    close(err)
+                    return@addSnapshotListener
+                }
+                val map = snap?.documents.orEmpty().mapNotNull { doc ->
+                    val loc = doc.get("location") as? FirestoreGeoPoint ?: return@mapNotNull null
+                    doc.id to loc
+                }.toMap()
+                trySend(map)
+            }
+        awaitClose { registration.remove() }
+    }
 
     // owners.paused == true → hide all their pets from every other deck.
     private fun observePausedOwnerIds(): Flow<Set<String>> = callbackFlow {
