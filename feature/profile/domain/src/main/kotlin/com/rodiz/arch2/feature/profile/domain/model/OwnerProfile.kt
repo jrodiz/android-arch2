@@ -17,4 +17,6 @@ data class GeoPoint(
     val lat: Double,
     val lng: Double,
     val geohash: String,
+    /** Human-readable label like "Mexico City, MX"; null when reverse-geocode failed. */
+    val cityLabel: String? = null,
 )

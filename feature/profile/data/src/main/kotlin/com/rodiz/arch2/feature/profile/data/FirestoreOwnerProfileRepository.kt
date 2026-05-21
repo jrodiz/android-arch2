@@ -113,6 +113,7 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
                 mapOf(
                     "location" to FirestoreGeoPoint(point.lat, point.lng),
                     "geohash" to point.geohash,
+                    "cityLabel" to point.cityLabel,
                     "updatedAt" to now.toTimestamp(),
                     "createdAt" to now.toTimestamp(),
                 ),
@@ -150,6 +151,7 @@ private fun DocumentSnapshot.toOwnerProfile(uid: String, email: String?): OwnerP
             lat = native.latitude,
             lng = native.longitude,
             geohash = getString("geohash").orEmpty(),
+            cityLabel = getString("cityLabel"),
         )
     }
     val createdAt = getTimestamp("createdAt")?.toKxInstant() ?: Instant.fromEpochMilliseconds(0)

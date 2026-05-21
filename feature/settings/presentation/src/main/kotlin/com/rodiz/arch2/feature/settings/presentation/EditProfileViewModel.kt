@@ -115,7 +115,7 @@ internal class EditProfileViewModel @Inject constructor(
         }
     }
 
-    fun onLocationFetched(lat: Double, lng: Double) {
+    fun onLocationFetched(lat: Double, lng: Double, cityLabel: String?) {
         if (_uiState.value.isUpdatingLocation) return
         viewModelScope.launch {
             _uiState.update { it.copy(isUpdatingLocation = true) }
@@ -124,6 +124,7 @@ internal class EditProfileViewModel @Inject constructor(
                     lat = lat,
                     lng = lng,
                     geohash = Geohash.encode(lat, lng, precision = 6),
+                    cityLabel = cityLabel,
                 )
                 updateLocationUseCase(point)
             }.onFailure { e ->

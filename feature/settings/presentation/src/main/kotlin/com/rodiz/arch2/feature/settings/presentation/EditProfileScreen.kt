@@ -1,7 +1,9 @@
 package com.rodiz.arch2.feature.settings.presentation
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -58,8 +60,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.google.android.gms.location.LocationServices
 import com.rodiz.arch2.feature.profile.domain.model.GeoPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,7 +102,8 @@ internal fun EditProfileRoute(
                 @Suppress("MissingPermission")
                 val loc = locationClient.lastLocation.await()
                 if (loc != null) {
-                    viewModel.onLocationFetched(loc.latitude, loc.longitude)
+                    val city = reverseGeocode(ctx, loc.latitude, loc.longitude)
+                    viewModel.onLocationFetched(loc.latitude, loc.longitude, city)
                 } else {
                     viewModel.onLocationError("Location unavailable — try outdoors with GPS on.")
                 }
@@ -266,7 +271,8 @@ private fun LocationRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        text = "%.4f, %.4f".format(location.lat, location.lng),
+                        text = location.cityLabel
+                            ?: "%.4f, %.4f".format(location.lat, location.lng),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 } else {
@@ -289,3 +295,18 @@ private fun LocationRow(
         }
     }
 }
+
+// Best-effort reverse geocode. Returns null if the Geocoder is unavailable, the
+// network fails, or no locality is resolved — the caller falls back to raw coords.
+private suspend fun reverseGeocode(ctx: Context, lat: Double, lng: Double): String? =
+    withContext(Dispatchers.IO) {
+        runCatching {
+            @Suppress("DEPRECATION")
+            val results = Geocoder(ctx).getFromLocation(lat, lng, 1)
+            results?.firstOrNull()?.let { addr ->
+                listOfNotNull(addr.locality, addr.countryCode)
+                    .joinToString(", ")
+                    .ifEmpty { null }
+            }
+        }.getOrNull()
+    }
