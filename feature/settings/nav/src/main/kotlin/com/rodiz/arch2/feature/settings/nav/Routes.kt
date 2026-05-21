@@ -9,6 +9,9 @@ data object SettingsHome
 data object SettingsEditProfile
 
 @Serializable
+data object SettingsNotifications
+
+@Serializable
 data object SettingsAccount
 
 @Serializable

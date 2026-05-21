@@ -4,10 +4,10 @@ import androidx.navigation3.runtime.entry
 import com.rodiz.arch2.core.navigation.EntryProviderInstaller
 import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.login.nav.LoginHome
-import com.rodiz.arch2.feature.notifications.nav.NotificationRationale
 import com.rodiz.arch2.feature.settings.nav.SettingsAccount
 import com.rodiz.arch2.feature.settings.nav.SettingsEditProfile
 import com.rodiz.arch2.feature.settings.nav.SettingsHome
+import com.rodiz.arch2.feature.settings.nav.SettingsNotifications
 import com.rodiz.arch2.feature.settings.nav.SettingsPrivacy
 import dagger.Module
 import dagger.Provides
@@ -25,13 +25,16 @@ internal object SettingsNavModule {
             SettingsHomeRoute(
                 onBack = { navigator.goBack() },
                 onOpenEditProfile = { navigator.goTo(SettingsEditProfile) },
-                onOpenNotifications = { navigator.goTo(NotificationRationale) },
+                onOpenNotifications = { navigator.goTo(SettingsNotifications) },
                 onOpenPrivacy = { navigator.goTo(SettingsPrivacy) },
                 onOpenAccount = { navigator.goTo(SettingsAccount) },
             )
         }
         entry<SettingsEditProfile> {
             EditProfileRoute(onBack = { navigator.goBack() })
+        }
+        entry<SettingsNotifications> {
+            NotificationsRoute(onBack = { navigator.goBack() })
         }
         entry<SettingsPrivacy> {
             PrivacyRoute(onBack = { navigator.goBack() })
