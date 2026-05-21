@@ -1,8 +1,10 @@
 package com.rodiz.arch2.feature.settings.domain.usecase
 
 import com.rodiz.arch2.feature.settings.domain.model.AccountDeletion
+import com.rodiz.arch2.feature.settings.domain.model.BlockedOwner
 import com.rodiz.arch2.feature.settings.domain.model.NotificationPrefs
 import com.rodiz.arch2.feature.settings.domain.repository.AccountDeletionRepository
+import com.rodiz.arch2.feature.settings.domain.repository.BlockRepository
 import com.rodiz.arch2.feature.settings.domain.repository.NotificationPrefsRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -35,4 +37,16 @@ class UpdateNotificationPrefsUseCase @Inject constructor(
     private val repo: NotificationPrefsRepository,
 ) {
     suspend operator fun invoke(prefs: NotificationPrefs) = repo.updatePrefs(prefs)
+}
+
+class ObserveBlockedOwnersUseCase @Inject constructor(
+    private val repo: BlockRepository,
+) {
+    operator fun invoke(): Flow<List<BlockedOwner>> = repo.observeBlockedOwners()
+}
+
+class UnblockOwnerUseCase @Inject constructor(
+    private val repo: BlockRepository,
+) {
+    suspend operator fun invoke(otherOwnerId: String) = repo.unblock(otherOwnerId)
 }

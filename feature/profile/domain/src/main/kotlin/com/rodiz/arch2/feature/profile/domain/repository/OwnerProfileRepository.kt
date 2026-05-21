@@ -12,4 +12,7 @@ interface OwnerProfileRepository {
 
     /** Uploads the local image, then persists the resulting download URL on the owner doc. */
     suspend fun updateAvatar(localUri: String)
+
+    /** Hide my pets from other owners' decks. Toggleable from Settings → Privacy. */
+    suspend fun setPaused(paused: Boolean)
 }

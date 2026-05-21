@@ -27,3 +27,9 @@ class UpdateAvatarUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(localUri: String) = repo.updateAvatar(localUri)
 }
+
+class SetPausedUseCase @Inject constructor(
+    private val repo: OwnerProfileRepository,
+) {
+    suspend operator fun invoke(paused: Boolean) = repo.setPaused(paused)
+}

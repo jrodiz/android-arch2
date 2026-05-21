@@ -5,6 +5,7 @@ import com.rodiz.arch2.core.navigation.EntryProviderInstaller
 import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.login.nav.LoginHome
 import com.rodiz.arch2.feature.settings.nav.SettingsAccount
+import com.rodiz.arch2.feature.settings.nav.SettingsBlockedUsers
 import com.rodiz.arch2.feature.settings.nav.SettingsEditProfile
 import com.rodiz.arch2.feature.settings.nav.SettingsFilters
 import com.rodiz.arch2.feature.settings.nav.SettingsHome
@@ -42,7 +43,13 @@ internal object SettingsNavModule {
             FiltersRoute(onBack = { navigator.goBack() })
         }
         entry<SettingsPrivacy> {
-            PrivacyRoute(onBack = { navigator.goBack() })
+            PrivacyRoute(
+                onBack = { navigator.goBack() },
+                onOpenBlockedUsers = { navigator.goTo(SettingsBlockedUsers) },
+            )
+        }
+        entry<SettingsBlockedUsers> {
+            BlockedUsersRoute(onBack = { navigator.goBack() })
         }
         entry<SettingsAccount> {
             AccountRoute(

@@ -16,6 +16,20 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == uid;
     }
 
+    // Block records. Top-level (not subcollection) so both sides of the relationship
+    // can be queried directly: `where ownerId == me` (who I blocked) and
+    // `where blockedOwnerId == me` (who blocked me — used by the deck filter).
+    // Each block is created/deleted only by its initiator.
+    match /blocks/{blockId} {
+      allow read:   if request.auth != null
+                    && (resource.data.ownerId == request.auth.uid
+                        || resource.data.blockedOwnerId == request.auth.uid);
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid;
+      allow delete: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid;
+    }
+
     // Pets are public to signed-in users (the deck needs to see other owners' pets).
     // Only the owner can create/update; hard-deletes are blocked — the app soft-deletes
     // via state transitions (ACTIVE → ARCHIVED → PURGED).

@@ -88,6 +88,21 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
         }
     }
 
+    override suspend fun setPaused(paused: Boolean) {
+        withContext(io) {
+            val uid = currentUid()
+            val now = Clock.System.now()
+            ownersCol.document(uid).set(
+                mapOf(
+                    "paused" to paused,
+                    "updatedAt" to now.toTimestamp(),
+                    "createdAt" to now.toTimestamp(),
+                ),
+                SetOptions.merge(),
+            ).await()
+        }
+    }
+
     private suspend fun currentUid(): String =
         sessionRepo.current()?.userId ?: error("No signed-in user")
 
@@ -99,6 +114,7 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
             firstName = user?.displayName.orEmpty(),
             avatarUrl = user?.photoUrl?.toString(),
             email = user?.email,
+            paused = false,
             createdAt = now,
             updatedAt = now,
         )
@@ -109,6 +125,7 @@ private fun DocumentSnapshot.toOwnerProfile(uid: String, email: String?): OwnerP
     if (!exists()) return null
     val firstName = getString("firstName") ?: return null
     val avatarUrl = getString("avatarUrl")
+    val paused = getBoolean("paused") ?: false
     val createdAt = getTimestamp("createdAt")?.toKxInstant() ?: Instant.fromEpochMilliseconds(0)
     val updatedAt = getTimestamp("updatedAt")?.toKxInstant() ?: Instant.fromEpochMilliseconds(0)
     return OwnerProfile(
@@ -116,6 +133,7 @@ private fun DocumentSnapshot.toOwnerProfile(uid: String, email: String?): OwnerP
         firstName = firstName,
         avatarUrl = avatarUrl,
         email = email,
+        paused = paused,
         createdAt = createdAt,
         updatedAt = updatedAt,
     )
