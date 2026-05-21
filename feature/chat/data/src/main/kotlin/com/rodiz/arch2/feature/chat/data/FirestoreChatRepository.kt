@@ -9,6 +9,7 @@ import com.rodiz.arch2.core.common.coroutine.IoDispatcher
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.chat.domain.model.Message
 import com.rodiz.arch2.feature.chat.domain.model.MessageId
+import com.rodiz.arch2.feature.chat.domain.model.ReportReason
 import com.rodiz.arch2.feature.chat.domain.repository.ChatRepository
 import com.rodiz.arch2.feature.match.domain.model.MatchId
 import kotlinx.coroutines.CoroutineDispatcher
@@ -31,6 +32,7 @@ internal class FirestoreChatRepository @Inject constructor(
 
     private val matchesCol get() = firestore.collection("matches")
     private val blocksCol get() = firestore.collection("blocks")
+    private val reportsCol get() = firestore.collection("reports")
 
     override fun observeChat(matchId: MatchId, pageSize: Int): Flow<List<Message>> = callbackFlow {
         val registration = matchesCol.document(matchId.value)
@@ -102,6 +104,32 @@ internal class FirestoreChatRepository @Inject constructor(
                 batch.update(doc.reference, "readBy.$me", FieldValue.serverTimestamp())
             }
             batch.commit().await()
+        }
+    }
+
+    override suspend fun reportOther(matchId: MatchId, reason: ReportReason, freeText: String?) {
+        withContext(io) {
+            val me = sessionRepo.current()?.userId ?: error("No signed-in user")
+            val matchRef = matchesCol.document(matchId.value)
+            val matchSnap = matchRef.get().await()
+            @Suppress("UNCHECKED_CAST")
+            val participants = (matchSnap.get("participants") as? List<String>).orEmpty()
+            val other = participants.firstOrNull { it != me }
+                ?: error("Match ${matchId.value} has no other participant")
+            val trimmedNote = freeText?.trim()?.take(500)?.takeIf { it.isNotEmpty() }
+            reportsCol.add(
+                mapOf(
+                    "reporter" to me,
+                    "reportedOwnerId" to other,
+                    "reason" to reason.name,
+                    "freeText" to trimmedNote,
+                    "context" to mapOf(
+                        "type" to "chat",
+                        "matchId" to matchId.value,
+                    ),
+                    "createdAt" to FieldValue.serverTimestamp(),
+                ),
+            ).await()
         }
     }
 

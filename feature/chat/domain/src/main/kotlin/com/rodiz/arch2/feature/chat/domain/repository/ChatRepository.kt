@@ -1,6 +1,7 @@
 package com.rodiz.arch2.feature.chat.domain.repository
 
 import com.rodiz.arch2.feature.chat.domain.model.Message
+import com.rodiz.arch2.feature.chat.domain.model.ReportReason
 import com.rodiz.arch2.feature.match.domain.model.MatchId
 import kotlinx.coroutines.flow.Flow
 
@@ -19,4 +20,10 @@ interface ChatRepository {
      * deletes the match doc (Cloud Function recursively cleans up messages).
      */
     suspend fun blockOther(matchId: MatchId)
+
+    /**
+     * Submit a report against the other participant. Writes /reports/{auto-id}.
+     * Does NOT delete the match — the user can decide to also block separately.
+     */
+    suspend fun reportOther(matchId: MatchId, reason: ReportReason, freeText: String?)
 }

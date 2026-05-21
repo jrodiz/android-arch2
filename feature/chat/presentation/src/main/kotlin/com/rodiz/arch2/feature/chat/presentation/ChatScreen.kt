@@ -20,15 +20,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.HeartBroken
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -36,7 +39,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Button
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rodiz.arch2.feature.chat.domain.model.Message
+import com.rodiz.arch2.feature.chat.domain.model.ReportReason
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -72,12 +78,19 @@ internal fun ChatScreen(
     val snackbar = remember { SnackbarHostState() }
     var showUnmatchDialog by remember { mutableStateOf(false) }
     var showBlockDialog by remember { mutableStateOf(false) }
+    var showReportSheet by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let {
             snackbar.showSnackbar(it)
             viewModel.clearError()
+        }
+    }
+    LaunchedEffect(state.reportSubmittedAtMillis) {
+        if (state.reportSubmittedAtMillis != null) {
+            snackbar.showSnackbar("Report submitted")
+            viewModel.clearReportSubmitted()
         }
     }
     LaunchedEffect(Unit) {
@@ -120,6 +133,16 @@ internal fun ChatScreen(
                                 onClick = {
                                     menuOpen = false
                                     showBlockDialog = true
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Report") },
+                                leadingIcon = {
+                                    Icon(Icons.Outlined.Flag, contentDescription = null)
+                                },
+                                onClick = {
+                                    menuOpen = false
+                                    showReportSheet = true
                                 },
                             )
                         }
@@ -184,6 +207,91 @@ internal fun ChatScreen(
             },
         )
     }
+
+    if (showReportSheet) {
+        ReportSheet(
+            isSubmitting = state.isReporting,
+            onDismiss = { showReportSheet = false },
+            onSubmit = { reason, freeText ->
+                showReportSheet = false
+                viewModel.submitReport(reason, freeText)
+            },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReportSheet(
+    isSubmitting: Boolean,
+    onDismiss: () -> Unit,
+    onSubmit: (ReportReason, String?) -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var selectedReason by remember { mutableStateOf<ReportReason?>(null) }
+    var freeText by remember { mutableStateOf("") }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(
+                text = "Report this person",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            Text(
+                text = "Pick a reason. Reports go to our moderation team.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            androidx.compose.foundation.layout.FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                ReportReason.entries.forEach { reason ->
+                    FilterChip(
+                        selected = selectedReason == reason,
+                        onClick = { selectedReason = reason },
+                        label = { Text(reason.label()) },
+                    )
+                }
+            }
+            OutlinedTextField(
+                value = freeText,
+                onValueChange = { if (it.length <= 500) freeText = it },
+                placeholder = { Text("Add details (optional)") },
+                supportingText = { Text("${freeText.length}/500") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3,
+            )
+            Button(
+                onClick = {
+                    val reason = selectedReason ?: return@Button
+                    onSubmit(reason, freeText.takeIf { it.isNotBlank() })
+                },
+                enabled = selectedReason != null && !isSubmitting,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(if (isSubmitting) "Submitting…" else "Submit")
+            }
+            Spacer(Modifier.size(8.dp))
+        }
+    }
+}
+
+private fun ReportReason.label(): String = when (this) {
+    ReportReason.SPAM -> "Spam"
+    ReportReason.FAKE_PROFILE -> "Fake profile"
+    ReportReason.HARASSMENT -> "Harassment"
+    ReportReason.ANIMAL_WELFARE_CONCERN -> "Animal welfare concern"
+    ReportReason.OTHER -> "Other"
 }
 
 @Composable

@@ -30,6 +30,14 @@ service cloud.firestore {
                     && resource.data.ownerId == request.auth.uid;
     }
 
+    // Moderation reports. Write-only from clients — reads are admin-only via the
+    // Firebase console (or a future Cloud Function with custom claims).
+    match /reports/{reportId} {
+      allow read:   if false;
+      allow create: if request.auth != null
+                    && request.resource.data.reporter == request.auth.uid;
+    }
+
     // Pets are public to signed-in users (the deck needs to see other owners' pets).
     // Only the owner can create/update; hard-deletes are blocked — the app soft-deletes
     // via state transitions (ACTIVE → ARCHIVED → PURGED).

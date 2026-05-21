@@ -1,6 +1,7 @@
 package com.rodiz.arch2.feature.chat.domain.usecase
 
 import com.rodiz.arch2.feature.chat.domain.model.Message
+import com.rodiz.arch2.feature.chat.domain.model.ReportReason
 import com.rodiz.arch2.feature.chat.domain.repository.ChatRepository
 import com.rodiz.arch2.feature.match.domain.model.MatchId
 import kotlinx.coroutines.flow.Flow
@@ -29,4 +30,11 @@ class BlockOtherUseCase @Inject constructor(
     private val repo: ChatRepository,
 ) {
     suspend operator fun invoke(matchId: MatchId) = repo.blockOther(matchId)
+}
+
+class ReportOtherUseCase @Inject constructor(
+    private val repo: ChatRepository,
+) {
+    suspend operator fun invoke(matchId: MatchId, reason: ReportReason, freeText: String?) =
+        repo.reportOther(matchId, reason, freeText)
 }

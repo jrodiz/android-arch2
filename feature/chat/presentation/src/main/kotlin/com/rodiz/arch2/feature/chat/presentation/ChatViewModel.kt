@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.chat.domain.model.Message
+import com.rodiz.arch2.feature.chat.domain.model.ReportReason
 import com.rodiz.arch2.feature.chat.domain.usecase.BlockOtherUseCase
 import com.rodiz.arch2.feature.chat.domain.usecase.MarkAllReadUseCase
 import com.rodiz.arch2.feature.chat.domain.usecase.ObserveChatUseCase
+import com.rodiz.arch2.feature.chat.domain.usecase.ReportOtherUseCase
 import com.rodiz.arch2.feature.chat.domain.usecase.SendMessageUseCase
 import com.rodiz.arch2.feature.match.domain.model.MatchId
 import com.rodiz.arch2.feature.match.domain.usecase.ObserveMatchUseCase
@@ -31,6 +33,8 @@ internal data class ChatUiState(
     val unmatched: Boolean = false,
     val errorMessage: String? = null,
     val currentUid: String = "",
+    val isReporting: Boolean = false,
+    val reportSubmittedAtMillis: Long? = null,
 )
 
 internal class ChatViewModel @AssistedInject constructor(
@@ -41,6 +45,7 @@ internal class ChatViewModel @AssistedInject constructor(
     private val markAllRead: MarkAllReadUseCase,
     private val unmatch: UnmatchUseCase,
     private val blockOther: BlockOtherUseCase,
+    private val reportOther: ReportOtherUseCase,
     private val sessionRepo: SessionRepository,
 ) : ViewModel() {
 
@@ -110,6 +115,26 @@ internal class ChatViewModel @AssistedInject constructor(
                 .onSuccess { _exited.tryEmit(Unit) }
                 .onFailure { e -> _uiState.update { it.copy(errorMessage = e.message ?: "Block failed") } }
         }
+    }
+
+    fun submitReport(reason: ReportReason, freeText: String?) {
+        if (_uiState.value.isReporting) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isReporting = true) }
+            runCatching { reportOther(matchId, reason, freeText) }
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(isReporting = false, reportSubmittedAtMillis = System.currentTimeMillis())
+                    }
+                }
+                .onFailure { e ->
+                    _uiState.update { it.copy(isReporting = false, errorMessage = e.message ?: "Report failed") }
+                }
+        }
+    }
+
+    fun clearReportSubmitted() {
+        _uiState.update { it.copy(reportSubmittedAtMillis = null) }
     }
 
     fun clearError() {
