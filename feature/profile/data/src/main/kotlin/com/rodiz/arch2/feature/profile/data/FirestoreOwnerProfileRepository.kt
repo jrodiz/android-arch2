@@ -8,6 +8,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
 import com.rodiz.arch2.core.session.domain.SessionRepository
+import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
+import com.rodiz.arch2.feature.profile.domain.model.GeoPoint
 import com.rodiz.arch2.feature.profile.domain.model.OwnerProfile
 import com.rodiz.arch2.feature.profile.domain.repository.OwnerProfileRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -103,6 +105,22 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
         }
     }
 
+    override suspend fun updateLocation(point: GeoPoint) {
+        withContext(io) {
+            val uid = currentUid()
+            val now = Clock.System.now()
+            ownersCol.document(uid).set(
+                mapOf(
+                    "location" to FirestoreGeoPoint(point.lat, point.lng),
+                    "geohash" to point.geohash,
+                    "updatedAt" to now.toTimestamp(),
+                    "createdAt" to now.toTimestamp(),
+                ),
+                SetOptions.merge(),
+            ).await()
+        }
+    }
+
     private suspend fun currentUid(): String =
         sessionRepo.current()?.userId ?: error("No signed-in user")
 
@@ -115,6 +133,7 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
             avatarUrl = user?.photoUrl?.toString(),
             email = user?.email,
             paused = false,
+            location = null,
             createdAt = now,
             updatedAt = now,
         )
@@ -126,6 +145,13 @@ private fun DocumentSnapshot.toOwnerProfile(uid: String, email: String?): OwnerP
     val firstName = getString("firstName") ?: return null
     val avatarUrl = getString("avatarUrl")
     val paused = getBoolean("paused") ?: false
+    val location = (get("location") as? FirestoreGeoPoint)?.let { native ->
+        GeoPoint(
+            lat = native.latitude,
+            lng = native.longitude,
+            geohash = getString("geohash").orEmpty(),
+        )
+    }
     val createdAt = getTimestamp("createdAt")?.toKxInstant() ?: Instant.fromEpochMilliseconds(0)
     val updatedAt = getTimestamp("updatedAt")?.toKxInstant() ?: Instant.fromEpochMilliseconds(0)
     return OwnerProfile(
@@ -134,6 +160,7 @@ private fun DocumentSnapshot.toOwnerProfile(uid: String, email: String?): OwnerP
         avatarUrl = avatarUrl,
         email = email,
         paused = paused,
+        location = location,
         createdAt = createdAt,
         updatedAt = updatedAt,
     )

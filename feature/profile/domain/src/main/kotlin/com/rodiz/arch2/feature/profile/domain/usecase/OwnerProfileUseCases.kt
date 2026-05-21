@@ -1,5 +1,6 @@
 package com.rodiz.arch2.feature.profile.domain.usecase
 
+import com.rodiz.arch2.feature.profile.domain.model.GeoPoint
 import com.rodiz.arch2.feature.profile.domain.model.OwnerProfile
 import com.rodiz.arch2.feature.profile.domain.repository.OwnerProfileRepository
 import kotlinx.coroutines.flow.Flow
@@ -32,4 +33,10 @@ class SetPausedUseCase @Inject constructor(
     private val repo: OwnerProfileRepository,
 ) {
     suspend operator fun invoke(paused: Boolean) = repo.setPaused(paused)
+}
+
+class UpdateLocationUseCase @Inject constructor(
+    private val repo: OwnerProfileRepository,
+) {
+    suspend operator fun invoke(point: GeoPoint) = repo.updateLocation(point)
 }

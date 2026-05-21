@@ -15,6 +15,9 @@ dependencies {
     implementation(project(":core:filters:domain"))
 
     implementation(libs.coil.compose)
+    implementation(libs.play.services.location)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(project(":core:common"))
     implementation(project(":core:navigation"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:session:domain"))

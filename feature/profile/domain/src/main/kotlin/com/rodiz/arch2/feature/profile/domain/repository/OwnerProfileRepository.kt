@@ -1,5 +1,6 @@
 package com.rodiz.arch2.feature.profile.domain.repository
 
+import com.rodiz.arch2.feature.profile.domain.model.GeoPoint
 import com.rodiz.arch2.feature.profile.domain.model.OwnerProfile
 import kotlinx.coroutines.flow.Flow
 
@@ -15,4 +16,7 @@ interface OwnerProfileRepository {
 
     /** Hide my pets from other owners' decks. Toggleable from Settings → Privacy. */
     suspend fun setPaused(paused: Boolean)
+
+    /** Set the owner's coarse location (used by deck distance filter, later iterations). */
+    suspend fun updateLocation(point: GeoPoint)
 }

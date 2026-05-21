@@ -8,6 +8,13 @@ data class OwnerProfile(
     val avatarUrl: String?,
     val email: String?,
     val paused: Boolean,
+    val location: GeoPoint?,
     val createdAt: Instant,
     val updatedAt: Instant,
+)
+
+data class GeoPoint(
+    val lat: Double,
+    val lng: Double,
+    val geohash: String,
 )

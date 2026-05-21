@@ -31,6 +31,7 @@ googleServices = "4.4.2"
 firebaseCrashlyticsPlugin = "3.0.2"
 androidxCredentials = "1.3.0"
 googleId = "1.1.1"
+playServicesLocation = "21.3.0"
 
 junit4 = "4.13.2"
 junitJupiter = "5.11.3"
@@ -86,6 +87,7 @@ androidx-credentials = { group = "androidx.credentials", name = "credentials", v
 androidx-credentials-play-services = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "androidxCredentials" }
 google-id = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleId" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutines" }
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 # Convention plugin support (Gradle plugins exposed as libraries so build-logic can apply them via id())
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
