@@ -1,4 +1,4 @@
-package com.rodiz.arch2.feature.deck.domain.model
+package com.rodiz.arch2.core.filters.domain
 
 import com.rodiz.arch2.feature.pet.domain.model.Intent
 import com.rodiz.arch2.feature.pet.domain.model.SpeciesCategory

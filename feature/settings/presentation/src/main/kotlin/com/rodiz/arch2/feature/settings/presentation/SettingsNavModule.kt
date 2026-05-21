@@ -6,6 +6,7 @@ import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.login.nav.LoginHome
 import com.rodiz.arch2.feature.settings.nav.SettingsAccount
 import com.rodiz.arch2.feature.settings.nav.SettingsEditProfile
+import com.rodiz.arch2.feature.settings.nav.SettingsFilters
 import com.rodiz.arch2.feature.settings.nav.SettingsHome
 import com.rodiz.arch2.feature.settings.nav.SettingsNotifications
 import com.rodiz.arch2.feature.settings.nav.SettingsPrivacy
@@ -26,6 +27,7 @@ internal object SettingsNavModule {
                 onBack = { navigator.goBack() },
                 onOpenEditProfile = { navigator.goTo(SettingsEditProfile) },
                 onOpenNotifications = { navigator.goTo(SettingsNotifications) },
+                onOpenFilters = { navigator.goTo(SettingsFilters) },
                 onOpenPrivacy = { navigator.goTo(SettingsPrivacy) },
                 onOpenAccount = { navigator.goTo(SettingsAccount) },
             )
@@ -35,6 +37,9 @@ internal object SettingsNavModule {
         }
         entry<SettingsNotifications> {
             NotificationsRoute(onBack = { navigator.goBack() })
+        }
+        entry<SettingsFilters> {
+            FiltersRoute(onBack = { navigator.goBack() })
         }
         entry<SettingsPrivacy> {
             PrivacyRoute(onBack = { navigator.goBack() })

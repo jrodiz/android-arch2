@@ -44,6 +44,7 @@ dependencies {
     implementation(project(":core:session:data"))
     implementation(project(":core:datastore"))
     implementation(project(":core:firebase"))
+    implementation(project(":core:filters:data"))
 
     implementation(project(":feature:login:nav"))
     implementation(project(":feature:login:domain"))

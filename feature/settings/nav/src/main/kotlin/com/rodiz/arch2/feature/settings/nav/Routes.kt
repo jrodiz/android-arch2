@@ -12,6 +12,9 @@ data object SettingsEditProfile
 data object SettingsNotifications
 
 @Serializable
+data object SettingsFilters
+
+@Serializable
 data object SettingsAccount
 
 @Serializable

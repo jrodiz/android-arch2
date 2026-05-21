@@ -8,7 +8,7 @@ import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.deck.domain.model.DeckCard
 import com.rodiz.arch2.feature.deck.domain.model.DeckSnapshot
 import com.rodiz.arch2.feature.deck.domain.model.DeckState
-import com.rodiz.arch2.feature.deck.domain.model.FilterPrefs
+import com.rodiz.arch2.core.filters.domain.FilterPrefs
 import com.rodiz.arch2.feature.deck.domain.model.SwipeAction
 import com.rodiz.arch2.feature.deck.domain.model.SwipeResult
 import com.rodiz.arch2.feature.deck.domain.repository.DeckRepository

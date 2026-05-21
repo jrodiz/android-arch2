@@ -2,9 +2,9 @@ package com.rodiz.arch2.feature.deck.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rodiz.arch2.core.filters.domain.FilterPrefsRepository
 import com.rodiz.arch2.feature.deck.domain.model.DeckCard
 import com.rodiz.arch2.feature.deck.domain.model.DeckState
-import com.rodiz.arch2.feature.deck.domain.model.FilterPrefs
 import com.rodiz.arch2.feature.deck.domain.model.SwipeAction
 import com.rodiz.arch2.feature.deck.domain.model.SwipeResult
 import com.rodiz.arch2.feature.deck.domain.usecase.ObserveDeckUseCase
@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,6 +41,7 @@ internal data class DeckUiState(
 internal class DeckViewModel @Inject constructor(
     observeDeck: ObserveDeckUseCase,
     observeMyPets: ObserveMyPetsUseCase,
+    filterPrefsRepo: FilterPrefsRepository,
     private val submitSwipe: SubmitSwipeUseCase,
     private val undoLastSwipe: UndoLastSwipeUseCase,
 ) : ViewModel() {
@@ -53,7 +55,8 @@ internal class DeckViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            observeDeck(FilterPrefs.DEFAULT)
+            filterPrefsRepo.observePrefs()
+                .flatMapLatest { prefs -> observeDeck(prefs) }
                 .catch { e -> _uiState.update { it.copy(errorMessage = e.message) } }
                 .collect { snapshot ->
                     val filtered = snapshot.cards.filterNot { it.pet.id.value in recentlySwiped }

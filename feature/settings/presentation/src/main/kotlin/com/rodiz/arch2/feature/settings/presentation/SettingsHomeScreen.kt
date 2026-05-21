@@ -39,13 +39,14 @@ internal fun SettingsHomeRoute(
     onBack: () -> Unit,
     onOpenEditProfile: () -> Unit,
     onOpenNotifications: () -> Unit,
+    onOpenFilters: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenAccount: () -> Unit,
 ) {
     val categories = listOf(
         SettingsCategory("Profile", "Name and avatar", Icons.Outlined.Person, onOpenEditProfile),
         SettingsCategory("Notifications", "Matches, messages, likes", Icons.Outlined.Notifications, onOpenNotifications),
-        SettingsCategory("Filters", "Distance, intent, species", Icons.Outlined.Tune, {}, enabled = false),
+        SettingsCategory("Filters", "Distance, intent, species", Icons.Outlined.Tune, onOpenFilters),
         SettingsCategory("Privacy", "Pause, blocked users", Icons.Outlined.Lock, onOpenPrivacy),
         SettingsCategory("Account", "Email, delete account", Icons.Outlined.Settings, onOpenAccount),
     )

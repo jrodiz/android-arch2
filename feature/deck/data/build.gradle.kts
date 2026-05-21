@@ -10,6 +10,7 @@ android {
 dependencies {
     implementation(project(":feature:deck:domain"))
     implementation(project(":feature:pet:domain"))
+    implementation(project(":core:filters:domain"))
     implementation(project(":core:firebase"))
     implementation(project(":core:common"))
     implementation(project(":core:session:domain"))
