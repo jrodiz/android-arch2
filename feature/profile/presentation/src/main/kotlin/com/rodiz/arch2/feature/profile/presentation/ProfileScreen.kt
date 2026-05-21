@@ -16,9 +16,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Pets
@@ -29,9 +31,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +47,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.rodiz.arch2.feature.profile.domain.model.OwnerProfile
+import com.rodiz.arch2.feature.settings.domain.model.AccountDeletion
+import kotlinx.datetime.Clock
+import kotlin.math.max
+import kotlin.math.roundToInt
 
 @Composable
 fun ProfileRoute(
@@ -59,6 +68,13 @@ fun ProfileRoute(
             .padding(horizontal = 16.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        state.pendingDeletion?.let { deletion ->
+            CancelDeletionBanner(
+                deletion = deletion,
+                isCancelling = state.isCancellingDeletion,
+                onCancel = viewModel::cancelPendingDeletion,
+            )
+        }
         ProfileHeader(profile = state.profile, onClick = onEditProfile)
         Spacer(Modifier.height(8.dp))
         ListItem(
@@ -146,6 +162,50 @@ private fun ProfileHeader(
                 contentDescription = "Edit profile",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+@Composable
+private fun CancelDeletionBanner(
+    deletion: AccountDeletion,
+    isCancelling: Boolean,
+    onCancel: () -> Unit,
+) {
+    val daysLeft = remember(deletion.hardDeleteAt) {
+        val now = Clock.System.now()
+        val seconds = (deletion.hardDeleteAt - now).inWholeSeconds
+        max(0, (seconds / 86_400.0).roundToInt())
+    }
+    Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.DeleteOutline,
+                contentDescription = null,
+            )
+            Spacer(Modifier.size(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Welcome back",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                )
+                Text(
+                    text = "Your account is scheduled for deletion in $daysLeft day${if (daysLeft == 1) "" else "s"}.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Spacer(Modifier.size(8.dp))
+            TextButton(onClick = onCancel, enabled = !isCancelling) {
+                Text(if (isCancelling) "…" else "Cancel deletion")
+            }
         }
     }
 }
