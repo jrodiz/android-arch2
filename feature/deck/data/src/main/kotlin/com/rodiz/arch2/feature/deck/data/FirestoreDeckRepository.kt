@@ -7,6 +7,7 @@ import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
 import com.google.firebase.firestore.Query
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
 import com.rodiz.arch2.core.common.geo.Haversine
+import com.rodiz.arch2.core.ownerlookup.domain.OwnerLookupRepository
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.deck.domain.model.DeckCard
 import com.rodiz.arch2.feature.deck.domain.model.DeckSnapshot
@@ -38,6 +39,7 @@ internal class FirestoreDeckRepository @Inject constructor(
     private val sessionRepo: SessionRepository,
     private val firestore: FirebaseFirestore,
     private val petRepo: PetRepository,
+    private val ownerLookup: OwnerLookupRepository,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) : DeckRepository {
 
@@ -63,7 +65,8 @@ internal class FirestoreDeckRepository @Inject constructor(
             observePausedOwnerIds(),
             observeBlockHideSet(uid),
             observeOwnerLocations(),
-        ) { pets, paused, blocked, locations ->
+            ownerLookup.observeAll(),
+        ) { pets, paused, blocked, locations, owners ->
             val hideOwners = paused + blocked
             val myLoc = locations[uid]
             val maxKm = filters.maxDistanceKm.toDouble()
@@ -73,7 +76,8 @@ internal class FirestoreDeckRepository @Inject constructor(
                     "TinPet.Deck",
                     "observeDeck uid=$uid pets=${pets.size} " +
                         "paused=${paused.size} blocked=${blocked.size} " +
-                        "locations=${locations.size} myLoc=${myLoc != null} maxKm=$maxKm " +
+                        "locations=${locations.size} owners=${owners.size} " +
+                        "myLoc=${myLoc != null} maxKm=$maxKm " +
                         "sampleOwnerIds=${pets.take(3).map { it.ownerId }}",
                 )
             }
@@ -85,7 +89,7 @@ internal class FirestoreDeckRepository @Inject constructor(
                 .filter { it.species.category in filters.speciesCategories }
                 .filter { it.intents.any { intent -> intent in filters.intents } }
                 .filter { pet -> withinDistance(myLoc, locations[pet.ownerId], maxKm) }
-                .map { DeckCard(it) }
+                .map { pet -> DeckCard(pet = pet, owner = owners[pet.ownerId]) }
             val state = if (cards.isEmpty()) DeckState.EXHAUSTED else DeckState.READY
             DeckSnapshot(cards, state)
         }.collect { emit(it) }

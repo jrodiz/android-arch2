@@ -5,6 +5,8 @@ plugins {
 dependencies {
     implementation(project(":feature:pet:domain"))
     implementation(project(":core:filters:domain"))
+    // api: DeckCard.owner is OwnerDisplay, exposed to consumers (deck:presentation).
+    api(project(":core:ownerlookup:domain"))
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.datetime)
     implementation(libs.javax.inject)

@@ -142,8 +142,13 @@ internal fun DeckCardView(
                         color = Color.White,
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
                     )
+                    val species = card.pet.species.name.lowercase().replaceFirstChar { it.uppercase() }
+                    val subtitle = card.owner?.firstName
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let { "$species · with $it" }
+                        ?: species
                     Text(
-                        text = card.pet.species.name.lowercase().replaceFirstChar { it.uppercase() },
+                        text = subtitle,
                         color = Color.White.copy(alpha = 0.85f),
                         style = MaterialTheme.typography.bodyMedium,
                     )

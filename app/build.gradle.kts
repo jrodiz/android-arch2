@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":core:datastore"))
     implementation(project(":core:firebase"))
     implementation(project(":core:filters:data"))
+    implementation(project(":core:ownerlookup:data"))
 
     implementation(project(":feature:login:nav"))
     implementation(project(":feature:login:domain"))
