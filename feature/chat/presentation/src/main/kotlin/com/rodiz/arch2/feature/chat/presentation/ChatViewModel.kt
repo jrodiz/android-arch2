@@ -2,6 +2,8 @@ package com.rodiz.arch2.feature.chat.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rodiz.arch2.core.ownerlookup.domain.OwnerDisplay
+import com.rodiz.arch2.core.ownerlookup.domain.OwnerLookupRepository
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.chat.domain.model.Message
 import com.rodiz.arch2.feature.chat.domain.model.ReportReason
@@ -23,6 +25,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -33,6 +37,7 @@ internal data class ChatUiState(
     val unmatched: Boolean = false,
     val errorMessage: String? = null,
     val currentUid: String = "",
+    val other: OwnerDisplay? = null,
     val isReporting: Boolean = false,
     val reportSubmittedAtMillis: Long? = null,
 )
@@ -47,6 +52,7 @@ internal class ChatViewModel @AssistedInject constructor(
     private val blockOther: BlockOtherUseCase,
     private val reportOther: ReportOtherUseCase,
     private val sessionRepo: SessionRepository,
+    private val ownerLookup: OwnerLookupRepository,
 ) : ViewModel() {
 
     private val matchId: MatchId = MatchId(matchIdValue)
@@ -81,6 +87,19 @@ internal class ChatViewModel @AssistedInject constructor(
                 .collect { match ->
                     if (match == null) _uiState.update { it.copy(unmatched = true) }
                 }
+        }
+        // Resolve the other participant's display info reactively. flatMapLatest
+        // re-subscribes when my uid finally lands or when the match changes
+        // (e.g., right after match-create where participants are written async).
+        viewModelScope.launch {
+            observeMatch(matchId)
+                .flatMapLatest { match ->
+                    val me = sessionRepo.current()?.userId
+                    val other = match?.let { if (me != null) it.otherOwnerId(me) else null }
+                    if (other != null) ownerLookup.observe(other) else flowOf(null)
+                }
+                .catch { /* swallow — header just shows a fallback */ }
+                .collect { display -> _uiState.update { it.copy(other = display) } }
         }
     }
 

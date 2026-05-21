@@ -16,4 +16,5 @@ dependencies {
     implementation(project(":core:session:domain"))
 
     implementation(libs.androidx.compose.material.icons)
+    implementation(libs.coil.compose)
 }
