@@ -6,6 +6,9 @@ import kotlinx.serialization.Serializable
 data object SettingsHome
 
 @Serializable
+data object SettingsEditProfile
+
+@Serializable
 data object SettingsAccount
 
 @Serializable

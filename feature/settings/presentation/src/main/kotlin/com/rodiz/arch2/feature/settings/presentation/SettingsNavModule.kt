@@ -6,6 +6,7 @@ import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.login.nav.LoginHome
 import com.rodiz.arch2.feature.notifications.nav.NotificationRationale
 import com.rodiz.arch2.feature.settings.nav.SettingsAccount
+import com.rodiz.arch2.feature.settings.nav.SettingsEditProfile
 import com.rodiz.arch2.feature.settings.nav.SettingsHome
 import com.rodiz.arch2.feature.settings.nav.SettingsPrivacy
 import dagger.Module
@@ -23,10 +24,14 @@ internal object SettingsNavModule {
         entry<SettingsHome> {
             SettingsHomeRoute(
                 onBack = { navigator.goBack() },
+                onOpenEditProfile = { navigator.goTo(SettingsEditProfile) },
                 onOpenNotifications = { navigator.goTo(NotificationRationale) },
                 onOpenPrivacy = { navigator.goTo(SettingsPrivacy) },
                 onOpenAccount = { navigator.goTo(SettingsAccount) },
             )
+        }
+        entry<SettingsEditProfile> {
+            EditProfileRoute(onBack = { navigator.goBack() })
         }
         entry<SettingsPrivacy> {
             PrivacyRoute(onBack = { navigator.goBack() })

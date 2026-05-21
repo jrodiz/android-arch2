@@ -51,6 +51,8 @@ dependencies {
     implementation(project(":feature:login:presentation"))
 
     implementation(project(":feature:profile:nav"))
+    implementation(project(":feature:profile:domain"))
+    implementation(project(":feature:profile:data"))
     implementation(project(":feature:profile:presentation"))
 
     implementation(project(":feature:pet:nav"))

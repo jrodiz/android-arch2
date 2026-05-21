@@ -37,12 +37,13 @@ private data class SettingsCategory(
 @Composable
 internal fun SettingsHomeRoute(
     onBack: () -> Unit,
+    onOpenEditProfile: () -> Unit,
     onOpenNotifications: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenAccount: () -> Unit,
 ) {
     val categories = listOf(
-        SettingsCategory("Profile", "Name, avatar, location", Icons.Outlined.Person, {}, enabled = false),
+        SettingsCategory("Profile", "Name and avatar", Icons.Outlined.Person, onOpenEditProfile),
         SettingsCategory("Notifications", "Matches, messages, likes", Icons.Outlined.Notifications, onOpenNotifications),
         SettingsCategory("Filters", "Distance, intent, species", Icons.Outlined.Tune, {}, enabled = false),
         SettingsCategory("Privacy", "Pause, blocked users", Icons.Outlined.Lock, onOpenPrivacy),
