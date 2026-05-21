@@ -6,6 +6,7 @@ data class OwnerProfile(
     val id: String,
     val firstName: String,
     val avatarUrl: String?,
+    val email: String?,
     val createdAt: Instant,
     val updatedAt: Instant,
 )

@@ -8,6 +8,7 @@ android {
 
 dependencies {
     implementation(project(":feature:profile:nav"))
+    implementation(project(":feature:profile:domain"))
     implementation(project(":feature:login:nav"))
     implementation(project(":feature:pet:nav"))
     implementation(project(":feature:settings:nav"))
@@ -16,4 +17,5 @@ dependencies {
     implementation(project(":core:session:domain"))
 
     implementation(libs.androidx.compose.material.icons)
+    implementation(libs.coil.compose)
 }

@@ -6,6 +6,7 @@ import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.login.nav.LoginHome
 import com.rodiz.arch2.feature.pet.nav.MyPets
 import com.rodiz.arch2.feature.profile.nav.ProfileHome
+import com.rodiz.arch2.feature.settings.nav.SettingsEditProfile
 import com.rodiz.arch2.feature.settings.nav.SettingsHome
 import dagger.Module
 import dagger.Provides
@@ -24,6 +25,7 @@ internal object ProfileNavModule {
                 onSignedOut = { navigator.replaceAll(LoginHome) },
                 onOpenMyPets = { navigator.goTo(MyPets) },
                 onOpenSettings = { navigator.goTo(SettingsHome) },
+                onEditProfile = { navigator.goTo(SettingsEditProfile) },
             )
         }
     }

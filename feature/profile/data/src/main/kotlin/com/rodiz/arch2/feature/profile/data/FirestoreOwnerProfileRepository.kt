@@ -50,7 +50,9 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
             // Seed from Firebase Auth if the Firestore doc hasn't been written yet — sign-up
             // populates displayName/photoUrl on the Auth user before any owners/{uid} write
             // exists, and we want the edit screen to start from those values, not from blanks.
-            trySend(snap?.toOwnerProfile(uid) ?: seedFromAuth(uid))
+            // Email is always pulled from Auth (it's not stored on the owners doc).
+            val email = firebaseAuth.currentUser?.email
+            trySend(snap?.toOwnerProfile(uid, email) ?: seedFromAuth(uid))
         }
         awaitClose { registration.remove() }
     }.flowOn(io)
@@ -96,13 +98,14 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
             id = uid,
             firstName = user?.displayName.orEmpty(),
             avatarUrl = user?.photoUrl?.toString(),
+            email = user?.email,
             createdAt = now,
             updatedAt = now,
         )
     }
 }
 
-private fun DocumentSnapshot.toOwnerProfile(uid: String): OwnerProfile? {
+private fun DocumentSnapshot.toOwnerProfile(uid: String, email: String?): OwnerProfile? {
     if (!exists()) return null
     val firstName = getString("firstName") ?: return null
     val avatarUrl = getString("avatarUrl")
@@ -112,6 +115,7 @@ private fun DocumentSnapshot.toOwnerProfile(uid: String): OwnerProfile? {
         id = uid,
         firstName = firstName,
         avatarUrl = avatarUrl,
+        email = email,
         createdAt = createdAt,
         updatedAt = updatedAt,
     )
