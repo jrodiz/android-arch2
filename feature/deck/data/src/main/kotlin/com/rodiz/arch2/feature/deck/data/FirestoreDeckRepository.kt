@@ -16,11 +16,13 @@ import com.rodiz.arch2.feature.pet.domain.model.Pet
 import com.rodiz.arch2.feature.pet.domain.model.PetId
 import com.rodiz.arch2.feature.pet.domain.repository.PetRepository
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
@@ -39,6 +41,8 @@ internal class FirestoreDeckRepository @Inject constructor(
     private val likesCol get() = firestore.collection("likes")
     private val passesCol get() = firestore.collection("passes")
     private val matchesCol get() = firestore.collection("matches")
+    private val ownersCol get() = firestore.collection("owners")
+    private val blocksCol get() = firestore.collection("blocks")
 
     private data class LastSwipe(val petId: PetId, val action: SwipeAction, val at: Instant)
     private var lastSwipe: LastSwipe? = null
@@ -51,31 +55,77 @@ internal class FirestoreDeckRepository @Inject constructor(
             ?: run { emit(DeckSnapshot(emptyList(), DeckState.LOADING)); return@flow }
 
         var loggedOnce = false
-        petRepo.observeAllActivePets()
-            .map { pets ->
-                // One-shot diagnostic — first emission only, so logcat stays clean.
-                // Surfaces a uid/ownerId mismatch (e.g. stale handle pets from before
-                // the auth-uid fix) immediately instead of via a console trip.
-                if (!loggedOnce) {
-                    loggedOnce = true
-                    Log.d(
-                        "TinPet.Deck",
-                        "observeDeck uid=$uid pets=${pets.size} " +
-                            "sampleOwnerIds=${pets.take(3).map { it.ownerId }}",
-                    )
-                }
-                val cards = pets
-                    .filter { it.ownerId != uid }
-                    .filter { it.enabled }
-                    .filter { it.id.value !in sessionSwiped }
-                    .filter { it.species.category in filters.speciesCategories }
-                    .filter { it.intents.any { intent -> intent in filters.intents } }
-                    .map { DeckCard(it) }
-                val state = if (cards.isEmpty()) DeckState.EXHAUSTED else DeckState.READY
-                DeckSnapshot(cards, state)
+        combine(
+            petRepo.observeAllActivePets(),
+            observePausedOwnerIds(),
+            observeBlockHideSet(uid),
+        ) { pets, paused, blocked ->
+            val hideOwners = paused + blocked
+            // One-shot diagnostic — first emission only, so logcat stays clean.
+            // Surfaces a uid/ownerId mismatch (e.g. stale handle pets from before
+            // the auth-uid fix) immediately instead of via a console trip.
+            if (!loggedOnce) {
+                loggedOnce = true
+                Log.d(
+                    "TinPet.Deck",
+                    "observeDeck uid=$uid pets=${pets.size} " +
+                        "paused=${paused.size} blocked=${blocked.size} " +
+                        "sampleOwnerIds=${pets.take(3).map { it.ownerId }}",
+                )
             }
-            .collect { emit(it) }
+            val cards = pets
+                .filter { it.ownerId != uid }
+                .filter { it.ownerId !in hideOwners }
+                .filter { it.enabled }
+                .filter { it.id.value !in sessionSwiped }
+                .filter { it.species.category in filters.speciesCategories }
+                .filter { it.intents.any { intent -> intent in filters.intents } }
+                .map { DeckCard(it) }
+            val state = if (cards.isEmpty()) DeckState.EXHAUSTED else DeckState.READY
+            DeckSnapshot(cards, state)
+        }.collect { emit(it) }
     }.flowOn(io)
+
+    // owners.paused == true → hide all their pets from every other deck.
+    private fun observePausedOwnerIds(): Flow<Set<String>> = callbackFlow {
+        val registration = ownersCol
+            .whereEqualTo("paused", true)
+            .addSnapshotListener { snap, err ->
+                if (err != null) {
+                    close(err)
+                    return@addSnapshotListener
+                }
+                trySend(snap?.documents.orEmpty().map { it.id }.toSet())
+            }
+        awaitClose { registration.remove() }
+    }
+
+    // Two-sided block filter: owners I've blocked AND owners who've blocked me.
+    // Either direction hides the other party's pets from my deck.
+    private fun observeBlockHideSet(uid: String): Flow<Set<String>> = combine(
+        observeBlockedOtherIds(field = "ownerId", uid = uid, targetField = "blockedOwnerId"),
+        observeBlockedOtherIds(field = "blockedOwnerId", uid = uid, targetField = "ownerId"),
+    ) { iBlocked, blockedMe -> iBlocked + blockedMe }
+
+    private fun observeBlockedOtherIds(
+        field: String,
+        uid: String,
+        targetField: String,
+    ): Flow<Set<String>> = callbackFlow {
+        val registration = blocksCol
+            .whereEqualTo(field, uid)
+            .addSnapshotListener { snap, err ->
+                if (err != null) {
+                    close(err)
+                    return@addSnapshotListener
+                }
+                val ids = snap?.documents.orEmpty()
+                    .mapNotNull { it.getString(targetField) }
+                    .toSet()
+                trySend(ids)
+            }
+        awaitClose { registration.remove() }
+    }
 
     override suspend fun submitSwipe(petId: PetId, action: SwipeAction): SwipeResult = withContext(io) {
         val me = sessionRepo.current()?.userId ?: error("No signed-in user")

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.chat.domain.model.Message
+import com.rodiz.arch2.feature.chat.domain.usecase.BlockOtherUseCase
 import com.rodiz.arch2.feature.chat.domain.usecase.MarkAllReadUseCase
 import com.rodiz.arch2.feature.chat.domain.usecase.ObserveChatUseCase
 import com.rodiz.arch2.feature.chat.domain.usecase.SendMessageUseCase
@@ -39,6 +40,7 @@ internal class ChatViewModel @AssistedInject constructor(
     private val sendMessage: SendMessageUseCase,
     private val markAllRead: MarkAllReadUseCase,
     private val unmatch: UnmatchUseCase,
+    private val blockOther: BlockOtherUseCase,
     private val sessionRepo: SessionRepository,
 ) : ViewModel() {
 
@@ -99,6 +101,14 @@ internal class ChatViewModel @AssistedInject constructor(
             runCatching { unmatch(matchId) }
                 .onSuccess { _exited.tryEmit(Unit) }
                 .onFailure { e -> _uiState.update { it.copy(errorMessage = e.message) } }
+        }
+    }
+
+    fun blockAndExit() {
+        viewModelScope.launch {
+            runCatching { blockOther(matchId) }
+                .onSuccess { _exited.tryEmit(Unit) }
+                .onFailure { e -> _uiState.update { it.copy(errorMessage = e.message ?: "Block failed") } }
         }
     }
 

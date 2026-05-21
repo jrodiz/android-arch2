@@ -24,3 +24,9 @@ class MarkAllReadUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(matchId: MatchId) = repo.markAllRead(matchId)
 }
+
+class BlockOtherUseCase @Inject constructor(
+    private val repo: ChatRepository,
+) {
+    suspend operator fun invoke(matchId: MatchId) = repo.blockOther(matchId)
+}

@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.HeartBroken
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
@@ -70,6 +71,7 @@ internal fun ChatScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var showUnmatchDialog by remember { mutableStateOf(false) }
+    var showBlockDialog by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.errorMessage) {
@@ -110,6 +112,16 @@ internal fun ChatScreen(
                                     showUnmatchDialog = true
                                 },
                             )
+                            DropdownMenuItem(
+                                text = { Text("Block") },
+                                leadingIcon = {
+                                    Icon(Icons.Outlined.Block, contentDescription = null)
+                                },
+                                onClick = {
+                                    menuOpen = false
+                                    showBlockDialog = true
+                                },
+                            )
                         }
                     }
                 },
@@ -147,6 +159,28 @@ internal fun ChatScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showUnmatchDialog = false }) { Text("Cancel") }
+            },
+        )
+    }
+
+    if (showBlockDialog) {
+        AlertDialog(
+            onDismissRequest = { showBlockDialog = false },
+            title = { Text("Block this person?") },
+            text = {
+                Text(
+                    "Blocking deletes the conversation and stops their pets from showing up in your " +
+                        "deck. You can unblock from Settings → Privacy → Blocked users.",
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showBlockDialog = false
+                    viewModel.blockAndExit()
+                }) { Text("Block") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBlockDialog = false }) { Text("Cancel") }
             },
         )
     }

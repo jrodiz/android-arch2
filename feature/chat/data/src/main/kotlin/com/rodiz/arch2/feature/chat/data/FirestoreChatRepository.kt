@@ -30,6 +30,7 @@ internal class FirestoreChatRepository @Inject constructor(
 ) : ChatRepository {
 
     private val matchesCol get() = firestore.collection("matches")
+    private val blocksCol get() = firestore.collection("blocks")
 
     override fun observeChat(matchId: MatchId, pageSize: Int): Flow<List<Message>> = callbackFlow {
         val registration = matchesCol.document(matchId.value)
@@ -101,6 +102,29 @@ internal class FirestoreChatRepository @Inject constructor(
                 batch.update(doc.reference, "readBy.$me", FieldValue.serverTimestamp())
             }
             batch.commit().await()
+        }
+    }
+
+    override suspend fun blockOther(matchId: MatchId) {
+        withContext(io) {
+            val me = sessionRepo.current()?.userId ?: error("No signed-in user")
+            val matchRef = matchesCol.document(matchId.value)
+            val matchSnap = matchRef.get().await()
+            @Suppress("UNCHECKED_CAST")
+            val participants = (matchSnap.get("participants") as? List<String>).orEmpty()
+            val other = participants.firstOrNull { it != me }
+                ?: error("Match $matchId.value has no other participant")
+            val blockId = "${me}_$other"
+            // Write the block first so the deck filter picks them up immediately.
+            blocksCol.document(blockId).set(
+                mapOf(
+                    "ownerId" to me,
+                    "blockedOwnerId" to other,
+                    "blockedAt" to FieldValue.serverTimestamp(),
+                ),
+            ).await()
+            // Then drop the match — Cloud Function onMatchDelete cleans up messages.
+            matchRef.delete().await()
         }
     }
 }
