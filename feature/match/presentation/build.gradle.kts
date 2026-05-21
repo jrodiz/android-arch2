@@ -17,4 +17,5 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.coil.compose)
 }

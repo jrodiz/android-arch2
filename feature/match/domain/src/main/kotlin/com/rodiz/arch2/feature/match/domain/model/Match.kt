@@ -1,5 +1,6 @@
 package com.rodiz.arch2.feature.match.domain.model
 
+import com.rodiz.arch2.core.ownerlookup.domain.OwnerDisplay
 import kotlinx.datetime.Instant
 
 @JvmInline
@@ -18,10 +19,11 @@ data class Match(
     val hasMessages: Boolean get() = lastMessageAt != null
 }
 
-/** What the Matches inbox row shows. Pet/owner display info is resolved later. */
+/** What the Matches inbox row shows. `other` is null while the owner doc is loading. */
 data class MatchSummary(
     val match: Match,
     val otherOwnerId: String,
+    val other: OwnerDisplay? = null,
 )
 
 data class InboxSnapshot(

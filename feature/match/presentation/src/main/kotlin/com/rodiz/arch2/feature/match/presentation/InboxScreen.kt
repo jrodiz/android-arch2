@@ -1,19 +1,22 @@
 package com.rodiz.arch2.feature.match.presentation
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bolt
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -25,11 +28,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.rodiz.arch2.core.designsystem.component.EmptyTabState
 import com.rodiz.arch2.feature.match.domain.model.MatchSummary
 
@@ -101,19 +108,51 @@ private fun SectionHeader(text: String) {
 @Composable
 private fun MatchRow(row: MatchSummary, onClick: () -> Unit) {
     ListItem(
-        headlineContent = { Text(row.otherOwnerId.take(12) + "…") },
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        leadingContent = { OwnerAvatar(avatarUrl = row.other?.avatarUrl) },
+        headlineContent = { Text(row.displayTitle()) },
         supportingContent = { Text("Matched • say hello") },
-        modifier = Modifier.fillMaxWidth(),
     )
 }
 
 @Composable
 private fun ConversationRow(row: MatchSummary, onClick: () -> Unit) {
     ListItem(
-        headlineContent = { Text(row.otherOwnerId.take(12) + "…") },
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        leadingContent = { OwnerAvatar(avatarUrl = row.other?.avatarUrl) },
+        headlineContent = { Text(row.displayTitle()) },
         supportingContent = {
             Text(row.match.lastMessagePreview ?: "…", maxLines = 1)
         },
-        modifier = Modifier.fillMaxWidth(),
     )
 }
+
+@Composable
+private fun OwnerAvatar(avatarUrl: String?) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (avatarUrl != null) {
+            AsyncImage(
+                model = avatarUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Outlined.Person,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+private fun MatchSummary.displayTitle(): String =
+    other?.firstName?.takeIf { it.isNotBlank() } ?: "Someone"
