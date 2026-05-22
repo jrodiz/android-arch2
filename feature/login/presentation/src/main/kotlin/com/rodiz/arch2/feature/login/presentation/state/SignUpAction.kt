@@ -17,4 +17,7 @@ sealed interface SignUpAction {
     data object Submit : SignUpAction
     data object BackTapped : SignUpAction
     data object DismissError : SignUpAction
+    data object ToggleTerms : SignUpAction
+    data object TermsLinkTapped : SignUpAction
+    data object PrivacyLinkTapped : SignUpAction
 }

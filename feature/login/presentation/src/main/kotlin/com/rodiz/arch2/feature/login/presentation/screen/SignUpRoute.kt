@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +53,7 @@ fun SignUpRoute(
     }
 
     val avatarUploadFailedMsg = stringResource(R.string.signup_warning_avatar_upload_failed)
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
@@ -69,11 +71,17 @@ fun SignUpRoute(
                     SoftWarning.AvatarUploadFailed ->
                         Toast.makeText(context, avatarUploadFailedMsg, Toast.LENGTH_LONG).show()
                 }
+                is SignUpEvent.ShowComingSoon ->
+                    snackbarHostState.showSnackbar(context.getString(event.resId))
             }
         }
     }
 
-    SignUpScreen(state = state, onAction = viewModel::onAction)
+    SignUpScreen(
+        state = state,
+        onAction = viewModel::onAction,
+        snackbarHostState = snackbarHostState,
+    )
 }
 
 private fun createTempAvatarUri(context: Context): Uri {

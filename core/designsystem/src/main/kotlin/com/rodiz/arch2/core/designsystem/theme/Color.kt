@@ -55,5 +55,7 @@ internal val DarkScheme = darkColorScheme(
 object BrandColors {
     val Coral: Color = Color(0xFFF08A8A)
     val CoralDeep: Color = Color(0xFFE97A7A)
+    /** Lighter peach used as the bottom stop of the SignUp hero's vertical gradient. */
+    val CoralLight: Color = Color(0xFFF6B5A0)
     val CoralOnPattern: Color = Color.White
 }

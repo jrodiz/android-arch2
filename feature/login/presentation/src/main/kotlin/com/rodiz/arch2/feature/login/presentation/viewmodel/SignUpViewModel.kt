@@ -13,6 +13,7 @@ import com.rodiz.arch2.feature.login.domain.usecase.ValidateConfirmPasswordUseCa
 import com.rodiz.arch2.feature.login.domain.usecase.ValidateEmailUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.ValidateNameUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.ValidatePasswordUseCase
+import com.rodiz.arch2.feature.login.presentation.R
 import com.rodiz.arch2.feature.login.presentation.state.SignUpAction
 import com.rodiz.arch2.feature.login.presentation.state.SignUpEvent
 import com.rodiz.arch2.feature.login.presentation.state.SignUpUiState
@@ -89,6 +90,10 @@ class SignUpViewModel @Inject constructor(
             SignUpAction.Submit -> submit()
             SignUpAction.BackTapped -> emit(SignUpEvent.NavigateBack)
             SignUpAction.DismissError -> _state.update { it.copy(transientError = null) }
+            SignUpAction.ToggleTerms ->
+                _state.update { it.copy(termsAccepted = !it.termsAccepted) }
+            SignUpAction.TermsLinkTapped,
+            SignUpAction.PrivacyLinkTapped -> emit(SignUpEvent.ShowComingSoon(R.string.signup_coming_soon))
         }
     }
 

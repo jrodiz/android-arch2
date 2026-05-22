@@ -35,15 +35,21 @@
     <string name="login_validation_password_empty">Password is required.</string>
     <string name="login_validation_password_short">Password must be at least %1$d characters.</string>
 
-    <string name="signup_title">Sign up</string>
+    <string name="signup_title">Create account</string>
+    <string name="signup_subtitle">Two minutes to start matching your pets with new friends nearby.</string>
     <string name="signup_first_name">First name</string>
     <string name="signup_first_name_placeholder">e.g. Steve</string>
     <string name="signup_last_name">Last name</string>
     <string name="signup_last_name_placeholder">e.g. Rogers</string>
     <string name="signup_confirm_password">Confirm password</string>
-    <string name="signup_submit">Register</string>
+    <string name="signup_submit">Create account</string>
     <string name="signup_avatar_picker_cd">Choose profile photo</string>
-    <string name="signup_avatar_picker_label">Add a profile photo (optional)</string>
+    <string name="signup_avatar_picker_label">Add a photo (optional) — owners love a face</string>
+    <string name="signup_terms_prefix">"I agree to TinPet\'s "</string>
+    <string name="signup_terms_link">Terms</string>
+    <string name="signup_terms_conjunction">" &amp; "</string>
+    <string name="signup_privacy_link">Privacy</string>
+    <string name="signup_coming_soon">Coming soon</string>
     <string name="signup_avatar_clear">Remove photo</string>
     <string name="signup_avatar_source_title">Add a profile photo</string>
     <string name="signup_avatar_source_gallery">Choose from gallery</string>

@@ -20,6 +20,7 @@ data class SignUpUiState(
     val isSubmitting: Boolean = false,
     val transientError: AuthError? = null,
     val showAvatarSourceSheet: Boolean = false,
+    val termsAccepted: Boolean = false,
 ) {
     val canSubmit: Boolean
         get() = firstName.isNotBlank() &&
@@ -32,5 +33,6 @@ data class SignUpUiState(
             emailError == null &&
             passwordError == null &&
             confirmPasswordError == null &&
+            termsAccepted &&
             !isSubmitting
 }

@@ -5,10 +5,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun EmailFieldPill(
@@ -17,6 +20,8 @@ fun EmailFieldPill(
     placeholder: String,
     errorMessage: String?,
     modifier: Modifier = Modifier,
+    containerColor: Color? = null,
+    shadowElevation: Dp = 0.dp,
 ) {
     FilledPillTextField(
         value = value,
@@ -32,5 +37,7 @@ fun EmailFieldPill(
         ),
         modifier = modifier,
         fieldModifier = Modifier.testTag("email_field_pill"),
+        containerColor = containerColor,
+        shadowElevation = shadowElevation,
     )
 }

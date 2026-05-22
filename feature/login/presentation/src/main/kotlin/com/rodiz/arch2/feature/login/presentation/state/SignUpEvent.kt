@@ -6,6 +6,8 @@ sealed interface SignUpEvent {
     data object LaunchGalleryPicker : SignUpEvent
     data object LaunchCamera : SignUpEvent
     data class ShowSoftWarning(val warning: SoftWarning) : SignUpEvent
+    /** Transient snackbar hint, identified by a string resource id resolved at render time. */
+    data class ShowComingSoon(val resId: Int) : SignUpEvent
 }
 
 enum class SoftWarning { AvatarUploadFailed }
