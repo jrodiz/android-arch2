@@ -1,6 +1,12 @@
 package com.rodiz.arch2.feature.login.presentation.screen
 
 import android.app.Activity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -243,67 +249,97 @@ private fun CardContent(state: LoginUiState, onAction: (LoginAction) -> Unit) {
             Spacer(Modifier.height(16.dp))
         }
 
-        EmailFieldPill(
-            value = state.email,
-            onValueChange = { onAction(LoginAction.EmailChanged(it)) },
-            placeholder = stringResource(R.string.login_email_placeholder),
-            errorMessage = state.emailError?.localized(),
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        PasswordFieldPill(
-            value = state.password,
-            onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
-            placeholder = stringResource(R.string.login_password_placeholder),
-            visible = state.passwordVisible,
-            onToggleVisibility = { onAction(LoginAction.TogglePasswordVisibility) },
-            onImeDone = { onAction(LoginAction.Submit) },
-            errorMessage = state.passwordError?.localized(),
-            toggleContentDescription = stringResource(
-                if (state.passwordVisible) R.string.login_password_hide else R.string.login_password_show,
-            ),
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically,
+        // Collapsed entry: a single "Login with email" CTA. Tapping expands the form.
+        AnimatedVisibility(
+            visible = !state.emailFormExpanded,
+            enter = expandVertically(animationSpec = tween(durationMillis = 250)) +
+                fadeIn(animationSpec = tween(durationMillis = 200)),
+            exit = shrinkVertically(animationSpec = tween(durationMillis = 200)) +
+                fadeOut(animationSpec = tween(durationMillis = 150)),
         ) {
-            TextButton(
-                onClick = { onAction(LoginAction.ForgotPasswordTapped) },
-                contentPadding = PaddingValues(horizontal = 4.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.login_forgot),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                )
-            }
+            PrimaryButton(
+                text = stringResource(R.string.login_email_form_show),
+                loading = false,
+                enabled = !state.isSubmitting,
+                onClick = { onAction(LoginAction.ShowEmailForm) },
+                testTag = "login_email_form_show",
+            )
         }
 
-        Spacer(Modifier.height(16.dp))
+        // Expanded form: email + password + forgot link + Sign in CTA + (optional)
+        // biometric. AnimatedVisibility wraps the whole block so the height
+        // animation matches the original UX.
+        AnimatedVisibility(
+            visible = state.emailFormExpanded,
+            enter = expandVertically(animationSpec = tween(durationMillis = 300)) +
+                fadeIn(animationSpec = tween(durationMillis = 300)),
+            exit = shrinkVertically(animationSpec = tween(durationMillis = 250)) +
+                fadeOut(animationSpec = tween(durationMillis = 200)),
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                EmailFieldPill(
+                    value = state.email,
+                    onValueChange = { onAction(LoginAction.EmailChanged(it)) },
+                    placeholder = stringResource(R.string.login_email_placeholder),
+                    errorMessage = state.emailError?.localized(),
+                )
 
-        PrimaryButton(
-            text = stringResource(R.string.login_submit),
-            loading = state.isSubmitting,
-            enabled = state.canSubmit,
-            onClick = { onAction(LoginAction.Submit) },
-            testTag = "login_submit",
-        )
+                Spacer(Modifier.height(12.dp))
 
-        if (state.biometricAvailable) {
-            Spacer(Modifier.height(12.dp))
-            OutlinedButton(
-                onClick = { onAction(LoginAction.BiometricRequested) },
-                enabled = !state.isSubmitting,
-                shape = MaterialTheme.shapes.large,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .testTag("login_biometric"),
-            ) {
-                Text(stringResource(R.string.login_biometric))
+                PasswordFieldPill(
+                    value = state.password,
+                    onValueChange = { onAction(LoginAction.PasswordChanged(it)) },
+                    placeholder = stringResource(R.string.login_password_placeholder),
+                    visible = state.passwordVisible,
+                    onToggleVisibility = { onAction(LoginAction.TogglePasswordVisibility) },
+                    onImeDone = { onAction(LoginAction.Submit) },
+                    errorMessage = state.passwordError?.localized(),
+                    toggleContentDescription = stringResource(
+                        if (state.passwordVisible) R.string.login_password_hide else R.string.login_password_show,
+                    ),
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    TextButton(
+                        onClick = { onAction(LoginAction.ForgotPasswordTapped) },
+                        contentPadding = PaddingValues(horizontal = 4.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.login_forgot),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                PrimaryButton(
+                    text = stringResource(R.string.login_submit),
+                    loading = state.isSubmitting,
+                    enabled = state.canSubmit,
+                    onClick = { onAction(LoginAction.Submit) },
+                    testTag = "login_submit",
+                )
+
+                if (state.biometricAvailable) {
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedButton(
+                        onClick = { onAction(LoginAction.BiometricRequested) },
+                        enabled = !state.isSubmitting,
+                        shape = MaterialTheme.shapes.large,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .testTag("login_biometric"),
+                    ) {
+                        Text(stringResource(R.string.login_biometric))
+                    }
+                }
             }
         }
 
@@ -440,28 +476,23 @@ private fun LightStatusBarIconsWhileShown() {
     }
 }
 
-@Preview(name = "Login — welcome back", showBackground = true, heightDp = 900)
+@Preview(name = "Login — collapsed", showBackground = true, heightDp = 900)
 @Composable
-private fun LoginScreenPreview() {
+private fun LoginScreenPreviewCollapsed() {
     TinPetTheme {
-        LoginScreen(
-            state = LoginUiState(
-                email = "rodiz@tinpet.com",
-                password = "password1",
-            ),
-            onAction = {},
-        )
+        LoginScreen(state = LoginUiState(), onAction = {})
     }
 }
 
-@Preview(name = "Login — biometric available", showBackground = true, heightDp = 980)
+@Preview(name = "Login — expanded", showBackground = true, heightDp = 980)
 @Composable
-private fun LoginScreenPreviewBiometric() {
+private fun LoginScreenPreviewExpanded() {
     TinPetTheme {
         LoginScreen(
             state = LoginUiState(
                 email = "rodiz@tinpet.com",
                 password = "password1",
+                emailFormExpanded = true,
                 biometricAvailable = true,
             ),
             onAction = {},
@@ -479,6 +510,7 @@ private fun LoginScreenPreviewError() {
                 password = "shrt",
                 passwordError = ValidationError.PasswordTooShort(8),
                 transientError = AuthError.NoNetwork,
+                emailFormExpanded = true,
             ),
             onAction = {},
         )

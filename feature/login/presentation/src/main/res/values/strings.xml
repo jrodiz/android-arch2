@@ -11,6 +11,7 @@
     <string name="login_password_show">Show password</string>
     <string name="login_password_hide">Hide password</string>
     <string name="login_submit">Sign in</string>
+    <string name="login_email_form_show">Login with email</string>
     <string name="login_forgot">Forgot password?</string>
     <string name="login_biometric">Sign in with biometric</string>
     <string name="login_or_divider">or continue with</string>
