@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="login_tab_sign_in">Sign In</string>
-    <string name="login_tab_sign_up">Sign Up</string>
+    <string name="login_welcome_title">Welcome back</string>
+    <string name="login_welcome_subtitle">Let\'s find a new pal for your pet</string>
+    <string name="login_tab_sign_in">Sign in</string>
+    <string name="login_tab_sign_up">Sign up</string>
     <string name="login_email_label">Email</string>
-    <string name="login_email_placeholder">demo@email.com</string>
+    <string name="login_email_placeholder">rodiz@tinpet.com</string>
     <string name="login_password_label">Password</string>
     <string name="login_password_placeholder">enter your password</string>
     <string name="login_password_show">Show password</string>
     <string name="login_password_hide">Hide password</string>
-    <string name="login_submit">Login</string>
-    <string name="login_forgot">Forgot Password?</string>
+    <string name="login_submit">Sign in</string>
+    <string name="login_forgot">Forgot password?</string>
     <string name="login_biometric">Sign in with biometric</string>
-    <string name="login_or_divider">or</string>
+    <string name="login_or_divider">or continue with</string>
     <string name="login_continue_google">Continue with Google</string>
     <string name="login_google_icon_description">Google</string>
     <string name="login_biometric_title">Confirm it\'s you</string>
     <string name="login_biometric_subtitle">Use biometric authentication to sign in</string>
     <string name="login_biometric_cancel">Cancel</string>
     <string name="login_error_dismiss">Dismiss error</string>
-    <string name="login_email_form_show">Login with email</string>
 
     <string name="login_error_invalid_credentials">Incorrect email or password.</string>
     <string name="login_error_no_network">No network connection. Check your internet and try again.</string>

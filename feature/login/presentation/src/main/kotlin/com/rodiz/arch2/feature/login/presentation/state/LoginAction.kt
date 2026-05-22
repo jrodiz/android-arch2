@@ -11,5 +11,4 @@ sealed interface LoginAction {
     data object GoogleSignInRequested : LoginAction
     data object ForgotPasswordTapped : LoginAction
     data object DismissError : LoginAction
-    data object ShowEmailForm : LoginAction
 }
