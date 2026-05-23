@@ -4,7 +4,6 @@ import androidx.navigation3.runtime.entry
 import com.rodiz.arch2.core.navigation.EntryProviderInstaller
 import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.login.nav.LoginHome
-import com.rodiz.arch2.feature.settings.nav.SettingsAccount
 import com.rodiz.arch2.feature.settings.nav.SettingsBlockedUsers
 import com.rodiz.arch2.feature.settings.nav.SettingsEditProfile
 import com.rodiz.arch2.feature.settings.nav.SettingsFilters
@@ -31,7 +30,6 @@ internal object SettingsNavModule {
                 onOpenFilters = { navigator.goTo(SettingsFilters) },
                 onOpenPrivacy = { navigator.goTo(SettingsPrivacy) },
                 onOpenBlockedOwners = { navigator.goTo(SettingsBlockedUsers) },
-                onOpenAccount = { navigator.goTo(SettingsAccount) },
                 onSignedOut = { navigator.replaceAll(LoginHome) },
             )
         }
@@ -48,17 +46,11 @@ internal object SettingsNavModule {
             PrivacyRoute(
                 onBack = { navigator.goBack() },
                 onOpenBlockedOwners = { navigator.goTo(SettingsBlockedUsers) },
-                onOpenDeleteAccount = { navigator.goTo(SettingsAccount) },
+                onAccountDeleted = { navigator.replaceAll(LoginHome) },
             )
         }
         entry<SettingsBlockedUsers> {
             BlockedUsersRoute(onBack = { navigator.goBack() })
-        }
-        entry<SettingsAccount> {
-            AccountRoute(
-                onBack = { navigator.goBack() },
-                onDeleted = { navigator.replaceAll(LoginHome) },
-            )
         }
     }
 }

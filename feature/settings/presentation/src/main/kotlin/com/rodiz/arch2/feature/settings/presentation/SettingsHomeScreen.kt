@@ -71,7 +71,6 @@ internal fun SettingsHomeRoute(
     onOpenFilters: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenBlockedOwners: () -> Unit,
-    onOpenAccount: () -> Unit,
     onSignedOut: () -> Unit,
     viewModel: SettingsHomeViewModel = hiltViewModel(),
 ) {
@@ -111,17 +110,6 @@ internal fun SettingsHomeRoute(
                         onClick = onOpenEditProfile,
                         trailing = { ChevronTrailing() },
                         testTag = "settings_row_profile",
-                    )
-                    RowDivider()
-                    SettingsRow(
-                        icon = Icons.Outlined.MailOutline,
-                        iconBackground = BrandColors.PeachTint,
-                        iconTint = BrandColors.PeachInk,
-                        title = stringResource(R.string.settings_row_account_title),
-                        subtitle = stringResource(R.string.settings_row_account_subtitle),
-                        onClick = onOpenAccount,
-                        trailing = { ChevronTrailing() },
-                        testTag = "settings_row_account",
                     )
                 }
             }
@@ -493,17 +481,6 @@ private fun SettingsHomeScaffoldPreview(
                         onClick = {},
                         trailing = { ChevronTrailing() },
                         testTag = "preview_profile",
-                    )
-                    RowDivider()
-                    SettingsRow(
-                        icon = Icons.Outlined.MailOutline,
-                        iconBackground = BrandColors.PeachTint,
-                        iconTint = BrandColors.PeachInk,
-                        title = stringResource(R.string.settings_row_account_title),
-                        subtitle = stringResource(R.string.settings_row_account_subtitle),
-                        onClick = {},
-                        trailing = { ChevronTrailing() },
-                        testTag = "preview_account",
                     )
                 }
             }

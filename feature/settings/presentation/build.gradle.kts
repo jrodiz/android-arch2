@@ -21,6 +21,8 @@ dependencies {
     implementation(project(":feature:settings:nav"))
     implementation(project(":feature:settings:domain"))
     implementation(project(":feature:profile:domain"))
+    implementation(project(":feature:pet:domain"))
+    implementation(project(":feature:match:domain"))
     implementation(project(":feature:notifications:nav"))
     implementation(project(":feature:login:nav"))
     implementation(project(":core:filters:domain"))

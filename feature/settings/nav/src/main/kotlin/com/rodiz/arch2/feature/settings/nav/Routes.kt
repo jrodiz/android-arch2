@@ -15,9 +15,6 @@ data object SettingsNotifications
 data object SettingsFilters
 
 @Serializable
-data object SettingsAccount
-
-@Serializable
 data object SettingsPrivacy
 
 @Serializable

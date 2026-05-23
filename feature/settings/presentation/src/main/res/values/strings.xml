@@ -6,8 +6,6 @@
     <string name="settings_section_account">Account</string>
     <string name="settings_row_profile_title">Profile</string>
     <string name="settings_row_profile_subtitle">Name, avatar, bio</string>
-    <string name="settings_row_account_title">Account</string>
-    <string name="settings_row_account_subtitle">Email, sign in methods</string>
 
     <string name="settings_section_matching">Matching</string>
     <string name="settings_row_filters_title">Filters</string>
@@ -104,4 +102,32 @@
     <string name="privacy_delete_title">Delete account</string>
     <string name="privacy_delete_subtitle">30-day grace period before hard delete</string>
     <string name="privacy_coming_soon">Coming soon</string>
+
+    <!-- Delete account bottom sheet -->
+    <string name="delete_sheet_headline">Delete your account?</string>
+    <string name="delete_sheet_body_30_days">30 days</string>
+    <string name="delete_sheet_body_format">We\'ll keep your data for %1$s. Sign in again any time before then to restore everything.</string>
+    <string name="delete_sheet_will_remove">This will remove</string>
+    <string name="delete_sheet_profile_row">Your profile and photos</string>
+    <string name="delete_sheet_confirm_eyebrow">Type DELETE to confirm</string>
+    <string name="delete_sheet_placeholder">DELETE</string>
+    <string name="delete_account_cta">Delete account</string>
+    <string name="delete_sheet_keep">Keep my account</string>
+    <string name="delete_sheet_close">Close</string>
+    <string name="delete_sheet_grace_headline">Deletion scheduled</string>
+    <string name="delete_sheet_grace_body_format">Your account will be permanently deleted in %1$s. Sign in any time before then to keep it.</string>
+    <string name="delete_sheet_grace_days_format">%1$d days</string>
+    <string name="delete_sheet_cancel_cta">Cancel deletion</string>
+    <string name="delete_sheet_pill_format">Scheduled · %1$d days</string>
+    <string name="delete_sheet_error_generic">Couldn\'t schedule deletion. Try again.</string>
+    <string name="delete_sheet_error_cancel">Couldn\'t cancel deletion. Try again.</string>
+    <string name="delete_sheet_icon_cd">Delete account</string>
+    <plurals name="delete_summary_pets">
+        <item quantity="one">%1$d pet — %2$s</item>
+        <item quantity="other">%1$d pets — %2$s</item>
+    </plurals>
+    <plurals name="delete_summary_matches">
+        <item quantity="one">%1$d match and all chats</item>
+        <item quantity="other">%1$d matches and all chats</item>
+    </plurals>
 </resources>

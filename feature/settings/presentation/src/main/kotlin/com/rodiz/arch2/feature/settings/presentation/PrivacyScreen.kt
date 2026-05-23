@@ -41,7 +41,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,12 +68,15 @@ import com.rodiz.arch2.core.designsystem.theme.TinPetTheme
 internal fun PrivacyRoute(
     onBack: () -> Unit,
     onOpenBlockedOwners: () -> Unit,
-    onOpenDeleteAccount: () -> Unit,
+    onAccountDeleted: () -> Unit,
     viewModel: PrivacyViewModel = hiltViewModel(),
+    deleteSheetViewModel: DeleteAccountSheetViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val deleteState by deleteSheetViewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val comingSoonMessage = stringResource(R.string.privacy_coming_soon)
+    var sheetOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let {
@@ -82,6 +88,22 @@ internal fun PrivacyRoute(
         state.transientMessage?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearTransient()
+        }
+    }
+    val deleteErrorMessage = deleteState.errorRes?.let { stringResource(it) }
+    LaunchedEffect(deleteErrorMessage) {
+        deleteErrorMessage?.let {
+            // Dismiss the sheet so the snackbar isn't hidden underneath it.
+            sheetOpen = false
+            snackbarHostState.showSnackbar(it)
+            deleteSheetViewModel.onErrorShown()
+        }
+    }
+    LaunchedEffect(deleteState.completed) {
+        if (deleteState.completed) {
+            sheetOpen = false
+            deleteSheetViewModel.onCompletedHandled()
+            onAccountDeleted()
         }
     }
 
@@ -104,12 +126,29 @@ internal fun PrivacyRoute(
             paddingValues = padding,
             paused = state.paused,
             blockedCount = state.blockedCount,
+            deletionDaysRemaining = deleteState.pendingDeletion?.let { deleteState.daysRemaining.toInt() },
             onBack = onBack,
             onTogglePause = viewModel::onTogglePause,
             onOpenBlockedOwners = onOpenBlockedOwners,
-            onOpenDeleteAccount = onOpenDeleteAccount,
+            onOpenDeleteAccount = {
+                deleteSheetViewModel.onSheetOpen()
+                sheetOpen = true
+            },
             onComingSoon = { viewModel.notifyComingSoon(comingSoonMessage) },
         )
+
+        if (sheetOpen) {
+            DeleteAccountSheet(
+                state = deleteState,
+                onTypedChanged = deleteSheetViewModel::onTypedChanged,
+                onConfirm = deleteSheetViewModel::onConfirmDelete,
+                onCancelDeletion = deleteSheetViewModel::onCancelDeletion,
+                onDismiss = {
+                    sheetOpen = false
+                    deleteSheetViewModel.onDismiss()
+                },
+            )
+        }
     }
 }
 
@@ -118,6 +157,7 @@ private fun PrivacyContent(
     paddingValues: androidx.compose.foundation.layout.PaddingValues,
     paused: Boolean,
     blockedCount: Int,
+    deletionDaysRemaining: Int?,
     onBack: () -> Unit,
     onTogglePause: (Boolean) -> Unit,
     onOpenBlockedOwners: () -> Unit,
@@ -199,7 +239,17 @@ private fun PrivacyContent(
                 subtitle = stringResource(R.string.privacy_delete_subtitle),
                 titleColor = MaterialTheme.colorScheme.error,
                 onClick = onOpenDeleteAccount,
-                trailing = { ChevronTrailing() },
+                trailing = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        if (deletionDaysRemaining != null) {
+                            ScheduledPill(daysRemaining = deletionDaysRemaining)
+                        }
+                        ChevronTrailing()
+                    }
+                },
                 testTag = "privacy_row_delete",
             )
         }
@@ -420,6 +470,21 @@ private fun ChevronTrailing() {
     )
 }
 
+@Composable
+private fun ScheduledPill(daysRemaining: Int) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = BrandColors.CoralTint,
+    ) {
+        Text(
+            text = stringResource(R.string.delete_sheet_pill_format, daysRemaining),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = BrandColors.CoralDeep,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+        )
+    }
+}
+
 // ----- Previews ------------------------------------------------------------
 
 @Preview(name = "Privacy — default", showBackground = true, heightDp = 1100)
@@ -431,6 +496,7 @@ private fun PrivacyScreenPreviewDefault() {
                 paddingValues = padding,
                 paused = false,
                 blockedCount = 0,
+                deletionDaysRemaining = null,
                 onBack = {},
                 onTogglePause = {},
                 onOpenBlockedOwners = {},
@@ -450,6 +516,7 @@ private fun PrivacyScreenPreviewPopulated() {
                 paddingValues = padding,
                 paused = true,
                 blockedCount = 3,
+                deletionDaysRemaining = 27,
                 onBack = {},
                 onTogglePause = {},
                 onOpenBlockedOwners = {},
