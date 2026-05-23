@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -26,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
@@ -72,35 +70,33 @@ class MainActivity : FragmentActivity() {
                 val bottomNavViewModel: BottomNavViewModel = hiltViewModel()
                 val badges by bottomNavViewModel.badges.collectAsStateWithLifecycle()
 
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        contentWindowInsets = WindowInsets(0),
-                    ) { innerPadding ->
-                        NavDisplay(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding),
-                            backStack = navigator.backStack,
-                            onBack = { navigator.goBack() },
-                            entryProvider = entryProvider {
-                                entryProviderInstallers.forEach { install -> install() }
-                            },
-                        )
-                    }
-
-                    AnimatedVisibility(
-                        visible = showBottomBar,
-                        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                    ) {
-                        FloatingChipNavBar(
-                            items = navBarItems(badges.likes, badges.matches),
-                            selectedRoute = current,
-                            onSelected = { route -> navigator.replaceAll(route) },
-                        )
-                    }
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    contentWindowInsets = WindowInsets(0),
+                    bottomBar = {
+                        AnimatedVisibility(
+                            visible = showBottomBar,
+                            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                        ) {
+                            FloatingChipNavBar(
+                                items = navBarItems(badges.likes, badges.matches),
+                                selectedRoute = current,
+                                onSelected = { route -> navigator.replaceAll(route) },
+                            )
+                        }
+                    },
+                ) { innerPadding ->
+                    NavDisplay(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        backStack = navigator.backStack,
+                        onBack = { navigator.goBack() },
+                        entryProvider = entryProvider {
+                            entryProviderInstallers.forEach { install -> install() }
+                        },
+                    )
                 }
             }
         }

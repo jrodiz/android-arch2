@@ -69,17 +69,17 @@ fun FloatingChipNavBar(
 ) {
     Surface(
         modifier = modifier
-            .padding(horizontal = 16.dp)
-            .windowInsetsPadding(WindowInsets.navigationBars)
-            .padding(bottom = 16.dp)
+            .fillMaxWidth()
             .testTag("floating_nav"),
-        shape = RoundedCornerShape(percent = 50),
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         color = BrandColors.NavSurface,
         shadowElevation = 8.dp,
     ) {
         Row(
-            modifier = Modifier.padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             items.forEach { item ->
@@ -214,14 +214,11 @@ private val SampleItems = listOf(
 @Composable
 private fun FloatingChipNavBarPreviewEmpty() {
     TinPetTheme {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            FloatingChipNavBar(
-                items = SampleItems,
-                selectedRoute = DeckHome,
-                onSelected = {},
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
-        }
+        FloatingChipNavBar(
+            items = SampleItems,
+            selectedRoute = DeckHome,
+            onSelected = {},
+        )
     }
 }
 
@@ -229,19 +226,16 @@ private fun FloatingChipNavBarPreviewEmpty() {
 @Composable
 private fun FloatingChipNavBarPreviewLikesSelected() {
     TinPetTheme {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            FloatingChipNavBar(
-                items = listOf(
-                    SampleItems[0],
-                    SampleItems[1].copy(badgeCount = 6),
-                    SampleItems[2].copy(badgeCount = 1),
-                    SampleItems[3],
-                ),
-                selectedRoute = LikesHome,
-                onSelected = {},
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
-        }
+        FloatingChipNavBar(
+            items = listOf(
+                SampleItems[0],
+                SampleItems[1].copy(badgeCount = 6),
+                SampleItems[2].copy(badgeCount = 1),
+                SampleItems[3],
+            ),
+            selectedRoute = LikesHome,
+            onSelected = {},
+        )
     }
 }
 
@@ -249,18 +243,15 @@ private fun FloatingChipNavBarPreviewLikesSelected() {
 @Composable
 private fun FloatingChipNavBarPreviewCap() {
     TinPetTheme {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            FloatingChipNavBar(
-                items = listOf(
-                    SampleItems[0],
-                    SampleItems[1].copy(badgeCount = 120),
-                    SampleItems[2].copy(badgeCount = 8),
-                    SampleItems[3],
-                ),
-                selectedRoute = LikesHome,
-                onSelected = {},
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
-        }
+        FloatingChipNavBar(
+            items = listOf(
+                SampleItems[0],
+                SampleItems[1].copy(badgeCount = 120),
+                SampleItems[2].copy(badgeCount = 8),
+                SampleItems[3],
+            ),
+            selectedRoute = LikesHome,
+            onSelected = {},
+        )
     }
 }
