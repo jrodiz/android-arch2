@@ -140,6 +140,7 @@ internal fun handlePetFormEvent(state: MutableStateFlow<PetFormUiState>, event: 
                 photos = draft.photos.filterIndexed { idx, _ -> idx != event.index },
             )
             is PetFormEvent.BioChanged -> draft.copy(bio = event.value.take(PetDraft.BIO_MAX_LEN).ifEmpty { null })
+            is PetFormEvent.BreedChanged -> draft.copy(breed = event.value.take(PetDraft.BREED_MAX_LEN).trim().ifEmpty { null })
             is PetFormEvent.SizeChanged -> draft.copy(size = event.size)
             is PetFormEvent.EnergyChanged -> draft.copy(energy = event.energy)
             PetFormEvent.DismissError -> draft

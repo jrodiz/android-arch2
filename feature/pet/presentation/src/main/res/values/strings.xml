@@ -58,6 +58,9 @@
 
     <!-- Add a pet — Step 2 (personality) -->
     <string name="addpet2_intro">A little personality goes a long way. All of these are optional.</string>
+    <string name="addpet2_label_breed">Breed</string>
+    <string name="addpet2_breed_placeholder">What kind of %1$s? e.g. Corgi</string>
+    <string name="addpet2_breed_placeholder_generic">Breed — e.g. Corgi, Maine Coon</string>
     <string name="addpet2_label_bio">Bio</string>
     <string name="addpet2_bio_placeholder">Tell other owners what %1$s is like — favorite snack, ideal afternoon, weird quirks…</string>
     <string name="addpet2_bio_placeholder_generic">Tell other owners what your pet is like — favorite snack, ideal afternoon, weird quirks…</string>

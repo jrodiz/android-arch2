@@ -191,6 +191,7 @@ private fun DocumentSnapshot.toPetOrNull(): Pet? {
             ageYears = ageYears,
             ageIsApproximate = ageIsApproximate,
             species = species,
+            breed = getString("breed"),
             intents = intents,
             photos = photos,
             bio = getString("bio"),

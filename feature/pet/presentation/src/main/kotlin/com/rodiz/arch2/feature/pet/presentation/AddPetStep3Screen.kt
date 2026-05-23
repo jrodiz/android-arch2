@@ -215,7 +215,10 @@ private fun BasicsCard(draft: PetDraft, modifier: Modifier = Modifier) {
             val subtitle = if (species != null) {
                 val format = if (draft.ageIsApproximate) R.string.addpet3_subtitle_approx
                 else R.string.addpet3_subtitle_exact
-                stringResource(format, draft.ageYears, species.label())
+                // Prefer breed over species in the subtitle when set — same convention
+                // as PetThumbnailCard so My Pets and the wizard review stay aligned.
+                val speciesPortion = draft.breed?.takeIf { it.isNotBlank() } ?: species.label()
+                stringResource(format, draft.ageYears, speciesPortion)
             } else {
                 stringResource(R.string.addpet3_value_empty)
             }

@@ -173,6 +173,16 @@ internal fun PetForm(
             }
         }
 
+        OutlinedTextField(
+            value = state.draft.breed.orEmpty(),
+            onValueChange = { onEvent(PetFormEvent.BreedChanged(it)) },
+            label = { Text("Breed (optional)") },
+            placeholder = { Text("e.g. Corgi") },
+            singleLine = true,
+            supportingText = { Text("${(state.draft.breed?.length ?: 0)}/${PetDraft.BREED_MAX_LEN}") },
+            modifier = Modifier.fillMaxWidth(),
+        )
+
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),

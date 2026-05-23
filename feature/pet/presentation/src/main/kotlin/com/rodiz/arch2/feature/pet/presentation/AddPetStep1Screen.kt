@@ -568,7 +568,7 @@ internal fun SectionLabel(
 }
 
 @Composable
-private fun WhitePillTextField(
+internal fun WhitePillTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,

@@ -95,6 +95,21 @@ private fun AddPetStep2Screen(
             )
             Spacer(Modifier.height(20.dp))
 
+            LabeledField(
+                label = stringResource(R.string.addpet2_label_breed),
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
+                val placeholder = state.draft.species
+                    ?.let { stringResource(R.string.addpet2_breed_placeholder, it.label()) }
+                    ?: stringResource(R.string.addpet2_breed_placeholder_generic)
+                WhitePillTextField(
+                    value = state.draft.breed.orEmpty(),
+                    onValueChange = { onEvent(PetFormEvent.BreedChanged(it)) },
+                    placeholder = placeholder,
+                )
+            }
+
+            Spacer(Modifier.height(22.dp))
             BioField(
                 petName = state.draft.name,
                 bio = state.draft.bio.orEmpty(),

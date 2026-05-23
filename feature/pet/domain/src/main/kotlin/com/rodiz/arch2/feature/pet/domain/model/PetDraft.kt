@@ -5,6 +5,8 @@ data class PetDraft(
     val ageYears: Int,
     val ageIsApproximate: Boolean,
     val species: Species?,
+    /** Optional free-text breed collected on Add Pet Step 2. Null when not set. */
+    val breed: String? = null,
     val intents: Set<Intent>,
     val photos: List<PetPhoto>,
     val bio: String?,
@@ -19,6 +21,7 @@ data class PetDraft(
             ageYears = 0,
             ageIsApproximate = false,
             species = null,
+            breed = null,
             intents = emptySet(),
             photos = emptyList(),
             bio = null,
@@ -32,6 +35,7 @@ data class PetDraft(
         const val PHOTOS_MIN = 1
         const val PHOTOS_MAX = 6
         const val BIO_MAX_LEN = 300
+        const val BREED_MAX_LEN = 40
     }
 }
 

@@ -9,6 +9,13 @@ data class Pet(
     val ageYears: Int,
     val ageIsApproximate: Boolean,
     val species: Species,
+    /**
+     * Optional free-text breed (e.g. "Corgi", "Maine Coon"). When set, display
+     * surfaces prefer the breed over the broader species label — e.g. the My Pets
+     * card subtitle reads "3 yr · Corgi" instead of "3 yr · Dog". Null when the
+     * owner hasn't filled it in (or for pets created before this field existed).
+     */
+    val breed: String? = null,
     val intents: Set<Intent>,
     val photos: List<PetPhoto>,
     val bio: String?,

@@ -221,7 +221,8 @@ private fun PetPreviewContent(
             text = buildString {
                 append("${if (pet.ageIsApproximate) "~" else ""}${pet.ageYears} ")
                 append(if (pet.ageYears == 1) "yr" else "yrs")
-                append(" · ${pet.species.label()}")
+                val speciesPortion = pet.breed?.takeIf { it.isNotBlank() } ?: pet.species.label()
+                append(" · $speciesPortion")
             },
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

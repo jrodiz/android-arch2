@@ -136,11 +136,13 @@ internal class FirestorePetRepository @Inject constructor(
 
         val uploadedPhotos = draft.photos.map { uploadPhotoOrPassThrough(id.value, it) }
         val now = Clock.System.now()
-        // Preserve size/energy across updates when the draft doesn't carry them — the
-        // Edit form still doesn't collect them (Add Pet Step 2 does). Without this,
-        // saving from Edit would silently wipe the fields a fresh Add captured.
+        // Preserve breed/size/energy across updates when the draft doesn't carry them
+        // — the legacy Edit form (PetForm.kt) only collects the original fields.
+        // Without this, saving from Edit would silently wipe values a fresh Add Pet
+        // Step 2 captured.
         val finalDraft = draft.copy(
             photos = uploadedPhotos,
+            breed = draft.breed ?: existing.breed,
             size = draft.size ?: existing.size,
             energy = draft.energy ?: existing.energy,
         )

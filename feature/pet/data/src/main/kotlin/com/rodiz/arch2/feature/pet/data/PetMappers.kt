@@ -33,6 +33,7 @@ internal fun buildPetMap(
     "ageIsApproximate" to draft.ageIsApproximate,
     "species" to draft.species?.name,
     "speciesCategory" to draft.species?.category?.name,
+    "breed" to draft.breed,
     "intents" to draft.intents.map { it.name },
     "photos" to draft.photos.map { photo ->
         val remote = photo.source as? PhotoSource.Remote
@@ -65,6 +66,7 @@ internal fun DocumentSnapshot.toPetOrNull(): Pet? {
         val ageIsApproximate = getBoolean("ageIsApproximate") ?: false
         val speciesName = getString("species") ?: return null
         val species = Species.entries.firstOrNull { it.name == speciesName } ?: return null
+        val breed = getString("breed")
         val intents = (get("intents") as? List<String>).orEmpty()
             .mapNotNull { name -> Intent.entries.firstOrNull { it.name == name } }
             .toSet()
@@ -102,6 +104,7 @@ internal fun DocumentSnapshot.toPetOrNull(): Pet? {
             ageYears = ageYears,
             ageIsApproximate = ageIsApproximate,
             species = species,
+            breed = breed,
             intents = intents,
             photos = photos,
             bio = bio,
@@ -135,6 +138,7 @@ internal fun petFromWrite(
     ageYears = draft.ageYears,
     ageIsApproximate = draft.ageIsApproximate,
     species = requireNotNull(draft.species) { "species must be validated upstream" },
+    breed = draft.breed,
     intents = draft.intents,
     photos = draft.photos,
     bio = draft.bio,

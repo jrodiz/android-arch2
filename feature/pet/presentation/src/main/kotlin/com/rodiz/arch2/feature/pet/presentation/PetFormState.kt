@@ -41,6 +41,7 @@ internal sealed interface PetFormEvent {
     data class PhotoAdded(val photo: PetPhoto) : PetFormEvent
     data class PhotoRemoved(val index: Int) : PetFormEvent
     data class BioChanged(val value: String) : PetFormEvent
+    data class BreedChanged(val value: String) : PetFormEvent
     /** Pass null to clear the selection (tapping an already-selected pill). */
     data class SizeChanged(val size: PetSize?) : PetFormEvent
     /** Pass null to clear the selection. */

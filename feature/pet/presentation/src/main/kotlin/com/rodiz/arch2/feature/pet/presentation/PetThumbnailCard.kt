@@ -84,8 +84,11 @@ internal fun PetThumbnailCard(
                 } else {
                     R.string.pet_subtitle_exact_age
                 }
+                // Prefer breed over species when set ("3 yr · Corgi"), fall back to
+                // species ("3 yr · Dog") for pets without a breed filled in.
+                val speciesPortion = pet.breed?.takeIf { it.isNotBlank() } ?: pet.species.label()
                 Text(
-                    text = stringResource(subtitleRes, pet.ageYears, pet.species.label()),
+                    text = stringResource(subtitleRes, pet.ageYears, speciesPortion),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
