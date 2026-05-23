@@ -23,6 +23,16 @@ class UpdateFirstNameUseCase @Inject constructor(
     }
 }
 
+class UpdateBioUseCase @Inject constructor(
+    private val repo: OwnerProfileRepository,
+) {
+    suspend operator fun invoke(bio: String) {
+        val trimmed = bio.trim()
+        require(trimmed.length <= 150) { "Bio cannot exceed 150 characters" }
+        repo.updateBio(trimmed)
+    }
+}
+
 class UpdateAvatarUseCase @Inject constructor(
     private val repo: OwnerProfileRepository,
 ) {

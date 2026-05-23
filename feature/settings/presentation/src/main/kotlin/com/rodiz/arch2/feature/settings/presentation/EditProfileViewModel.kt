@@ -7,6 +7,7 @@ import com.rodiz.arch2.feature.profile.domain.model.GeoPoint
 import com.rodiz.arch2.feature.profile.domain.model.OwnerProfile
 import com.rodiz.arch2.feature.profile.domain.usecase.ObserveMyProfileUseCase
 import com.rodiz.arch2.feature.profile.domain.usecase.UpdateAvatarUseCase
+import com.rodiz.arch2.feature.profile.domain.usecase.UpdateBioUseCase
 import com.rodiz.arch2.feature.profile.domain.usecase.UpdateFirstNameUseCase
 import com.rodiz.arch2.feature.profile.domain.usecase.UpdateLocationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +25,9 @@ import javax.inject.Inject
 internal data class EditProfileUiState(
     val isLoading: Boolean = true,
     val firstNameField: String = "",
+    val bioField: String = "",
     val avatarUrl: String? = null,
+    val email: String? = null,
     val location: GeoPoint? = null,
     val isSaving: Boolean = false,
     val isUploadingAvatar: Boolean = false,
@@ -34,14 +37,29 @@ internal data class EditProfileUiState(
     val original: OwnerProfile? = null,
 ) {
     val isNameValid: Boolean = firstNameField.trim().length in 1..30
-    val isDirty: Boolean = original?.let { it.firstName != firstNameField.trim() } ?: false
-    val canSave: Boolean = isNameValid && isDirty && !isSaving
+    val isBioValid: Boolean = bioField.length <= MAX_BIO_LENGTH
+    val isDirty: Boolean = original?.let { orig ->
+        orig.firstName != firstNameField.trim() || orig.bio != bioField.trim()
+    } ?: false
+    val canSave: Boolean = isNameValid && isBioValid && isDirty && !isSaving
+    /**
+     * Email-verified state is a UI-only signal for the redesign. Real Firebase
+     * `currentUser.isEmailVerified` plumbing lands in a follow-up — for now we treat
+     * "has an email on file" as verified so the populated state renders correctly.
+     */
+    val isEmailVerified: Boolean = !email.isNullOrBlank()
+
+    companion object {
+        const val MAX_BIO_LENGTH: Int = 150
+        const val MAX_FIRST_NAME_LENGTH: Int = 30
+    }
 }
 
 @HiltViewModel
 internal class EditProfileViewModel @Inject constructor(
     observeMyProfile: ObserveMyProfileUseCase,
     private val updateFirstName: UpdateFirstNameUseCase,
+    private val updateBio: UpdateBioUseCase,
     private val updateAvatar: UpdateAvatarUseCase,
     private val updateLocationUseCase: UpdateLocationUseCase,
 ) : ViewModel() {
@@ -61,12 +79,14 @@ internal class EditProfileViewModel @Inject constructor(
                         // Only seed the editable fields on the first emission. Subsequent
                         // emissions (e.g. after a successful avatar/location upload) refresh
                         // the baseline so dirty calculation stays correct, but keep whatever
-                        // the user has currently typed in the name field.
+                        // the user has currently typed in the editable fields.
                         if (current.original == null) {
                             current.copy(
                                 isLoading = false,
                                 firstNameField = profile?.firstName.orEmpty(),
+                                bioField = profile?.bio.orEmpty(),
                                 avatarUrl = profile?.avatarUrl,
+                                email = profile?.email,
                                 location = profile?.location,
                                 original = profile,
                             )
@@ -74,6 +94,7 @@ internal class EditProfileViewModel @Inject constructor(
                             current.copy(
                                 isLoading = false,
                                 avatarUrl = profile?.avatarUrl ?: current.avatarUrl,
+                                email = profile?.email ?: current.email,
                                 location = profile?.location ?: current.location,
                                 original = profile,
                             )
@@ -84,15 +105,26 @@ internal class EditProfileViewModel @Inject constructor(
     }
 
     fun onFirstNameChange(value: String) {
-        _uiState.update { it.copy(firstNameField = value.take(30)) }
+        _uiState.update { it.copy(firstNameField = value.take(EditProfileUiState.MAX_FIRST_NAME_LENGTH)) }
+    }
+
+    fun onBioChange(value: String) {
+        _uiState.update { it.copy(bioField = value.take(EditProfileUiState.MAX_BIO_LENGTH)) }
     }
 
     fun save() {
         val state = _uiState.value
         if (!state.canSave) return
+        val originalName = state.original?.firstName.orEmpty()
+        val originalBio = state.original?.bio.orEmpty()
+        val newName = state.firstNameField.trim()
+        val newBio = state.bioField.trim()
         viewModelScope.launch {
             _uiState.update { it.copy(isSaving = true) }
-            runCatching { updateFirstName(state.firstNameField) }
+            runCatching {
+                if (newName != originalName) updateFirstName(newName)
+                if (newBio != originalBio) updateBio(newBio)
+            }
                 .onSuccess {
                     _uiState.update { it.copy(isSaving = false, savedAtMillis = System.currentTimeMillis()) }
                     _saved.tryEmit(Unit)

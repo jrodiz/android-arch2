@@ -61,6 +61,35 @@
     <string name="notifications_quiet_hours_picker_soon">Custom quiet-hours coming soon</string>
     <string name="notifications_quiet_hours_window_template">%1$s → %2$s</string>
 
+    <!-- Edit profile screen -->
+    <string name="edit_profile_title">Edit profile</string>
+    <string name="edit_profile_back_cd">Back</string>
+    <string name="edit_profile_save">Save</string>
+    <string name="edit_profile_saving">Saving…</string>
+    <string name="edit_profile_saved">Profile saved</string>
+    <string name="edit_profile_change_photo">Change photo</string>
+    <string name="edit_profile_label_first_name">First name</string>
+    <string name="edit_profile_placeholder_first_name">Your first name</string>
+    <string name="edit_profile_label_bio">Bio</string>
+    <string name="edit_profile_placeholder_bio">Tell other owners about yourself and your pets</string>
+    <string name="edit_profile_bio_counter">%1$d / %2$d</string>
+    <string name="edit_profile_location_subtitle_set">Used to find pets near you</string>
+    <string name="edit_profile_location_subtitle_empty">Tap Update to find pets near you</string>
+    <string name="edit_profile_location_empty_title">Add your city</string>
+    <string name="edit_profile_location_update">Update</string>
+    <string name="edit_profile_location_updating">…</string>
+    <string name="edit_profile_email_verified_title">Email verified</string>
+    <string name="edit_profile_email_unverified_title">Email not verified</string>
+    <string name="edit_profile_email_missing">No email on file</string>
+    <string name="edit_profile_avatar_cd">Profile photo</string>
+    <string name="edit_profile_avatar_badge_cd">Change photo</string>
+    <string name="edit_profile_avatar_source_title">Change profile photo</string>
+    <string name="edit_profile_avatar_source_gallery">Choose from gallery</string>
+    <string name="edit_profile_avatar_source_camera">Take a photo</string>
+    <string name="edit_profile_location_permission_denied">Location permission denied</string>
+    <string name="edit_profile_location_unavailable">Location unavailable — try outdoors with GPS on.</string>
+    <string name="edit_profile_location_fetch_failed">Could not get location</string>
+
     <!-- Privacy screen -->
     <string name="privacy_title">Privacy</string>
     <string name="privacy_back_cd">Back</string>

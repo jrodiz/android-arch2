@@ -11,6 +11,8 @@ data class OwnerProfile(
     val location: GeoPoint?,
     val createdAt: Instant,
     val updatedAt: Instant,
+    /** Free-form self-introduction shown on Edit Profile. Hard-capped at 150 chars. */
+    val bio: String = "",
 )
 
 data class GeoPoint(

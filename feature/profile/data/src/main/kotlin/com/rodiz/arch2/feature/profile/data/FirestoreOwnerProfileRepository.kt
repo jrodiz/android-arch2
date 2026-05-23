@@ -74,6 +74,21 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
         }
     }
 
+    override suspend fun updateBio(bio: String) {
+        withContext(io) {
+            val uid = currentUid()
+            val now = Clock.System.now()
+            ownersCol.document(uid).set(
+                mapOf(
+                    "bio" to bio,
+                    "updatedAt" to now.toTimestamp(),
+                    "createdAt" to now.toTimestamp(),
+                ),
+                SetOptions.merge(),
+            ).await()
+        }
+    }
+
     override suspend fun updateAvatar(localUri: String) {
         withContext(io) {
             val uid = currentUid()
@@ -154,6 +169,7 @@ private fun DocumentSnapshot.toOwnerProfile(uid: String, email: String?): OwnerP
             cityLabel = getString("cityLabel"),
         )
     }
+    val bio = getString("bio").orEmpty()
     val createdAt = getTimestamp("createdAt")?.toKxInstant() ?: Instant.fromEpochMilliseconds(0)
     val updatedAt = getTimestamp("updatedAt")?.toKxInstant() ?: Instant.fromEpochMilliseconds(0)
     return OwnerProfile(
@@ -165,6 +181,7 @@ private fun DocumentSnapshot.toOwnerProfile(uid: String, email: String?): OwnerP
         location = location,
         createdAt = createdAt,
         updatedAt = updatedAt,
+        bio = bio,
     )
 }
 

@@ -11,6 +11,9 @@ interface OwnerProfileRepository {
     /** Rename the signed-in owner. 1..30 chars, trimmed. */
     suspend fun updateFirstName(name: String)
 
+    /** Update the signed-in owner's bio. 0..150 chars, trimmed. */
+    suspend fun updateBio(bio: String)
+
     /** Uploads the local image, then persists the resulting download URL on the owner doc. */
     suspend fun updateAvatar(localUri: String)
 

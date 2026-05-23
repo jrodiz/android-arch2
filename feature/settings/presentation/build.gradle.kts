@@ -31,6 +31,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:navigation"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:ui"))
     implementation(project(":core:session:domain"))
 
     implementation(libs.androidx.compose.material.icons)
