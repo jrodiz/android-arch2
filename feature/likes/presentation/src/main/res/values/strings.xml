@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="likes_eyebrow">Incoming</string>
+    <string name="likes_headline">Likes you</string>
+    <string name="likes_subtitle">Tap any pet to like back and start a match</string>
+    <string name="likes_count_format">%1$d new</string>
+
+    <string name="likes_filter_all">All</string>
+    <string name="likes_filter_playdate">Playdate</string>
+    <string name="likes_filter_adoption">Adoption</string>
+    <string name="likes_filter_friendship">Friendship</string>
+
+    <string name="likes_intent_playdate">Playdate</string>
+    <string name="likes_intent_friendship">Friendship</string>
+    <string name="likes_intent_adoption">Adoption</string>
+
+    <string name="likes_card_new">NEW</string>
+    <string name="likes_card_age_format">%1$s, %2$d</string>
+
+    <string name="likes_empty_headline">No one yet</string>
+    <string name="likes_empty_body">When someone likes one of your pets, they\'ll show up here.</string>
+    <string name="likes_empty_cta">Go to Deck</string>
+    <string name="likes_filtered_empty_format">No %1$s likes yet</string>
+
+    <string name="likes_time_just_now">just now</string>
+    <string name="likes_time_minutes_format">%1$dm</string>
+    <string name="likes_time_hours_format">%1$dh</string>
+    <string name="likes_time_days_format">%1$dd</string>
+    <string name="likes_time_weeks_format">%1$dw</string>
+
+    <string name="likes_distance_under_5">&lt; 5 km</string>
+    <string name="likes_distance_5_15">5–15 km</string>
+    <string name="likes_distance_15_50">15–50 km</string>
+    <string name="likes_distance_over_50">50+ km</string>
+</resources>

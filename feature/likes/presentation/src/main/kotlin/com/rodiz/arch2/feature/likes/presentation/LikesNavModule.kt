@@ -4,6 +4,7 @@ import androidx.navigation3.runtime.entry
 import com.rodiz.arch2.core.navigation.EntryProviderInstaller
 import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.deck.nav.DeckHome
+import com.rodiz.arch2.feature.deck.nav.DeckPetDetail
 import com.rodiz.arch2.feature.likes.nav.LikesHome
 import dagger.Module
 import dagger.Provides
@@ -18,7 +19,10 @@ internal object LikesNavModule {
     @IntoSet
     fun provideLikesEntries(navigator: Navigator): EntryProviderInstaller = {
         entry<LikesHome> {
-            LikesYouRoute(onGoToDeck = { navigator.replaceAll(DeckHome) })
+            LikesYouRoute(
+                onGoToDeck = { navigator.replaceAll(DeckHome) },
+                onOpenPetDetail = { petId -> navigator.goTo(DeckPetDetail(petId.value)) },
+            )
         }
     }
 }

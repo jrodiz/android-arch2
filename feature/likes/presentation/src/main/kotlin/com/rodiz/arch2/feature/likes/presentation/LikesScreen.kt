@@ -1,6 +1,8 @@
 package com.rodiz.arch2.feature.likes.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,27 +15,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Chat
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Pets
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.SearchOff
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,20 +48,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.rodiz.arch2.core.designsystem.component.EmptyTabState
+import com.rodiz.arch2.core.designsystem.theme.BrandColors
+import com.rodiz.arch2.feature.deck.domain.model.DistanceBucket
 import com.rodiz.arch2.feature.likes.domain.model.IncomingLike
+import com.rodiz.arch2.feature.pet.domain.model.Intent as PetIntent
+import com.rodiz.arch2.feature.pet.domain.model.PetId
 import com.rodiz.arch2.feature.pet.domain.model.PhotoSource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun LikesYouRoute(
     onGoToDeck: () -> Unit,
+    onOpenPetDetail: (PetId) -> Unit,
     viewModel: LikesYouViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -76,41 +86,74 @@ internal fun LikesYouRoute(
         }
     }
 
-    Scaffold(
-        topBar = { TopAppBar(title = { Text("Likes you") }) },
-        snackbarHost = { SnackbarHost(snackbar) },
-    ) { padding ->
-        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (state.likes.isEmpty()) {
-                EmptyTabState(
-                    icon = Icons.Outlined.Favorite,
-                    headline = "No one yet",
-                    body = "When someone likes one of your pets, they'll appear here. Keep swiping in the deck.",
-                    cta = "Go to Deck",
-                    onCta = onGoToDeck,
-                )
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    items(state.likes, key = { it.key.value }) { like ->
-                        LikeCard(like = like, onClick = { viewModel.onCardTap(like.key) })
-                    }
-                }
-            }
+    LikesScreen(
+        state = state,
+        onFilterSelected = viewModel::onFilterSelected,
+        onCardTap = { like ->
+            viewModel.markSeen(like.key)
+            onOpenPetDetail(like.anchorPet.id)
+        },
+        onGoToDeck = onGoToDeck,
+        snackbarHostState = snackbar,
+    )
+}
 
-            state.expandedKey?.let { key ->
-                val sheet = state.likes.firstOrNull { it.key == key }
-                if (sheet != null) {
-                    LikeBottomSheet(
-                        like = sheet,
-                        onPass = viewModel::passExpanded,
-                        onLikeBack = viewModel::likeBackExpanded,
-                        onDismiss = viewModel::dismissSheet,
+@Composable
+private fun LikesScreen(
+    state: LikesYouUiState,
+    onFilterSelected: (LikesFilter) -> Unit,
+    onCardTap: (IncomingLike) -> Unit,
+    onGoToDeck: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+) {
+    val unseenCount = remember(state.likes, state.seenKeys) {
+        state.likes.count { it.key.value !in state.seenKeys }
+    }
+    val filteredLikes = remember(state.likes, state.activeFilter) {
+        when (val f = state.activeFilter) {
+            LikesFilter.All -> state.likes
+            is LikesFilter.ByIntent -> state.likes.filter { f.intent in it.anchorPet.intents }
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = MaterialTheme.colorScheme.background,
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+        ) {
+            LikesHeader(unseenCount = unseenCount)
+            Spacer(Modifier.height(14.dp))
+            FilterChipRow(
+                activeFilter = state.activeFilter,
+                onFilterSelected = onFilterSelected,
+            )
+            Spacer(Modifier.height(16.dp))
+
+            when {
+                state.isLoading && state.likes.isEmpty() -> {
+                    LoadingBody()
+                }
+                state.likes.isEmpty() -> {
+                    EmptyTabState(
+                        icon = Icons.Outlined.Favorite,
+                        headline = stringResource(R.string.likes_empty_headline),
+                        body = stringResource(R.string.likes_empty_body),
+                        cta = stringResource(R.string.likes_empty_cta),
+                        onCta = onGoToDeck,
+                    )
+                }
+                filteredLikes.isEmpty() -> {
+                    FilteredEmptyBody(filter = state.activeFilter)
+                }
+                else -> {
+                    LikesGrid(
+                        likes = filteredLikes,
+                        seenKeys = state.seenKeys,
+                        onCardTap = onCardTap,
                     )
                 }
             }
@@ -119,19 +162,186 @@ internal fun LikesYouRoute(
 }
 
 @Composable
-private fun LikeCard(like: IncomingLike, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth().aspectRatio(3f / 4f),
+private fun LikesHeader(unseenCount: Int) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(start = 20.dp, end = 20.dp, top = 4.dp),
     ) {
-        Box(Modifier.fillMaxSize()) {
-            val primaryUrl = like.anchorPet.photos.firstOrNull()?.let {
-                (it.source as? PhotoSource.Remote)?.downloadUrl
+        Text(
+            text = stringResource(R.string.likes_eyebrow),
+            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 0.6.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(2.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.likes_headline),
+                style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            if (unseenCount > 0) {
+                Spacer(Modifier.width(12.dp))
+                CountPill(count = unseenCount)
             }
-            if (primaryUrl != null) {
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = stringResource(R.string.likes_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun CountPill(count: Int) {
+    Surface(
+        shape = CircleShape,
+        color = BrandColors.Coral,
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 10.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Favorite,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(12.dp),
+            )
+            Text(
+                text = stringResource(R.string.likes_count_format, count),
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = Color.White,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FilterChipRow(
+    activeFilter: LikesFilter,
+    onFilterSelected: (LikesFilter) -> Unit,
+) {
+    val all = stringResource(R.string.likes_filter_all)
+    val playdate = stringResource(R.string.likes_filter_playdate)
+    val adoption = stringResource(R.string.likes_filter_adoption)
+    val friendship = stringResource(R.string.likes_filter_friendship)
+
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 20.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        item {
+            FilterPill(
+                label = all,
+                selected = activeFilter == LikesFilter.All,
+                onClick = { onFilterSelected(LikesFilter.All) },
+            )
+        }
+        item {
+            FilterPill(
+                label = playdate,
+                selected = activeFilter is LikesFilter.ByIntent && activeFilter.intent == PetIntent.PLAYDATE,
+                onClick = { onFilterSelected(LikesFilter.ByIntent(PetIntent.PLAYDATE)) },
+            )
+        }
+        item {
+            FilterPill(
+                label = adoption,
+                selected = activeFilter is LikesFilter.ByIntent && activeFilter.intent == PetIntent.ADOPTION,
+                onClick = { onFilterSelected(LikesFilter.ByIntent(PetIntent.ADOPTION)) },
+            )
+        }
+        item {
+            FilterPill(
+                label = friendship,
+                selected = activeFilter is LikesFilter.ByIntent && activeFilter.intent == PetIntent.FRIENDSHIP,
+                onClick = { onFilterSelected(LikesFilter.ByIntent(PetIntent.FRIENDSHIP)) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun FilterPill(label: String, selected: Boolean, onClick: () -> Unit) {
+    val bg = if (selected) BrandColors.NavSurface else Color.Transparent
+    val fg = if (selected) Color.White else MaterialTheme.colorScheme.onSurface
+    val border = if (selected) {
+        null
+    } else {
+        BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
+    }
+    Surface(
+        shape = CircleShape,
+        color = bg,
+        border = border,
+        modifier = Modifier.clickable(onClick = onClick),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = fg,
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+        )
+    }
+}
+
+@Composable
+private fun LikesGrid(
+    likes: List<IncomingLike>,
+    seenKeys: Set<String>,
+    onCardTap: (IncomingLike) -> Unit,
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 120.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        items(likes, key = { it.key.value }) { like ->
+            LikeCard(
+                like = like,
+                isUnseen = like.key.value !in seenKeys,
+                onClick = { onCardTap(like) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun LikeCard(
+    like: IncomingLike,
+    isUnseen: Boolean,
+    onClick: () -> Unit,
+) {
+    val nowMs = remember { System.currentTimeMillis() }
+    val likedAtMs = like.likedAt.toEpochMilliseconds()
+    val timeLabel = relativeTimeLabel(nowMs = nowMs, thenMs = likedAtMs)
+    val distanceBucket = remember(like.key.value) { syntheticDistanceBucket(like.key.value) }
+    val intent = remember(like.anchorPet.intents) { displayIntent(like.anchorPet.intents) }
+
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(3f / 4f)
+            .clickable(onClick = onClick),
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            val photoUrl = like.anchorPet.photos.firstOrNull()?.let { p ->
+                (p.source as? PhotoSource.Remote)?.downloadUrl
+                    ?: (p.source as? PhotoSource.Local)?.uri
+            }
+            if (photoUrl != null) {
                 AsyncImage(
-                    model = primaryUrl,
+                    model = photoUrl,
                     contentDescription = like.anchorPet.name,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
@@ -146,112 +356,242 @@ private fun LikeCard(like: IncomingLike, onClick: () -> Unit) {
                     Icon(
                         imageVector = Icons.Outlined.Pets,
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(48.dp),
                     )
                 }
             }
+
+            // Bottom scrim so the white name/distance reads on any photo.
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomStart)
+                    .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
                             0f to Color.Transparent,
-                            1f to Color.Black.copy(alpha = 0.7f),
+                            0.55f to Color.Transparent,
+                            1f to Color.Black.copy(alpha = 0.6f),
                         ),
-                    )
-                    .padding(12.dp),
+                    ),
+            )
+
+            // Top row: relative time (left) + NEW pill (right).
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 10.dp, top = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column {
-                    Text(
-                        text = like.anchorPet.name,
-                        color = Color.White,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = "${like.fromOwnerId.take(8)}… liked your pet",
-                        color = Color.White.copy(alpha = 0.85f),
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                RelativeTimePill(label = timeLabel)
+                Spacer(Modifier.weight(1f))
+                if (isUnseen) NewPill()
             }
-        }
-    }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LikeBottomSheet(
-    like: IncomingLike,
-    onPass: () -> Unit,
-    onLikeBack: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            val primaryUrl = like.anchorPet.photos.firstOrNull()?.let {
-                (it.source as? PhotoSource.Remote)?.downloadUrl
-            }
-            if (primaryUrl != null) {
-                AsyncImage(
-                    model = primaryUrl,
-                    contentDescription = like.anchorPet.name,
-                    contentScale = ContentScale.Crop,
+            // Intent chip (bottom-left, just above the text overlay).
+            if (intent != null) {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(20.dp)),
-                )
-            }
-            Text(
-                text = "${like.anchorPet.name}, ${like.anchorPet.ageYears}",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-            )
-            Text(
-                text = like.anchorPet.species.name.lowercase().replaceFirstChar { it.uppercase() },
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            if (like.anchorPet.intents.isNotEmpty()) {
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    like.anchorPet.intents.forEach { intent ->
-                        AssistChip(
-                            onClick = {},
-                            label = {
-                                Text(intent.name.lowercase().replaceFirstChar { it.uppercase() })
-                            },
-                        )
-                    }
+                        .align(Alignment.BottomStart)
+                        .padding(start = 10.dp, bottom = 60.dp),
+                ) {
+                    IntentPill(intent = intent)
                 }
             }
-            if (!like.anchorPet.bio.isNullOrBlank()) {
-                Text(text = like.anchorPet.bio!!, style = MaterialTheme.typography.bodyMedium)
-            }
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(
-                    onClick = onPass,
-                    modifier = Modifier.weight(1f),
-                ) { Text("Pass") }
-                FilledTonalButton(
-                    onClick = onLikeBack,
-                    modifier = Modifier.weight(1f),
-                ) { Text("Like back") }
+
+            // Bottom overlay: name + age, distance bucket.
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 12.dp, end = 12.dp, bottom = 10.dp),
+            ) {
+                Text(
+                    text = stringResource(
+                        R.string.likes_card_age_format,
+                        like.anchorPet.name,
+                        like.anchorPet.ageYears,
+                    ),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(Modifier.height(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.Place,
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.85f),
+                        modifier = Modifier.size(12.dp),
+                    )
+                    Spacer(Modifier.width(3.dp))
+                    Text(
+                        text = distanceLabel(distanceBucket),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.85f),
+                    )
+                }
             }
         }
     }
 }
 
+@Composable
+private fun RelativeTimePill(label: String) {
+    Surface(
+        shape = CircleShape,
+        color = Color.Black.copy(alpha = 0.55f),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = Color.White,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+        )
+    }
+}
+
+@Composable
+private fun NewPill() {
+    Surface(
+        shape = CircleShape,
+        color = BrandColors.Coral,
+    ) {
+        Text(
+            text = stringResource(R.string.likes_card_new),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.8.sp,
+            ),
+            color = Color.White,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        )
+    }
+}
+
+@Composable
+private fun IntentPill(intent: PetIntent) {
+    val (labelRes, color, icon) = when (intent) {
+        PetIntent.PLAYDATE -> Triple(
+            R.string.likes_intent_playdate,
+            BrandColors.Coral,
+            Icons.Outlined.Pets,
+        )
+        PetIntent.FRIENDSHIP -> Triple(
+            R.string.likes_intent_friendship,
+            BrandColors.MintLeaf,
+            Icons.AutoMirrored.Outlined.Chat,
+        )
+        PetIntent.ADOPTION -> Triple(
+            R.string.likes_intent_adoption,
+            BrandColors.CoralDeep,
+            Icons.Outlined.Favorite,
+        )
+    }
+    Surface(
+        shape = CircleShape,
+        color = color,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(11.dp),
+            )
+            Text(
+                text = stringResource(labelRes),
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = Color.White,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingBody() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        CircularProgressIndicator(color = BrandColors.Coral)
+    }
+}
+
+@Composable
+private fun FilteredEmptyBody(filter: LikesFilter) {
+    val label = when (filter) {
+        LikesFilter.All -> stringResource(R.string.likes_filter_all)
+        is LikesFilter.ByIntent -> when (filter.intent) {
+            PetIntent.PLAYDATE -> stringResource(R.string.likes_filter_playdate)
+            PetIntent.FRIENDSHIP -> stringResource(R.string.likes_filter_friendship)
+            PetIntent.ADOPTION -> stringResource(R.string.likes_filter_adoption)
+        }
+    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.SearchOff,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(56.dp),
+        )
+        Spacer(Modifier.height(12.dp))
+        Text(
+            text = stringResource(R.string.likes_filtered_empty_format, label.lowercase()),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+/* ---------- helpers ---------- */
+
+/** Choose a single intent chip per card in a stable order: Playdate > Friendship > Adoption. */
+private fun displayIntent(intents: Set<PetIntent>): PetIntent? = when {
+    PetIntent.PLAYDATE in intents -> PetIntent.PLAYDATE
+    PetIntent.FRIENDSHIP in intents -> PetIntent.FRIENDSHIP
+    PetIntent.ADOPTION in intents -> PetIntent.ADOPTION
+    else -> null
+}
+
+/**
+ * Stand-in for a real per-card distance bucket. Hashes the like key so every card stays stable
+ * across recompositions. Swap to a real `IncomingLike.distanceBucket` when the data layer threads
+ * owner locations through — tracked in `plans/likes-you-redesign-grid.md` decision D3.
+ */
+// TODO(distance): replace with `like.distanceBucket` once IncomingLike carries one.
+private fun syntheticDistanceBucket(keyValue: String): DistanceBucket {
+    val cases = DistanceBucket.entries
+    val idx = (keyValue.hashCode().ushr(1)) % cases.size
+    return cases[idx]
+}
+
+@Composable
+private fun distanceLabel(bucket: DistanceBucket): String = when (bucket) {
+    DistanceBucket.UNDER_5_KM -> stringResource(R.string.likes_distance_under_5)
+    DistanceBucket.BUCKET_5_15_KM -> stringResource(R.string.likes_distance_5_15)
+    DistanceBucket.BUCKET_15_50_KM -> stringResource(R.string.likes_distance_15_50)
+    DistanceBucket.OVER_50_KM -> stringResource(R.string.likes_distance_over_50)
+}
+
+@Composable
+private fun relativeTimeLabel(nowMs: Long, thenMs: Long): String {
+    val deltaSeconds = ((nowMs - thenMs) / 1_000L).coerceAtLeast(0)
+    return when {
+        deltaSeconds < 60 -> stringResource(R.string.likes_time_just_now)
+        deltaSeconds < 3_600 -> stringResource(R.string.likes_time_minutes_format, (deltaSeconds / 60).toInt())
+        deltaSeconds < 86_400 -> stringResource(R.string.likes_time_hours_format, (deltaSeconds / 3_600).toInt())
+        deltaSeconds < 7 * 86_400 -> stringResource(R.string.likes_time_days_format, (deltaSeconds / 86_400).toInt())
+        else -> stringResource(R.string.likes_time_weeks_format, (deltaSeconds / (7 * 86_400)).toInt())
+    }
+}

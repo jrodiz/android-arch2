@@ -17,4 +17,7 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons)
     implementation(libs.coil.compose)
+    // Used by the LikeCard's relative-time helper to read `IncomingLike.likedAt` (a
+    // `kotlinx.datetime.Instant` exposed by `:feature:likes:domain`).
+    implementation(libs.kotlinx.datetime)
 }

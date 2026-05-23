@@ -8,6 +8,7 @@ import com.rodiz.arch2.feature.likes.domain.model.LikeKey
 import com.rodiz.arch2.feature.likes.domain.usecase.LikeBackUseCase
 import com.rodiz.arch2.feature.likes.domain.usecase.ObserveLikesYouUseCase
 import com.rodiz.arch2.feature.likes.domain.usecase.PassLikeUseCase
+import com.rodiz.arch2.feature.pet.domain.model.Intent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,11 +18,28 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Filter applied to the Likes-you grid. View-side only — the data layer always returns
+ * the full unfiltered list.
+ */
+internal sealed interface LikesFilter {
+    data object All : LikesFilter
+    data class ByIntent(val intent: Intent) : LikesFilter
+}
+
 internal data class LikesYouUiState(
     val likes: List<IncomingLike> = emptyList(),
-    val expandedKey: LikeKey? = null,
+    val expandedKey: LikeKey? = null,    // unused by the redesigned UI; kept to preserve VM API
     val matchMessage: String? = null,
     val errorMessage: String? = null,
+    val isLoading: Boolean = true,
+    val activeFilter: LikesFilter = LikesFilter.All,
+    /**
+     * Keys the user has already opened/seen during this session. Drives the "NEW" pill.
+     * In-memory only — resets on process death; persistence is a future concern (see
+     * [`plans/likes-you-redesign-grid.md`] decision D2).
+     */
+    val seenKeys: Set<String> = emptySet(),
 )
 
 @HiltViewModel
@@ -39,12 +57,23 @@ internal class LikesYouViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             observeLikesYou()
-                .catch { e -> _uiState.update { it.copy(errorMessage = e.message) } }
+                .catch { e ->
+                    _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
+                }
                 .collect { incoming ->
                     val visible = incoming.filterNot { it.key.value in locallyHidden }
-                    _uiState.update { it.copy(likes = visible) }
+                    _uiState.update { it.copy(isLoading = false, likes = visible) }
                 }
         }
+    }
+
+    fun onFilterSelected(filter: LikesFilter) {
+        _uiState.update { it.copy(activeFilter = filter) }
+    }
+
+    /** Mark a like as seen so its "NEW" pill clears (in-memory only). */
+    fun markSeen(key: LikeKey) {
+        _uiState.update { it.copy(seenKeys = it.seenKeys + key.value) }
     }
 
     fun onCardTap(key: LikeKey) = _uiState.update { it.copy(expandedKey = key) }
