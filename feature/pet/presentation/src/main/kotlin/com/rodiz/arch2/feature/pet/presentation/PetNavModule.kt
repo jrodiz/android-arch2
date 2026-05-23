@@ -28,7 +28,11 @@ internal object PetNavModule {
             )
         }
         entry<AddPet> {
-            AddPetRoute(onDone = { navigator.goBack() })
+            AddPetRoute(
+                onDone = { navigator.goBack() },
+                // TODO(addpet-step-2): wire to Step 2 destination once the wizard ships.
+                onContinue = { navigator.goBack() },
+            )
         }
         entry<PetDetail> { key ->
             PetPreviewRoute(

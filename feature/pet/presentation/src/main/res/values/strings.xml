@@ -34,4 +34,27 @@
         <item quantity="one">%d active pet</item>
         <item quantity="other">%d active pets</item>
     </plurals>
+
+    <!-- Add a pet — Step 1 -->
+    <string name="addpet_title">Add a pet</string>
+    <string name="addpet_step_indicator">Step %1$d / %2$d</string>
+    <string name="addpet_dropzone_title">Add up to 6 photos</string>
+    <string name="addpet_dropzone_hint">The first photo is the hero of the card</string>
+    <string name="addpet_label_name">Name</string>
+    <string name="addpet_label_age">Age</string>
+    <string name="addpet_label_species">Species</string>
+    <string name="addpet_label_open_to">Open to (pick at least one)</string>
+    <string name="addpet_placeholder_name">e.g. Biscuit</string>
+    <string name="addpet_placeholder_age">e.g. 3 years</string>
+    <string name="addpet_placeholder_species">Pick species</string>
+    <string name="addpet_action_save_draft">Save draft</string>
+    <string name="addpet_action_continue">Continue</string>
+    <string name="addpet_snackbar_draft_saved">Draft saved</string>
+    <string name="addpet_snackbar_continue_stub">Step 2 coming soon</string>
+    <string name="addpet_snackbar_species_soon">Species picker coming soon</string>
+    <string name="addpet_error_name_missing">Add your pet\'s name</string>
+    <string name="addpet_error_photos_missing">Add at least one photo</string>
+    <string name="addpet_error_species_missing">Pick a species</string>
+    <string name="addpet_error_intent_missing">Pick at least one intent</string>
+    <string name="addpet_a11y_remove_photo">Remove photo</string>
 </resources>

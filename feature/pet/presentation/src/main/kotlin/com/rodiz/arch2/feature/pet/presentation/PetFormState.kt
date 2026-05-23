@@ -11,7 +11,22 @@ internal data class PetFormUiState(
     val errors: List<PetValidationError> = emptyList(),
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
+    /** Step-1 validation errors surfaced inline under each labeled section. */
+    val step1Errors: Set<Step1Error> = emptySet(),
 )
+
+/**
+ * Presentation-only validation flags for the redesigned Add a pet — Step 1 screen.
+ * Lets the UI render an inline error under the right section without re-running the
+ * full domain `validate()` (which checks photo-count caps, bio length, etc. that are
+ * not Step-1 concerns).
+ */
+internal sealed interface Step1Error {
+    data object NameMissing : Step1Error
+    data object PhotosMissing : Step1Error
+    data object SpeciesMissing : Step1Error
+    data object IntentMissing : Step1Error
+}
 
 internal sealed interface PetFormEvent {
     data class NameChanged(val value: String) : PetFormEvent

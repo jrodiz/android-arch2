@@ -25,7 +25,42 @@ internal class AddPetViewModel @Inject constructor(
     private val _completed = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val completed: SharedFlow<Unit> = _completed.asSharedFlow()
 
-    fun onEvent(event: PetFormEvent) = handlePetFormEvent(_uiState, event)
+    /** One-shot UI events for the Step 1 redesign (draft saved, continue requested). */
+    private val _step1Events = MutableSharedFlow<Step1Event>(extraBufferCapacity = 4)
+    val step1Events: SharedFlow<Step1Event> = _step1Events.asSharedFlow()
+
+    fun onEvent(event: PetFormEvent) {
+        handlePetFormEvent(_uiState, event)
+        clearStep1ErrorFor(event)
+    }
+
+    /**
+     * Stub: persistence ships with the full 3-step flow. For now, emit a one-shot event
+     * so the screen can confirm the action with a snackbar.
+     */
+    fun saveDraft() {
+        _step1Events.tryEmit(Step1Event.DraftSaved)
+    }
+
+    /**
+     * Validate Step 1 required fields. If clean, fire ContinueRequested so the screen
+     * can hand off to Step 2 (currently stubbed). Otherwise populate `step1Errors`.
+     */
+    fun attemptContinue() {
+        val draft = _uiState.value.draft
+        val errors = buildSet {
+            if (draft.name.trim().isEmpty()) add(Step1Error.NameMissing)
+            if (draft.photos.isEmpty()) add(Step1Error.PhotosMissing)
+            if (draft.species == null) add(Step1Error.SpeciesMissing)
+            if (draft.intents.isEmpty()) add(Step1Error.IntentMissing)
+        }
+        if (errors.isEmpty()) {
+            _uiState.update { it.copy(step1Errors = emptySet()) }
+            _step1Events.tryEmit(Step1Event.ContinueRequested)
+        } else {
+            _uiState.update { it.copy(step1Errors = errors) }
+        }
+    }
 
     fun submit() {
         if (_uiState.value.isSubmitting) return
@@ -49,6 +84,26 @@ internal class AddPetViewModel @Inject constructor(
             }
         }
     }
+
+    /** Clear the relevant step-1 error when the user edits the corresponding field. */
+    private fun clearStep1ErrorFor(event: PetFormEvent) {
+        val target: Step1Error? = when (event) {
+            is PetFormEvent.NameChanged -> Step1Error.NameMissing
+            is PetFormEvent.PhotoAdded -> Step1Error.PhotosMissing
+            is PetFormEvent.SpeciesChanged -> Step1Error.SpeciesMissing
+            is PetFormEvent.IntentToggled -> Step1Error.IntentMissing
+            else -> null
+        }
+        if (target != null) {
+            _uiState.update { it.copy(step1Errors = it.step1Errors - target) }
+        }
+    }
+}
+
+/** One-shot UI events fired by the Add a pet — Step 1 screen. */
+internal sealed interface Step1Event {
+    data object DraftSaved : Step1Event
+    data object ContinueRequested : Step1Event
 }
 
 internal fun handlePetFormEvent(state: MutableStateFlow<PetFormUiState>, event: PetFormEvent) {
