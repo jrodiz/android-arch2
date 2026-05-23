@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="deck_overline">Discover</string>
+    <string name="deck_headline">Pets near you</string>
+    <string name="deck_filter_action">Filters</string>
+    <string name="deck_notifications_action">Notifications</string>
+    <string name="deck_distance_km_format">%1$d km</string>
+    <string name="deck_owner_with_format">with %1$s</string>
+    <string name="deck_owner_with_unknown">with someone</string>
+    <string name="deck_action_pass">Pass</string>
+    <string name="deck_action_rewind">Rewind</string>
+    <string name="deck_action_boost">Boost</string>
+    <string name="deck_action_like">Like</string>
+    <string name="deck_bio_quote_format">“%1$s”</string>
+    <string name="deck_distance_unknown">Nearby</string>
+    <string name="deck_back">Back</string>
+    <string name="deck_add_pet_action">Add</string>
+    <string name="deck_petless_title">Add your own pet to like back</string>
+    <string name="deck_petless_body">Browse freely, but liking requires at least one pet of your own.</string>
+    <string name="deck_empty_no_more_title">No more pets nearby</string>
+    <string name="deck_empty_no_more_body">Check back later — new pets join all the time.</string>
+    <string name="deck_empty_petless_title">Add a pet to start swiping</string>
+    <string name="deck_empty_petless_body">Pets on TinPet are owned by you. Tap below to add your first one.</string>
+    <string name="deck_empty_petless_action">Add a pet</string>
+
+    <plurals name="deck_intents_count">
+        <item quantity="one">1 intent</item>
+        <item quantity="other">%1$d intents</item>
+    </plurals>
+</resources>

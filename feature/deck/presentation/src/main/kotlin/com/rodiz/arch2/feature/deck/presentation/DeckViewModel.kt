@@ -10,8 +10,10 @@ import com.rodiz.arch2.feature.deck.domain.model.SwipeResult
 import com.rodiz.arch2.feature.deck.domain.usecase.ObserveDeckUseCase
 import com.rodiz.arch2.feature.deck.domain.usecase.SubmitSwipeUseCase
 import com.rodiz.arch2.feature.deck.domain.usecase.UndoLastSwipeUseCase
+import com.rodiz.arch2.feature.pet.domain.model.Intent
 import com.rodiz.arch2.feature.pet.domain.model.PetId
 import com.rodiz.arch2.feature.pet.domain.model.PetState
+import com.rodiz.arch2.feature.pet.domain.model.SpeciesCategory
 import com.rodiz.arch2.feature.pet.domain.usecase.ObserveMyPetsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,6 +34,11 @@ internal data class DeckUiState(
     // Default true so we don't flash the "add a pet" banner before the My Pets
     // snapshot has fired. Becomes false as soon as we know the user has zero active pets.
     val hasOwnPet: Boolean = true,
+    // Filter prefs surfaced to the header meta row. Default to the canonical defaults
+    // so the strip reads sanely on cold start before the prefs flow has emitted.
+    val maxDistanceKm: Int = 25,
+    val intentsCount: Int = Intent.entries.size,
+    val speciesCount: Int = SpeciesCategory.entries.size,
     val matchMessage: String? = null,
     val requiresPetMessage: String? = null,
     val errorMessage: String? = null,
@@ -68,6 +75,22 @@ internal class DeckViewModel @Inject constructor(
                             } else {
                                 snapshot.state
                             },
+                        )
+                    }
+                }
+        }
+        // Mirror the scalar filter values into UiState so the header meta strip
+        // (radius / intents / species count) reflects what the user has configured.
+        // Hot-shares the same flow as observeDeck above; no extra reads.
+        viewModelScope.launch {
+            filterPrefsRepo.observePrefs()
+                .catch { /* swallow — meta strip falls back to UiState defaults */ }
+                .collect { prefs ->
+                    _uiState.update {
+                        it.copy(
+                            maxDistanceKm = prefs.maxDistanceKm,
+                            intentsCount = prefs.intents.size,
+                            speciesCount = prefs.speciesCategories.size,
                         )
                     }
                 }

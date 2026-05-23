@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":feature:deck:domain"))
     implementation(project(":feature:pet:nav"))
     implementation(project(":feature:pet:domain"))
+    implementation(project(":feature:settings:nav"))
     implementation(project(":core:filters:domain"))
     implementation(project(":core:navigation"))
     implementation(project(":core:designsystem"))
