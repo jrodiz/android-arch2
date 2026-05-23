@@ -103,4 +103,7 @@ object BrandColors {
     val MoonTint: Color = Color(0xFFFFF1C2)
     /** Warm yellow crescent-moon glyph color for [MoonTint] tiles. */
     val MoonInk: Color = Color(0xFFE5B73B)
+
+    /** Deeper brick red used on irreversible destructive CTAs like the Delete account button. */
+    val DangerRed: Color = Color(0xFFB23A3A)
 }

@@ -141,6 +141,7 @@ private fun ConfirmContent(
         enabled = state.canSubmit,
         onClick = onConfirm,
         testTag = "delete_account_confirm_cta",
+        containerColor = BrandColors.DangerRed,
     )
     Spacer(Modifier.height(4.dp))
     TextButton(
