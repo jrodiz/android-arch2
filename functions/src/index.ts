@@ -8,3 +8,5 @@ export { onPetUpdate } from "./triggers/onPetUpdate.js";
 
 export { purgeArchivedPets } from "./scheduled/purgeArchivedPets.js";
 export { purgeDeletedAccounts } from "./scheduled/purgeDeletedAccounts.js";
+
+export { backfillMatchPetIds } from "./admin/backfillMatchPetIds.js";
