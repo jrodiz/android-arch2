@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pet_screen_title">My Pets</string>
+
+    <string name="pet_a11y_back">Back</string>
+    <string name="pet_a11y_add">Add a pet</string>
+    <string name="pet_a11y_edit_pet">Edit %1$s</string>
+
+    <string name="pet_banner_subtitle_below_quota">More pets = more matches. Up to %1$d per account.</string>
+    <string name="pet_banner_subtitle_at_quota">You’ve reached the %1$d-pet limit.</string>
+
+    <string name="pet_status_active">active</string>
+    <string name="pet_status_paused">paused</string>
+
+    <string name="pet_intent_playdate">Playdate</string>
+    <string name="pet_intent_friendship">Friendship</string>
+    <string name="pet_intent_adoption">Adoption</string>
+
+    <string name="pet_add_another_tile">Add another pet</string>
+
+    <string name="pet_archived_header">Archived</string>
+    <string name="pet_archived_show">Show</string>
+    <string name="pet_archived_hide">Hide</string>
+    <string name="pet_restore">Restore</string>
+
+    <string name="pet_empty_title">No pets yet</string>
+    <string name="pet_empty_subtitle">Add your first pet to start matching.</string>
+    <string name="pet_empty_cta">Add your first pet</string>
+
+    <string name="pet_subtitle_approx_age">~%1$d yr · %2$s</string>
+    <string name="pet_subtitle_exact_age">%1$d yr · %2$s</string>
+
+    <plurals name="pet_active_count">
+        <item quantity="one">%d active pet</item>
+        <item quantity="other">%d active pets</item>
+    </plurals>
+</resources>
