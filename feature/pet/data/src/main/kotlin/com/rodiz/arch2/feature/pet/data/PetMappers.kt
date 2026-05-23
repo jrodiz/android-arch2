@@ -26,8 +26,6 @@ internal fun buildPetMap(
     updatedAt: Instant,
     deletedAt: Instant?,
     enabled: Boolean = true,
-    size: PetSize? = null,
-    energy: PetEnergy? = null,
 ): Map<String, Any?> = mapOf(
     "ownerId" to ownerId,
     "name" to draft.name,
@@ -46,12 +44,8 @@ internal fun buildPetMap(
         )
     },
     "bio" to draft.bio,
-    // size / energy aren't on PetDraft yet (Add/Edit forms don't collect them — see
-    // plan §4). Pass them through here so callers that already know the values (e.g.,
-    // update flows preserving the existing record) can include them; defaults to null
-    // for create flows.
-    "size" to size?.name,
-    "energy" to energy?.name,
+    "size" to draft.size?.name,
+    "energy" to draft.energy?.name,
     "state" to state.name,
     "enabled" to enabled,
     "createdAt" to createdAt.toTimestamp(),
@@ -134,8 +128,6 @@ internal fun petFromWrite(
     updatedAt: Instant,
     deletedAt: Instant?,
     enabled: Boolean = true,
-    size: PetSize? = null,
-    energy: PetEnergy? = null,
 ): Pet = Pet(
     id = petId,
     ownerId = ownerId,
@@ -146,8 +138,8 @@ internal fun petFromWrite(
     intents = draft.intents,
     photos = draft.photos,
     bio = draft.bio,
-    size = size,
-    energy = energy,
+    size = draft.size,
+    energy = draft.energy,
     state = state,
     enabled = enabled,
     createdAt = createdAt,

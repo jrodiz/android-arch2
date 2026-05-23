@@ -136,7 +136,14 @@ internal class FirestorePetRepository @Inject constructor(
 
         val uploadedPhotos = draft.photos.map { uploadPhotoOrPassThrough(id.value, it) }
         val now = Clock.System.now()
-        val finalDraft = draft.copy(photos = uploadedPhotos)
+        // Preserve size/energy across updates when the draft doesn't carry them — the
+        // Edit form still doesn't collect them (Add Pet Step 2 does). Without this,
+        // saving from Edit would silently wipe the fields a fresh Add captured.
+        val finalDraft = draft.copy(
+            photos = uploadedPhotos,
+            size = draft.size ?: existing.size,
+            energy = draft.energy ?: existing.energy,
+        )
         docRef.set(
             buildPetMap(
                 ownerId = uid,
@@ -146,10 +153,6 @@ internal class FirestorePetRepository @Inject constructor(
                 updatedAt = now,
                 deletedAt = existing.deletedAt,
                 enabled = existing.enabled,
-                // Preserve size/energy across updates — the Edit form doesn't collect
-                // them yet (see plan §4), so we'd otherwise wipe them on every save.
-                size = existing.size,
-                energy = existing.energy,
             ),
         ).await()
         petFromWrite(
@@ -161,8 +164,6 @@ internal class FirestorePetRepository @Inject constructor(
             updatedAt = now,
             deletedAt = existing.deletedAt,
             enabled = existing.enabled,
-            size = existing.size,
-            energy = existing.energy,
         )
     }
 

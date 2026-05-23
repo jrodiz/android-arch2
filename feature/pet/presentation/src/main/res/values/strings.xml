@@ -50,11 +50,34 @@
     <string name="addpet_action_save_draft">Save draft</string>
     <string name="addpet_action_continue">Continue</string>
     <string name="addpet_snackbar_draft_saved">Draft saved</string>
-    <string name="addpet_snackbar_continue_stub">Step 2 coming soon</string>
-    <string name="addpet_snackbar_species_soon">Species picker coming soon</string>
     <string name="addpet_error_name_missing">Add your pet\'s name</string>
     <string name="addpet_error_photos_missing">Add at least one photo</string>
     <string name="addpet_error_species_missing">Pick a species</string>
     <string name="addpet_error_intent_missing">Pick at least one intent</string>
     <string name="addpet_a11y_remove_photo">Remove photo</string>
+
+    <!-- Add a pet — Step 2 (personality) -->
+    <string name="addpet2_intro">A little personality goes a long way. All of these are optional.</string>
+    <string name="addpet2_label_bio">Bio</string>
+    <string name="addpet2_bio_placeholder">Tell other owners what %1$s is like — favorite snack, ideal afternoon, weird quirks…</string>
+    <string name="addpet2_bio_placeholder_generic">Tell other owners what your pet is like — favorite snack, ideal afternoon, weird quirks…</string>
+    <string name="addpet2_bio_counter">%1$d / %2$d</string>
+    <string name="addpet2_label_size">Size</string>
+    <string name="addpet2_label_energy">Energy</string>
+    <string name="addpet_action_back">Back</string>
+
+    <!-- Add a pet — Step 3 (review + publish) -->
+    <string name="addpet3_intro">One last look. Hit Back to fix anything; otherwise tap Publish.</string>
+    <string name="addpet3_section_photos">Photos</string>
+    <string name="addpet3_section_basics">The basics</string>
+    <string name="addpet3_section_personality">Personality</string>
+    <string name="addpet3_field_bio">Bio</string>
+    <string name="addpet3_field_size">Size</string>
+    <string name="addpet3_field_energy">Energy</string>
+    <string name="addpet3_field_intents">Open to</string>
+    <string name="addpet3_value_empty">— not set</string>
+    <string name="addpet3_action_publish">Publish pet</string>
+    <string name="addpet3_subtitle_approx">~%1$d yr · %2$s</string>
+    <string name="addpet3_subtitle_exact">%1$d yr · %2$s</string>
+    <string name="addpet3_error_generic">Couldn\'t publish your pet. Try again.</string>
 </resources>

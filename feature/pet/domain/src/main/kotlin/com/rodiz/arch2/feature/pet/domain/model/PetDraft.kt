@@ -8,6 +8,10 @@ data class PetDraft(
     val intents: Set<Intent>,
     val photos: List<PetPhoto>,
     val bio: String?,
+    /** Optional size band collected on Add Pet Step 2. Null until the owner picks one. */
+    val size: PetSize? = null,
+    /** Optional energy level collected on Add Pet Step 2. Null until the owner picks one. */
+    val energy: PetEnergy? = null,
 ) {
     companion object {
         val EMPTY = PetDraft(
@@ -18,6 +22,8 @@ data class PetDraft(
             intents = emptySet(),
             photos = emptyList(),
             bio = null,
+            size = null,
+            energy = null,
         )
 
         const val NAME_MAX_LEN = 30

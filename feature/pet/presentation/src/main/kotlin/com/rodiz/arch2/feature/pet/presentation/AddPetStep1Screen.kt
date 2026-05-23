@@ -51,8 +51,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -86,30 +87,24 @@ import com.rodiz.arch2.feature.pet.domain.model.PhotoId
 import com.rodiz.arch2.feature.pet.domain.model.PhotoSource
 import com.rodiz.arch2.feature.pet.domain.model.Species
 
-private const val STEP_TOTAL = 3
-private const val STEP_CURRENT = 1
+internal const val ADD_PET_STEP_TOTAL = 3
 private const val PHOTO_SLOT_COUNT = PetDraft.PHOTOS_MAX
 
 @Composable
 internal fun AddPetStep1Route(
     onBack: () -> Unit,
-    onContinue: () -> Unit,
-    viewModel: AddPetViewModel = hiltViewModel(),
+    viewModel: AddPetViewModel,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    var speciesPickerOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.step1Events.collect { event ->
             when (event) {
                 Step1Event.DraftSaved ->
                     snackbar.showSnackbar(context.getString(R.string.addpet_snackbar_draft_saved))
-                Step1Event.ContinueRequested -> {
-                    snackbar.showSnackbar(context.getString(R.string.addpet_snackbar_continue_stub))
-                    onContinue()
-                }
             }
         }
     }
@@ -120,14 +115,20 @@ internal fun AddPetStep1Route(
         onEvent = viewModel::onEvent,
         onSaveDraft = viewModel::saveDraft,
         onContinue = viewModel::attemptContinue,
-        onSpeciesClick = {
-            // Species picker bottom-sheet is out of scope for this turn.
-            // Surface a snackbar so the affordance is visible and not silently broken.
-            val msg = context.getString(R.string.addpet_snackbar_species_soon)
-            scope.launch { snackbar.showSnackbar(msg) }
-        },
+        onSpeciesClick = { speciesPickerOpen = true },
         snackbarHostState = snackbar,
     )
+
+    if (speciesPickerOpen) {
+        SpeciesPickerSheet(
+            selected = state.draft.species,
+            onPicked = { species ->
+                viewModel.onEvent(PetFormEvent.SpeciesChanged(species))
+                speciesPickerOpen = false
+            },
+            onDismiss = { speciesPickerOpen = false },
+        )
+    }
 }
 
 @Composable
@@ -175,11 +176,11 @@ private fun AddPetStep1Screen(
                 .imePadding()
                 .padding(bottom = 124.dp),
         ) {
-            Step1Header(onBack = onBack)
+            AddPetWizardHeader(currentStep = 1, onBack = onBack)
             Spacer(Modifier.height(14.dp))
             StepProgressBar(
-                current = STEP_CURRENT,
-                total = STEP_TOTAL,
+                current = 1,
+                total = ADD_PET_STEP_TOTAL,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
             Spacer(Modifier.height(20.dp))
@@ -312,7 +313,7 @@ private fun AddPetStep1Screen(
 }
 
 @Composable
-private fun Step1Header(onBack: () -> Unit) {
+internal fun AddPetWizardHeader(currentStep: Int, onBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -350,7 +351,7 @@ private fun Step1Header(onBack: () -> Unit) {
             overflow = TextOverflow.Ellipsis,
         )
         Text(
-            text = stringResource(R.string.addpet_step_indicator, STEP_CURRENT, STEP_TOTAL),
+            text = stringResource(R.string.addpet_step_indicator, currentStep, ADD_PET_STEP_TOTAL),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
             color = BrandColors.CoralDeep,
         )
@@ -358,7 +359,7 @@ private fun Step1Header(onBack: () -> Unit) {
 }
 
 @Composable
-private fun StepProgressBar(
+internal fun StepProgressBar(
     current: Int,
     total: Int,
     modifier: Modifier = Modifier,
@@ -538,7 +539,7 @@ private fun PhotoStrip(
 }
 
 @Composable
-private fun LabeledField(
+internal fun LabeledField(
     label: String,
     modifier: Modifier = Modifier,
     field: @Composable () -> Unit,
@@ -551,7 +552,7 @@ private fun LabeledField(
 }
 
 @Composable
-private fun SectionLabel(
+internal fun SectionLabel(
     text: String,
     modifier: Modifier = Modifier,
 ) {
@@ -791,7 +792,7 @@ private fun Step1ActionBar(
 }
 
 @Composable
-private fun InlineError(
+internal fun InlineError(
     text: String,
     modifier: Modifier = Modifier,
 ) {
@@ -802,14 +803,4 @@ private fun InlineError(
         textAlign = TextAlign.Start,
         modifier = modifier,
     )
-}
-
-private fun Species.emoji(): String = when (this) {
-    Species.DOG -> "🐕"          // 🐕
-    Species.CAT -> "🐈"          // 🐈
-    Species.RABBIT -> "🐇"       // 🐇
-    Species.HAMSTER -> "🐹"      // 🐹
-    Species.GUINEA_PIG -> "🐹"   // 🐹 (closest match)
-    Species.FERRET -> "🦝"       // 🦝 (closest small mammal)
-    Species.OTHER_SMALL_MAMMAL -> "🐾" // 🐾
 }

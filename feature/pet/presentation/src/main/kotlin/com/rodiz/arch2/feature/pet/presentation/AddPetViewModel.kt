@@ -55,10 +55,22 @@ internal class AddPetViewModel @Inject constructor(
             if (draft.intents.isEmpty()) add(Step1Error.IntentMissing)
         }
         if (errors.isEmpty()) {
-            _uiState.update { it.copy(step1Errors = emptySet()) }
-            _step1Events.tryEmit(Step1Event.ContinueRequested)
+            _uiState.update { it.copy(step1Errors = emptySet(), currentStep = 2) }
         } else {
             _uiState.update { it.copy(step1Errors = errors) }
+        }
+    }
+
+    /** Step 2 has no required fields — every selection is optional. */
+    fun goToStep3() {
+        _uiState.update { it.copy(currentStep = 3) }
+    }
+
+    /** Wizard back navigation. Step 3 → 2 → 1; Step 1's back is handled by the host route. */
+    fun goToPreviousStep() {
+        val current = _uiState.value.currentStep
+        if (current > 1) {
+            _uiState.update { it.copy(currentStep = current - 1) }
         }
     }
 
@@ -103,7 +115,6 @@ internal class AddPetViewModel @Inject constructor(
 /** One-shot UI events fired by the Add a pet — Step 1 screen. */
 internal sealed interface Step1Event {
     data object DraftSaved : Step1Event
-    data object ContinueRequested : Step1Event
 }
 
 internal fun handlePetFormEvent(state: MutableStateFlow<PetFormUiState>, event: PetFormEvent) {
@@ -129,6 +140,8 @@ internal fun handlePetFormEvent(state: MutableStateFlow<PetFormUiState>, event: 
                 photos = draft.photos.filterIndexed { idx, _ -> idx != event.index },
             )
             is PetFormEvent.BioChanged -> draft.copy(bio = event.value.take(PetDraft.BIO_MAX_LEN).ifEmpty { null })
+            is PetFormEvent.SizeChanged -> draft.copy(size = event.size)
+            is PetFormEvent.EnergyChanged -> draft.copy(energy = event.energy)
             PetFormEvent.DismissError -> draft
         }
         when (event) {
