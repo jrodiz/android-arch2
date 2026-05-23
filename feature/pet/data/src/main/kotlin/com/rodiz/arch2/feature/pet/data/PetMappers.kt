@@ -5,8 +5,10 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.rodiz.arch2.feature.pet.domain.model.Intent
 import com.rodiz.arch2.feature.pet.domain.model.Pet
 import com.rodiz.arch2.feature.pet.domain.model.PetDraft
+import com.rodiz.arch2.feature.pet.domain.model.PetEnergy
 import com.rodiz.arch2.feature.pet.domain.model.PetId
 import com.rodiz.arch2.feature.pet.domain.model.PetPhoto
+import com.rodiz.arch2.feature.pet.domain.model.PetSize
 import com.rodiz.arch2.feature.pet.domain.model.PetState
 import com.rodiz.arch2.feature.pet.domain.model.PhotoId
 import com.rodiz.arch2.feature.pet.domain.model.PhotoSource
@@ -24,6 +26,8 @@ internal fun buildPetMap(
     updatedAt: Instant,
     deletedAt: Instant?,
     enabled: Boolean = true,
+    size: PetSize? = null,
+    energy: PetEnergy? = null,
 ): Map<String, Any?> = mapOf(
     "ownerId" to ownerId,
     "name" to draft.name,
@@ -42,6 +46,12 @@ internal fun buildPetMap(
         )
     },
     "bio" to draft.bio,
+    // size / energy aren't on PetDraft yet (Add/Edit forms don't collect them — see
+    // plan §4). Pass them through here so callers that already know the values (e.g.,
+    // update flows preserving the existing record) can include them; defaults to null
+    // for create flows.
+    "size" to size?.name,
+    "energy" to energy?.name,
     "state" to state.name,
     "enabled" to enabled,
     "createdAt" to createdAt.toTimestamp(),
@@ -75,6 +85,15 @@ internal fun DocumentSnapshot.toPetOrNull(): Pet? {
                 )
             }
         val bio = getString("bio")
+        // size / energy are optional — older pet docs predate the fields; Firestore
+        // returns null for absent fields. An unknown enum string also falls back to null
+        // rather than crashing the whole pet read.
+        val size = getString("size")?.let { name ->
+            PetSize.entries.firstOrNull { it.name == name }
+        }
+        val energy = getString("energy")?.let { name ->
+            PetEnergy.entries.firstOrNull { it.name == name }
+        }
         val stateName = getString("state") ?: PetState.ACTIVE.name
         val state = PetState.entries.firstOrNull { it.name == stateName } ?: PetState.ACTIVE
         // Default true so legacy docs written before the toggle existed stay visible by default.
@@ -92,6 +111,8 @@ internal fun DocumentSnapshot.toPetOrNull(): Pet? {
             intents = intents,
             photos = photos,
             bio = bio,
+            size = size,
+            energy = energy,
             state = state,
             enabled = enabled,
             createdAt = createdAt,
@@ -113,6 +134,8 @@ internal fun petFromWrite(
     updatedAt: Instant,
     deletedAt: Instant?,
     enabled: Boolean = true,
+    size: PetSize? = null,
+    energy: PetEnergy? = null,
 ): Pet = Pet(
     id = petId,
     ownerId = ownerId,
@@ -123,6 +146,8 @@ internal fun petFromWrite(
     intents = draft.intents,
     photos = draft.photos,
     bio = draft.bio,
+    size = size,
+    energy = energy,
     state = state,
     enabled = enabled,
     createdAt = createdAt,

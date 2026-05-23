@@ -6,7 +6,10 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitTouchSlopOrCancellation
+import androidx.compose.foundation.gestures.horizontalDrag
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -52,6 +56,7 @@ import coil.compose.AsyncImage
 import com.rodiz.arch2.core.designsystem.theme.BrandColors
 import com.rodiz.arch2.feature.deck.domain.model.DeckCard
 import com.rodiz.arch2.feature.deck.domain.model.SwipeAction
+import com.rodiz.arch2.feature.pet.domain.model.PetId
 import com.rodiz.arch2.feature.pet.domain.model.PhotoSource
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -66,6 +71,7 @@ import kotlin.math.abs
 internal fun DeckCardView(
     card: DeckCard,
     onSwipe: (SwipeAction) -> Unit,
+    onCardTap: (PetId) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val density = LocalDensity.current
@@ -82,17 +88,36 @@ internal fun DeckCardView(
             .offset { IntOffset(offsetX.value.toInt(), offsetY.value.toInt()) }
             .graphicsLayer { rotationZ = (offsetX.value / cardWidthPx) * 15f }
             .pointerInput(card.pet.id.value) {
-                detectDragGestures(
-                    onDrag = { change, drag ->
+                // Multiplex tap + drag on the same pointer: a pointer that doesn't
+                // pass the touch slop within its lifetime is treated as a tap and
+                // opens the detail sheet. A pointer that DOES pass slop continues
+                // into the horizontal swipe path. Critically, do NOT stack
+                // Modifier.clickable on top — it would consume pointer-down events
+                // before the gesture detector runs, breaking swipes.
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    val dragChange = awaitTouchSlopOrCancellation(down.id) { change, _ ->
                         change.consume()
+                    }
+                    if (dragChange == null) {
+                        // Pointer was released before crossing slop → tap.
+                        onCardTap(card.pet.id)
+                    } else {
+                        // Apply the initial slop-breaking delta, then continue with
+                        // the existing horizontal-drag accumulation.
                         scope.launch {
-                            offsetX.snapTo(offsetX.value + drag.x)
-                            offsetY.snapTo(offsetY.value + drag.y * 0.3f)
+                            offsetX.snapTo(offsetX.value + dragChange.positionChange().x)
+                            offsetY.snapTo(offsetY.value + dragChange.positionChange().y * 0.3f)
                         }
-                    },
-                    onDragEnd = {
+                        val dragSucceeded = horizontalDrag(dragChange.id) { change ->
+                            change.consume()
+                            scope.launch {
+                                offsetX.snapTo(offsetX.value + change.positionChange().x)
+                                offsetY.snapTo(offsetY.value + change.positionChange().y * 0.3f)
+                            }
+                        }
                         scope.launch {
-                            if (abs(offsetX.value) > thresholdPx) {
+                            if (dragSucceeded && abs(offsetX.value) > thresholdPx) {
                                 val direction = if (offsetX.value > 0) 1 else -1
                                 val target = direction * cardWidthPx * 2f
                                 offsetX.animateTo(target, tween(durationMillis = 280))
@@ -104,8 +129,8 @@ internal fun DeckCardView(
                                 offsetY.animateTo(0f, spring(stiffness = Spring.StiffnessMedium))
                             }
                         }
-                    },
-                )
+                    }
+                }
             },
     ) {
         // The card body sits below the chips with top padding so the chips can

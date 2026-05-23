@@ -65,6 +65,7 @@ internal fun DeckRoute(
     onAddPet: () -> Unit,
     onOpenFilters: () -> Unit,
     onOpenNotifications: () -> Unit,
+    onOpenPetDetail: (com.rodiz.arch2.feature.pet.domain.model.PetId) -> Unit,
     viewModel: DeckViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -156,6 +157,7 @@ internal fun DeckRoute(
                                     SwipeAction.PASS -> viewModel.passTop()
                                 }
                             },
+                            onCardTap = onOpenPetDetail,
                         )
                     }
                 }
@@ -331,6 +333,7 @@ private fun DeckStack(
     onSwipePass: () -> Unit,
     onRewind: () -> Unit,
     onSwipeFromGesture: (SwipeAction) -> Unit,
+    onCardTap: (com.rodiz.arch2.feature.pet.domain.model.PetId) -> Unit,
 ) {
     Column(Modifier.fillMaxSize()) {
         Box(
@@ -341,7 +344,11 @@ private fun DeckStack(
         ) {
             val top = cards.firstOrNull()
             if (top != null) {
-                DeckCardView(card = top, onSwipe = onSwipeFromGesture)
+                DeckCardView(
+                    card = top,
+                    onSwipe = onSwipeFromGesture,
+                    onCardTap = onCardTap,
+                )
             } else {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }

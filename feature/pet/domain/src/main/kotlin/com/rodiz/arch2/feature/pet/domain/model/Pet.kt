@@ -12,6 +12,16 @@ data class Pet(
     val intents: Set<Intent>,
     val photos: List<PetPhoto>,
     val bio: String?,
+    /**
+     * Owner-reported size band. Optional — pets created before this field existed
+     * (or owners who haven't filled it in) leave it null and the detail UI hides
+     * the size chip rather than rendering a fallback.
+     */
+    val size: PetSize? = null,
+    /**
+     * Owner-reported energy level. Same nullability story as [size].
+     */
+    val energy: PetEnergy? = null,
     val state: PetState,
     /**
      * Owner-controlled visibility toggle. When `false`, the pet stays in the owner's

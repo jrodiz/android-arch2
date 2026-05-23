@@ -146,6 +146,10 @@ internal class FirestorePetRepository @Inject constructor(
                 updatedAt = now,
                 deletedAt = existing.deletedAt,
                 enabled = existing.enabled,
+                // Preserve size/energy across updates — the Edit form doesn't collect
+                // them yet (see plan §4), so we'd otherwise wipe them on every save.
+                size = existing.size,
+                energy = existing.energy,
             ),
         ).await()
         petFromWrite(
@@ -157,6 +161,8 @@ internal class FirestorePetRepository @Inject constructor(
             updatedAt = now,
             deletedAt = existing.deletedAt,
             enabled = existing.enabled,
+            size = existing.size,
+            energy = existing.energy,
         )
     }
 

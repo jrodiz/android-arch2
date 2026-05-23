@@ -60,4 +60,6 @@ object BrandColors {
     val CoralOnPattern: Color = Color.White
     /** Warm dark surface for the floating chip nav capsule — sits in the same family as onSurface but reads as a deliberate surface. */
     val NavSurface: Color = Color(0xFF2A1F1D)
+    /** Mint green used on the deck pet-detail "Friendship" intent chip. */
+    val MintLeaf: Color = Color(0xFF6FAE9C)
 }
