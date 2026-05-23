@@ -66,10 +66,12 @@ dependencies {
     implementation(project(":feature:deck:presentation"))
 
     implementation(project(":feature:likes:nav"))
+    implementation(project(":feature:likes:domain"))
     implementation(project(":feature:likes:data"))
     implementation(project(":feature:likes:presentation"))
 
     implementation(project(":feature:match:nav"))
+    implementation(project(":feature:match:domain"))
     implementation(project(":feature:match:data"))
     implementation(project(":feature:match:presentation"))
 
@@ -93,6 +95,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.kotlinx.coroutines.android)

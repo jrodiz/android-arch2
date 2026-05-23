@@ -4,26 +4,34 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Pets
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.rodiz.arch2.core.designsystem.theme.TinPetTheme
@@ -35,6 +43,9 @@ import com.rodiz.arch2.feature.likes.nav.LikesHome
 import com.rodiz.arch2.feature.match.nav.MatchesHome
 import com.rodiz.arch2.feature.notifications.nav.NotificationRationale
 import com.rodiz.arch2.feature.profile.nav.ProfileHome
+import com.rodiz.arch2.ui.BottomNavViewModel
+import com.rodiz.arch2.ui.FloatingChipNavBar
+import com.rodiz.arch2.ui.NavBarItem
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -56,29 +67,40 @@ class MainActivity : FragmentActivity() {
                 val current by remember(navigator) {
                     derivedStateOf { navigator.backStack.lastOrNull() }
                 }
-                val showBottomBar = BOTTOM_TABS.any { it.route == current }
+                val showBottomBar = TOP_LEVEL_ROUTES.any { it == current }
 
-                Scaffold(
-                    bottomBar = {
-                        if (showBottomBar) {
-                            DashboardBottomBar(
-                                current = current,
-                                onTabSelected = { tabRoute ->
-                                    if (current != tabRoute) navigator.replaceAll(tabRoute)
-                                },
-                            )
-                        }
-                    },
-                    contentWindowInsets = WindowInsets(0),
-                ) { innerPadding ->
-                    NavDisplay(
-                        modifier = Modifier.padding(innerPadding),
-                        backStack = navigator.backStack,
-                        onBack = { navigator.goBack() },
-                        entryProvider = entryProvider {
-                            entryProviderInstallers.forEach { install -> install() }
-                        },
-                    )
+                val bottomNavViewModel: BottomNavViewModel = hiltViewModel()
+                val badges by bottomNavViewModel.badges.collectAsStateWithLifecycle()
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        contentWindowInsets = WindowInsets(0),
+                    ) { innerPadding ->
+                        NavDisplay(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(innerPadding),
+                            backStack = navigator.backStack,
+                            onBack = { navigator.goBack() },
+                            entryProvider = entryProvider {
+                                entryProviderInstallers.forEach { install -> install() }
+                            },
+                        )
+                    }
+
+                    AnimatedVisibility(
+                        visible = showBottomBar,
+                        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                    ) {
+                        FloatingChipNavBar(
+                            items = navBarItems(badges.likes, badges.matches),
+                            selectedRoute = current,
+                            onSelected = { route -> navigator.replaceAll(route) },
+                        )
+                    }
                 }
             }
         }
@@ -106,32 +128,11 @@ class MainActivity : FragmentActivity() {
     }
 }
 
-private data class BottomTab(
-    val route: Any,
-    val label: String,
-    val icon: ImageVector,
-)
+private val TOP_LEVEL_ROUTES: List<Any> = listOf(DeckHome, LikesHome, MatchesHome, ProfileHome)
 
-private val BOTTOM_TABS = listOf(
-    BottomTab(DeckHome, "Deck", Icons.Outlined.Pets),
-    BottomTab(LikesHome, "Likes you", Icons.Outlined.Favorite),
-    BottomTab(MatchesHome, "Matches", Icons.Outlined.Bolt),
-    BottomTab(ProfileHome, "Profile", Icons.Outlined.Person),
+private fun navBarItems(likes: Int, matches: Int): List<NavBarItem> = listOf(
+    NavBarItem(DeckHome, "Deck", Icons.Outlined.Pets, Icons.Filled.Pets),
+    NavBarItem(LikesHome, "Likes", Icons.Outlined.Favorite, Icons.Filled.Favorite, badgeCount = likes),
+    NavBarItem(MatchesHome, "Matches", Icons.Outlined.Bolt, Icons.Filled.Bolt, badgeCount = matches),
+    NavBarItem(ProfileHome, "Profile", Icons.Outlined.Person, Icons.Filled.Person),
 )
-
-@Composable
-private fun DashboardBottomBar(
-    current: Any?,
-    onTabSelected: (Any) -> Unit,
-) {
-    NavigationBar {
-        BOTTOM_TABS.forEach { tab ->
-            NavigationBarItem(
-                selected = current == tab.route,
-                onClick = { onTabSelected(tab.route) },
-                icon = { Icon(tab.icon, contentDescription = tab.label) },
-                label = { Text(tab.label) },
-            )
-        }
-    }
-}
