@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_active_now">Active now · &lt; 5 km</string>
+    <string name="chat_back_cd">Back</string>
+    <string name="chat_options_cd">Chat options</string>
+    <string name="chat_options_unmatch">Unmatch</string>
+    <string name="chat_options_block">Block</string>
+    <string name="chat_options_report">Report</string>
+    <string name="chat_banner_title_template">You matched %1$s</string>
+    <string name="chat_banner_subtitle">Say hi · share a playdate idea</string>
+    <string name="chat_date_today">Today</string>
+    <string name="chat_composer_placeholder_default">Message…</string>
+    <string name="chat_composer_placeholder_template">Message %1$s…</string>
+    <string name="chat_send_cd">Send</string>
+    <string name="chat_emoji_cd">Emoji</string>
+</resources>

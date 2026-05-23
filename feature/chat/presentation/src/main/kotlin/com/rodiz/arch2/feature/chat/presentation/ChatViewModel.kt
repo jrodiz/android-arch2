@@ -12,6 +12,7 @@ import com.rodiz.arch2.feature.chat.domain.usecase.MarkAllReadUseCase
 import com.rodiz.arch2.feature.chat.domain.usecase.ObserveChatUseCase
 import com.rodiz.arch2.feature.chat.domain.usecase.ReportOtherUseCase
 import com.rodiz.arch2.feature.chat.domain.usecase.SendMessageUseCase
+import com.rodiz.arch2.feature.match.domain.model.Match
 import com.rodiz.arch2.feature.match.domain.model.MatchId
 import com.rodiz.arch2.feature.match.domain.usecase.ObserveMatchUseCase
 import com.rodiz.arch2.feature.match.domain.usecase.UnmatchUseCase
@@ -38,6 +39,8 @@ internal data class ChatUiState(
     val errorMessage: String? = null,
     val currentUid: String = "",
     val other: OwnerDisplay? = null,
+    /** Surfaced so the redesigned chat header can render the "You matched on ..." banner. */
+    val match: Match? = null,
     val isReporting: Boolean = false,
     val reportSubmittedAtMillis: Long? = null,
 )
@@ -85,7 +88,11 @@ internal class ChatViewModel @AssistedInject constructor(
             observeMatch(matchId)
                 .catch { /* ignore */ }
                 .collect { match ->
-                    if (match == null) _uiState.update { it.copy(unmatched = true) }
+                    if (match == null) {
+                        _uiState.update { it.copy(unmatched = true) }
+                    } else {
+                        _uiState.update { it.copy(match = match) }
+                    }
                 }
         }
         // Resolve the other participant's display info reactively. flatMapLatest

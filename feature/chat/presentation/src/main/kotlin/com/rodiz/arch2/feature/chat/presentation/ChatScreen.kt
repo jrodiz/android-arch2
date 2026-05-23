@@ -1,37 +1,51 @@
 package com.rodiz.arch2.feature.chat.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.HeartBroken
-import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Pets
+import androidx.compose.material.icons.outlined.SentimentSatisfied
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -41,8 +55,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.Button
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,22 +65,40 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.rodiz.arch2.core.designsystem.theme.BrandColors
 import com.rodiz.arch2.core.ownerlookup.domain.OwnerDisplay
 import com.rodiz.arch2.feature.chat.domain.model.Message
 import com.rodiz.arch2.feature.chat.domain.model.ReportReason
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toLocalDateTime
 
 @HiltViewModel
 internal class ChatFactoryHolder @Inject constructor(
     val factory: ChatViewModel.Factory,
 ) : ViewModel()
+
+private val TopBarHeight = 72.dp
+private val MessageMaxWidth = 280.dp
+private val ActiveDotColor = Color(0xFF22C55E)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,52 +136,25 @@ internal fun ChatScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { ChatHeaderTitle(other = state.other) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Back")
-                    }
+            ChatTopBar(
+                other = state.other,
+                onBack = onBack,
+                menuOpen = menuOpen,
+                onMenuTap = { menuOpen = true },
+                onMenuDismiss = { menuOpen = false },
+                onUnmatch = {
+                    menuOpen = false
+                    showUnmatchDialog = true
                 },
-                actions = {
-                    Box {
-                        IconButton(onClick = { menuOpen = true }) {
-                            Icon(Icons.Outlined.MoreVert, contentDescription = "More")
-                        }
-                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                            DropdownMenuItem(
-                                text = { Text("Unmatch") },
-                                leadingIcon = {
-                                    Icon(Icons.Outlined.HeartBroken, contentDescription = null)
-                                },
-                                onClick = {
-                                    menuOpen = false
-                                    showUnmatchDialog = true
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Block") },
-                                leadingIcon = {
-                                    Icon(Icons.Outlined.Block, contentDescription = null)
-                                },
-                                onClick = {
-                                    menuOpen = false
-                                    showBlockDialog = true
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Report") },
-                                leadingIcon = {
-                                    Icon(Icons.Outlined.Flag, contentDescription = null)
-                                },
-                                onClick = {
-                                    menuOpen = false
-                                    showReportSheet = true
-                                },
-                            )
-                        }
-                    }
+                onBlock = {
+                    menuOpen = false
+                    showBlockDialog = true
+                },
+                onReport = {
+                    menuOpen = false
+                    showReportSheet = true
                 },
             )
         },
@@ -160,18 +163,26 @@ internal fun ChatScreen(
             Composer(
                 draft = state.draft,
                 isSending = state.isSending,
+                otherFirstName = state.other?.firstName,
                 onDraftChange = viewModel::draftChanged,
                 onSend = viewModel::send,
             )
         },
     ) { padding ->
-        MessageList(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            messages = state.messages,
-            currentUid = state.currentUid,
-        )
+        ) {
+            state.match?.let { match ->
+                MatchContextBanner(createdAt = match.createdAt)
+            }
+            MessageList(
+                modifier = Modifier.fillMaxSize(),
+                messages = state.messages,
+                currentUid = state.currentUid,
+            )
+        }
     }
 
     if (showUnmatchDialog) {
@@ -224,6 +235,399 @@ internal fun ChatScreen(
         )
     }
 }
+
+// -----------------------------------------------------------------------------
+// Top bar — white, no shadow, square-rounded avatar with coral mini-badge,
+// stacked title / presence row, sliders icon on the right.
+// -----------------------------------------------------------------------------
+
+@Composable
+private fun ChatTopBar(
+    other: OwnerDisplay?,
+    onBack: () -> Unit,
+    menuOpen: Boolean,
+    onMenuTap: () -> Unit,
+    onMenuDismiss: () -> Unit,
+    onUnmatch: () -> Unit,
+    onBlock: () -> Unit,
+    onReport: () -> Unit,
+) {
+    Surface(
+        color = Color.White,
+        shadowElevation = 0.dp,
+        tonalElevation = 0.dp,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .heightIn(min = TopBarHeight)
+                .padding(horizontal = 4.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                    contentDescription = stringResource(R.string.chat_back_cd),
+                    tint = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            HeaderAvatar(avatarUrl = other?.avatarUrl)
+            Spacer(Modifier.size(12.dp))
+            Column(modifier = Modifier
+                .weight(1f)
+                .padding(end = 8.dp)) {
+                Text(
+                    text = other?.firstName?.takeIf { it.isNotBlank() } ?: "Chat",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                )
+                Spacer(Modifier.size(2.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(ActiveDotColor),
+                    )
+                    Spacer(Modifier.size(6.dp))
+                    Text(
+                        // TODO presence + distance: static placeholder until we
+                        // have a presence channel and shared-location flag.
+                        text = stringResource(R.string.chat_active_now),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                    )
+                }
+            }
+            Box {
+                IconButton(onClick = onMenuTap) {
+                    Icon(
+                        imageVector = Icons.Outlined.Tune,
+                        contentDescription = stringResource(R.string.chat_options_cd),
+                        tint = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = onMenuDismiss) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.chat_options_unmatch)) },
+                        leadingIcon = {
+                            Icon(Icons.Outlined.HeartBroken, contentDescription = null)
+                        },
+                        onClick = onUnmatch,
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.chat_options_block)) },
+                        leadingIcon = {
+                            Icon(Icons.Outlined.Block, contentDescription = null)
+                        },
+                        onClick = onBlock,
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.chat_options_report)) },
+                        leadingIcon = {
+                            Icon(Icons.Outlined.Flag, contentDescription = null)
+                        },
+                        onClick = onReport,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeaderAvatar(avatarUrl: String?) {
+    Box(modifier = Modifier.size(44.dp)) {
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (avatarUrl != null) {
+                AsyncImage(
+                    model = avatarUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Outlined.Pets,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        // Coral mini-badge — placeholder for current user's primary pet avatar.
+        // TODO pet-mini: thread the current user's pet avatar through and render
+        // it inside this badge instead of the paw glyph.
+        BadgeOverlay()
+    }
+}
+
+@Composable
+private fun BoxScope.BadgeOverlay() {
+    Box(
+        modifier = Modifier
+            .size(18.dp)
+            .align(Alignment.BottomEnd)
+            .offset(x = 4.dp, y = 4.dp)
+            .clip(CircleShape)
+            .background(BrandColors.Coral)
+            .border(2.dp, Color.White, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Pets,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(10.dp),
+        )
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Match-context banner — soft coral wash, heart roundel, "You matched on X".
+// -----------------------------------------------------------------------------
+
+@Composable
+private fun MatchContextBanner(createdAt: Instant) {
+    val phrase = formatMatchDay(createdAt)
+    Surface(
+        color = BrandColors.Coral.copy(alpha = 0.12f),
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(BrandColors.Coral),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+            Spacer(Modifier.size(14.dp))
+            Column {
+                Text(
+                    text = stringResource(R.string.chat_banner_title_template, phrase),
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = BrandColors.CoralDeep,
+                )
+                Spacer(Modifier.size(2.dp))
+                Text(
+                    text = stringResource(R.string.chat_banner_subtitle),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = BrandColors.CoralDeep.copy(alpha = 0.85f),
+                )
+            }
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Message list — bubble-less, generous spacing, single "Today" separator.
+// -----------------------------------------------------------------------------
+
+@Composable
+private fun MessageList(
+    modifier: Modifier,
+    messages: List<Message>,
+    currentUid: String,
+) {
+    val listState = rememberLazyListState()
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
+    }
+    val tz = remember { TimeZone.currentSystemDefault() }
+    val today = remember { Clock.System.now().toLocalDateTime(tz).date }
+    // Index of the first message landing on the local "today" date. We surface
+    // a single "Today" separator above it. Older messages flow continuously
+    // without per-day buckets (intentional — see plan §2.5).
+    val todayStartIndex = remember(messages, tz) {
+        messages.indexOfFirst { it.createdAt.toLocalDateTime(tz).date == today }
+    }
+    LazyColumn(
+        state = listState,
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        itemsIndexed(messages, key = { _, m -> m.id.value }) { index, msg ->
+            if (todayStartIndex >= 0 && index == todayStartIndex) {
+                DateSeparator(label = stringResource(R.string.chat_date_today))
+            }
+            MessageRow(message = msg, isMine = msg.fromOwnerId == currentUid, tz = tz)
+        }
+    }
+}
+
+@Composable
+private fun DateSeparator(label: String) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+        )
+    }
+}
+
+@Composable
+private fun MessageRow(message: Message, isMine: Boolean, tz: TimeZone) {
+    val textColor = if (isMine) Color.White else MaterialTheme.colorScheme.onSurface
+    // Ghost-white outgoing text is intentionally low-contrast per the mock.
+    // See plan §10 for the accessibility fallback if QA pushes back.
+    val timestampColor = if (isMine) {
+        Color.White.copy(alpha = 0.85f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+    }
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = if (isMine) Alignment.End else Alignment.Start,
+    ) {
+        Text(
+            text = message.text,
+            color = textColor,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = if (isMine) TextAlign.End else TextAlign.Start,
+            modifier = Modifier.widthIn(max = MessageMaxWidth),
+        )
+        Spacer(Modifier.size(4.dp))
+        Text(
+            text = formatTime(message.createdAt, tz),
+            color = timestampColor,
+            style = MaterialTheme.typography.labelSmall,
+        )
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Composer — white rounded pill (placeholder + emoji icon) + coral send circle.
+// -----------------------------------------------------------------------------
+
+@Composable
+private fun Composer(
+    draft: String,
+    isSending: Boolean,
+    otherFirstName: String?,
+    onDraftChange: (String) -> Unit,
+    onSend: () -> Unit,
+) {
+    val placeholder = if (!otherFirstName.isNullOrBlank()) {
+        stringResource(R.string.chat_composer_placeholder_template, otherFirstName)
+    } else {
+        stringResource(R.string.chat_composer_placeholder_default)
+    }
+    val canSend = draft.isNotBlank() && !isSending
+    val sendBg = if (canSend) BrandColors.Coral else BrandColors.Coral.copy(alpha = 0.5f)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+            .imePadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Surface(
+            color = Color.White,
+            shape = RoundedCornerShape(28.dp),
+            shadowElevation = 0.dp,
+            tonalElevation = 0.dp,
+            modifier = Modifier
+                .weight(1f)
+                .heightIn(min = 52.dp),
+        ) {
+            Row(
+                modifier = Modifier.padding(start = 18.dp, end = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    BasicTextField(
+                        value = draft,
+                        onValueChange = onDraftChange,
+                        textStyle = LocalTextStyle.current.copy(
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                        ),
+                        cursorBrush = SolidColor(BrandColors.Coral),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 14.dp),
+                        decorationBox = { inner ->
+                            if (draft.isEmpty()) {
+                                Text(
+                                    text = placeholder,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                )
+                            }
+                            inner()
+                        },
+                    )
+                }
+                IconButton(
+                    onClick = { /* TODO emoji picker — decorative for now */ },
+                    modifier = Modifier.size(40.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.SentimentSatisfied,
+                        contentDescription = stringResource(R.string.chat_emoji_cd),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.size(10.dp))
+        Surface(
+            shape = CircleShape,
+            color = sendBg,
+            shadowElevation = 0.dp,
+            modifier = Modifier
+                .size(52.dp)
+                .clickable(enabled = canSend, onClick = onSend),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.Send,
+                    contentDescription = stringResource(R.string.chat_send_cd),
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(22.dp)
+                        .padding(start = 2.dp), // optical centering of the plane icon
+                )
+            }
+        }
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Report sheet — unchanged from the previous design (out of scope).
+// -----------------------------------------------------------------------------
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -299,128 +703,38 @@ private fun ReportReason.label(): String = when (this) {
     ReportReason.OTHER -> "Other"
 }
 
-@Composable
-private fun ChatHeaderTitle(other: OwnerDisplay?) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center,
-        ) {
-            val avatar = other?.avatarUrl
-            if (avatar != null) {
-                AsyncImage(
-                    model = avatar,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Outlined.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-        Spacer(Modifier.size(12.dp))
-        Text(other?.firstName?.takeIf { it.isNotBlank() } ?: "Chat")
+// -----------------------------------------------------------------------------
+// Date / time helpers — kotlinx.datetime so the JVM domain stays clean.
+// -----------------------------------------------------------------------------
+
+/**
+ * Returns the trailing portion of "You matched ___" — e.g. "today", "yesterday",
+ * "on tuesday", or "on May 12". Uses the device's local timezone.
+ */
+private fun formatMatchDay(createdAt: Instant): String {
+    val tz = TimeZone.currentSystemDefault()
+    val today = Clock.System.now().toLocalDateTime(tz).date
+    val createdDate = createdAt.toLocalDateTime(tz).date
+    val daysAgo = createdDate.daysUntil(today)
+    return when {
+        daysAgo == 0 -> "today"
+        daysAgo == 1 -> "yesterday"
+        daysAgo in 2..6 -> "on ${createdDate.dayOfWeek.titlecased()}"
+        else -> "on ${createdDate.monthAbbrev()} ${createdDate.dayOfMonth}"
     }
 }
 
-@Composable
-private fun MessageList(
-    modifier: Modifier,
-    messages: List<Message>,
-    currentUid: String,
-) {
-    val listState = rememberLazyListState()
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
-    }
-    LazyColumn(
-        state = listState,
-        modifier = modifier.padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        items(messages, key = { it.id.value }) { msg ->
-            MessageBubble(message = msg, isMine = msg.fromOwnerId == currentUid)
-        }
-    }
+private fun DayOfWeek.titlecased(): String =
+    name.lowercase().replaceFirstChar { it.titlecase() }
+
+private fun LocalDate.monthAbbrev(): String =
+    month.name.take(3).lowercase().replaceFirstChar { it.titlecase() }
+
+/** "HH:mm" in the device's local time. */
+private fun formatTime(instant: Instant, tz: TimeZone): String {
+    val ldt = instant.toLocalDateTime(tz)
+    val hh = ldt.hour.toString().padStart(2, '0')
+    val mm = ldt.minute.toString().padStart(2, '0')
+    return "$hh:$mm"
 }
 
-@Composable
-private fun MessageBubble(message: Message, isMine: Boolean) {
-    val arrangement = if (isMine) Arrangement.End else Arrangement.Start
-    val bg = if (isMine) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceVariant
-    val fg = if (isMine) MaterialTheme.colorScheme.onPrimaryContainer
-        else MaterialTheme.colorScheme.onSurfaceVariant
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = arrangement,
-    ) {
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = bg,
-            modifier = Modifier.widthIn(max = 280.dp),
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)) {
-                Text(text = message.text, color = fg, style = MaterialTheme.typography.bodyMedium)
-                if (isMine) {
-                    val readByOther = message.readBy.keys.any { it != message.fromOwnerId }
-                    Text(
-                        text = if (readByOther) "✓✓" else "✓",
-                        color = if (readByOther) MaterialTheme.colorScheme.primary else fg.copy(alpha = 0.6f),
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.align(Alignment.End),
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun Composer(
-    draft: String,
-    isSending: Boolean,
-    onDraftChange: (String) -> Unit,
-    onSend: () -> Unit,
-) {
-    Surface(tonalElevation = 2.dp) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
-                value = draft,
-                onValueChange = onDraftChange,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
-                placeholder = { Text("Type a message") },
-                maxLines = 4,
-            )
-            IconButton(
-                onClick = onSend,
-                enabled = !isSending && draft.isNotBlank(),
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.primary),
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.Send,
-                    contentDescription = "Send",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                )
-            }
-        }
-    }
-}
