@@ -30,7 +30,9 @@ internal object SettingsNavModule {
                 onOpenNotifications = { navigator.goTo(SettingsNotifications) },
                 onOpenFilters = { navigator.goTo(SettingsFilters) },
                 onOpenPrivacy = { navigator.goTo(SettingsPrivacy) },
+                onOpenBlockedOwners = { navigator.goTo(SettingsBlockedUsers) },
                 onOpenAccount = { navigator.goTo(SettingsAccount) },
+                onSignedOut = { navigator.replaceAll(LoginHome) },
             )
         }
         entry<SettingsEditProfile> {

@@ -72,4 +72,30 @@ object BrandColors {
     val PeachWarmDeep: Color = Color(0xFFD27750)
     /** Off-white cream used as the Filters screen container background. */
     val FiltersCream: Color = Color(0xFFFBF5F0)
+
+    // ----- Settings-home tinted icon palette -----------------------------------
+    // Tinted icon squares (44dp, RoundedCornerShape(12.dp)) read against the cream
+    // screen background. Each tint comes with a darker "ink" foreground so the
+    // glyph carries enough contrast.
+
+    /** Cream screen background used across the Settings redesign (lighter than surface). */
+    val Cream: Color = Color(0xFFFBF1E9)
+
+    /** Mint icon tile background — Profile, Privacy. Foreground = [MintLeaf]. */
+    val MintTint: Color = Color(0xFFDDEFE9)
+    /** Peach icon tile background — Account. Foreground = [PeachInk]. */
+    val PeachTint: Color = Color(0xFFFCE3D6)
+    /** Bright coral icon tile background — Filters, Blocked owners. Foreground = [CoralDeep]. */
+    val CoralTint: Color = Color(0xFFF7DAD3)
+    /** Lavender icon tile background — Notifications. Foreground = [LavenderInk]. */
+    val LavenderTint: Color = Color(0xFFE5DDF6)
+    /** Neutral grey icon tile background — Pause profile. Foreground = [NeutralInk]. */
+    val NeutralTint: Color = Color(0xFFE9E4E0)
+
+    /** Foreground glyph color for [PeachTint] tiles. */
+    val PeachInk: Color = Color(0xFFC4724F)
+    /** Foreground glyph color for [LavenderTint] tiles. */
+    val LavenderInk: Color = Color(0xFF6E5DB8)
+    /** Foreground glyph color for [NeutralTint] tiles. */
+    val NeutralInk: Color = Color(0xFF8B807A)
 }

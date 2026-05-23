@@ -4,6 +4,17 @@ plugins {
 
 android {
     namespace = "com.rodiz.arch2.feature.settings.presentation"
+
+    defaultConfig {
+        // App version surfaced by the Settings home footer. Kept in sync with
+        // `app/build.gradle.kts` `versionName` — bump both together until we
+        // hoist the value to a single gradle.properties entry.
+        buildConfigField("String", "VERSION_NAME", "\"0.1.0\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {

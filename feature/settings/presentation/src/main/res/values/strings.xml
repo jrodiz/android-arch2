@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_back_cd">Back</string>
+
+    <string name="settings_section_account">Account</string>
+    <string name="settings_row_profile_title">Profile</string>
+    <string name="settings_row_profile_subtitle">Name, avatar, bio</string>
+    <string name="settings_row_account_title">Account</string>
+    <string name="settings_row_account_subtitle">Email, sign in methods</string>
+
+    <string name="settings_section_matching">Matching</string>
+    <string name="settings_row_filters_title">Filters</string>
+    <string name="settings_row_filters_subtitle">Distance, intent, species</string>
+    <string name="settings_row_notifications_title">Notifications</string>
+    <string name="settings_row_notifications_subtitle">Matches, messages, likes</string>
+    <string name="settings_row_pause_title">Pause profile</string>
+    <string name="settings_row_pause_subtitle">Hide pets from decks</string>
+
+    <string name="settings_section_safety">Safety</string>
+    <string name="settings_row_privacy_title">Privacy</string>
+    <string name="settings_row_privacy_subtitle">Blocked users, data</string>
+    <string name="settings_row_blocked_title">Blocked owners</string>
+    <plurals name="settings_row_blocked_subtitle">
+        <item quantity="one">%1$d blocked</item>
+        <item quantity="other">%1$d blocked</item>
+    </plurals>
+
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_footer_template">TinPet v%1$s · Made with 🐾</string>
+</resources>
