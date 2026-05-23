@@ -88,6 +88,8 @@ internal fun DocumentSnapshot.toMatchOrNull(): Match? {
             lastMessageAt = getTimestamp("lastMessageAt")?.toKxInstant(),
             lastMessagePreview = getString("lastMessagePreview"),
             lastMessageFromOwnerId = getString("lastMessageFromOwnerId"),
+            petAId = getString("petAId"),
+            petBId = getString("petBId"),
         )
     } catch (_: Throwable) {
         null

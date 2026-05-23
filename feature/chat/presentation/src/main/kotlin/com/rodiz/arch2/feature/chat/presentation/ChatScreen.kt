@@ -140,6 +140,7 @@ internal fun ChatScreen(
         topBar = {
             ChatTopBar(
                 other = state.other,
+                otherPetName = state.otherPet?.name,
                 onBack = onBack,
                 menuOpen = menuOpen,
                 onMenuTap = { menuOpen = true },
@@ -244,6 +245,7 @@ internal fun ChatScreen(
 @Composable
 private fun ChatTopBar(
     other: OwnerDisplay?,
+    otherPetName: String?,
     onBack: () -> Unit,
     menuOpen: Boolean,
     onMenuTap: () -> Unit,
@@ -278,7 +280,10 @@ private fun ChatTopBar(
                 .weight(1f)
                 .padding(end = 8.dp)) {
                 Text(
-                    text = other?.firstName?.takeIf { it.isNotBlank() } ?: "Chat",
+                    text = chatHeaderTitle(
+                        ownerFirstName = other?.firstName,
+                        petName = otherPetName,
+                    ),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
@@ -706,6 +711,23 @@ private fun ReportReason.label(): String = when (this) {
 // -----------------------------------------------------------------------------
 // Date / time helpers — kotlinx.datetime so the JVM domain stays clean.
 // -----------------------------------------------------------------------------
+
+/**
+ * Header title combining the other owner and pet — "Leah & Mochi" when both are
+ * resolved, owner-only for pre-plumbing matches, pet-only as a backstop, and
+ * "Chat" when nothing has loaded yet. Same pattern as MatchSummary.displayTitle()
+ * on the inbox row so the two surfaces stay in sync.
+ */
+private fun chatHeaderTitle(ownerFirstName: String?, petName: String?): String {
+    val owner = ownerFirstName?.takeIf { it.isNotBlank() }
+    val pet = petName?.takeIf { it.isNotBlank() }
+    return when {
+        owner != null && pet != null -> "$owner & $pet"
+        owner != null -> owner
+        pet != null -> pet
+        else -> "Chat"
+    }
+}
 
 /**
  * Returns the trailing portion of "You matched ___" — e.g. "today", "yesterday",

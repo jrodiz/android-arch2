@@ -41,8 +41,23 @@ export const onLikeCreate = onDocumentCreated("likes/{likeId}", async (event) =>
 
   // 3. Mutual — write the match doc. Idempotent: deterministic id + merge means
   //    concurrent likes from both sides converge on identical data.
+  //
+  // We record BOTH sides' pets so the Android inbox/chat can render an
+  // "Owner & Pet" title from either participant's POV (see plans/match-inbox-redesign.md
+  // and plans/chat-redesign-conversation.md). The pet IDs come from each like's
+  // `toPetId`: the initiating like's `toPetId` is the pet owned by `toOwnerId`,
+  // and the reciprocal like's `toPetId` is the pet owned by `fromOwnerId`.
   const matchId = matchIdFor(fromOwnerId, toOwnerId);
   const [ownerAId, ownerBId] = matchId.split("_");
+  const reciprocalToPetId = reciprocal.docs[0].data().toPetId as string | undefined;
+  // toPetId belongs to the like's recipient. Map each pet to its owner so we can
+  // assign petAId vs petBId by owner (A/B is owner-id lexicographic, not like-direction).
+  const petByOwner: Record<string, string | undefined> = {
+    [toOwnerId]: toPetId,                  // recipient of the initiating like
+    [fromOwnerId]: reciprocalToPetId,      // recipient of the reciprocal like (i.e. the initiator's pet)
+  };
+  const petAId = petByOwner[ownerAId];
+  const petBId = petByOwner[ownerBId];
   await db.collection("matches").doc(matchId).set(
     {
       ownerAId,
@@ -50,9 +65,11 @@ export const onLikeCreate = onDocumentCreated("likes/{likeId}", async (event) =>
       participants: [ownerAId, ownerBId],
       createdAt: FieldValue.serverTimestamp(),
       initiatingLike: { fromOwnerId, toPetId },
+      ...(petAId ? { petAId } : {}),
+      ...(petBId ? { petBId } : {}),
     },
     { merge: true },
   );
 
-  logger.info(`Match created/updated: ${matchId}`);
+  logger.info(`Match created/updated: ${matchId} (petAId=${petAId ?? "-"}, petBId=${petBId ?? "-"})`);
 });

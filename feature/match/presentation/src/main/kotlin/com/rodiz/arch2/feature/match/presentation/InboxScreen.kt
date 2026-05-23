@@ -285,7 +285,7 @@ private fun RailAvatar(row: MatchSummary, onClick: () -> Unit) {
         }
         Spacer(Modifier.height(8.dp))
         Text(
-            text = row.displayTitle(),
+            text = row.railCaption(),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
@@ -364,8 +364,22 @@ private fun OwnerAvatar(avatarUrl: String?, size: Int) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-private fun MatchSummary.displayTitle(): String =
-    other?.firstName?.takeIf { it.isNotBlank() } ?: "Someone"
+private fun MatchSummary.displayTitle(): String {
+    val owner = other?.firstName?.takeIf { it.isNotBlank() }
+    val pet = otherPet?.name?.takeIf { it.isNotBlank() }
+    return when {
+        owner != null && pet != null -> "$owner & $pet"
+        owner != null -> owner
+        pet != null -> pet
+        else -> "Someone"
+    }
+}
+
+/** Rail caption shows just the pet name (mock: "Mochi", "Rex"), falling back to owner. */
+private fun MatchSummary.railCaption(): String =
+    otherPet?.name?.takeIf { it.isNotBlank() }
+        ?: other?.firstName?.takeIf { it.isNotBlank() }
+        ?: "Someone"
 
 /**
  * Compact inbox timestamp matching the mock:

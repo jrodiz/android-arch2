@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodiz.arch2.core.ownerlookup.domain.OwnerDisplay
 import com.rodiz.arch2.core.ownerlookup.domain.OwnerLookupRepository
+import com.rodiz.arch2.core.petlookup.domain.PetDisplay
+import com.rodiz.arch2.core.petlookup.domain.PetLookupRepository
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.chat.domain.model.Message
 import com.rodiz.arch2.feature.chat.domain.model.ReportReason
@@ -39,6 +41,8 @@ internal data class ChatUiState(
     val errorMessage: String? = null,
     val currentUid: String = "",
     val other: OwnerDisplay? = null,
+    /** The other participant's pet, looked up off the match's pet IDs. Null while loading or for matches predating pet plumbing. */
+    val otherPet: PetDisplay? = null,
     /** Surfaced so the redesigned chat header can render the "You matched on ..." banner. */
     val match: Match? = null,
     val isReporting: Boolean = false,
@@ -56,6 +60,7 @@ internal class ChatViewModel @AssistedInject constructor(
     private val reportOther: ReportOtherUseCase,
     private val sessionRepo: SessionRepository,
     private val ownerLookup: OwnerLookupRepository,
+    private val petLookup: PetLookupRepository,
 ) : ViewModel() {
 
     private val matchId: MatchId = MatchId(matchIdValue)
@@ -107,6 +112,18 @@ internal class ChatViewModel @AssistedInject constructor(
                 }
                 .catch { /* swallow — header just shows a fallback */ }
                 .collect { display -> _uiState.update { it.copy(other = display) } }
+        }
+        // Pet display for the chat header — same flatMapLatest pattern as owner above
+        // so the header re-renders when the match doc gains its pet IDs.
+        viewModelScope.launch {
+            observeMatch(matchId)
+                .flatMapLatest { match ->
+                    val me = sessionRepo.current()?.userId
+                    val otherPetId = match?.let { if (me != null) it.otherPetId(me) else null }
+                    if (otherPetId != null) petLookup.observe(otherPetId) else flowOf(null)
+                }
+                .catch { /* swallow */ }
+                .collect { display -> _uiState.update { it.copy(otherPet = display) } }
         }
     }
 

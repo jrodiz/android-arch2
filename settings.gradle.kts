@@ -31,6 +31,8 @@ include(":core:filters:domain")
 include(":core:filters:data")
 include(":core:ownerlookup:domain")
 include(":core:ownerlookup:data")
+include(":core:petlookup:domain")
+include(":core:petlookup:data")
 include(":core:testing")
 
 include(":feature:login:nav")
