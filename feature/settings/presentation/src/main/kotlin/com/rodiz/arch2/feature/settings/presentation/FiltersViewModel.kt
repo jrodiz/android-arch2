@@ -60,6 +60,20 @@ internal class FiltersViewModel @Inject constructor(
         if (next.isEmpty()) it else it.copy(speciesCategories = next)
     }
 
+    /** Reset everything to the canonical defaults (25km, all intents, all species). */
+    fun reset() = patch { FilterPrefs.DEFAULT }
+
+    /**
+     * Force-flush the current prefs to disk, bypassing the debounce. Called from the
+     * "Apply filters" CTA so that even if the user mashes Apply within 200ms of the
+     * last edit, the prefs are guaranteed to be persisted before navigating away.
+     * DataStore writes are idempotent, so re-writing the same value is harmless.
+     */
+    suspend fun flush() {
+        debounceJob?.cancel()
+        runCatching { repo.updatePrefs(_uiState.value.prefs) }
+    }
+
     private fun patch(mutate: (FilterPrefs) -> FilterPrefs) {
         val next = mutate(_uiState.value.prefs)
         if (next == _uiState.value.prefs) return

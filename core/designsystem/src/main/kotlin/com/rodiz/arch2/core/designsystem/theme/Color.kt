@@ -62,4 +62,14 @@ object BrandColors {
     val NavSurface: Color = Color(0xFF2A1F1D)
     /** Mint green used on the deck pet-detail "Friendship" intent chip. */
     val MintLeaf: Color = Color(0xFF6FAE9C)
+    /** Darker mint used as the icon-circle background on the Filters "Friendship" tile. */
+    val MintLeafDeep: Color = Color(0xFF4F9485)
+    /** Warm peach used as the saturated fill of the Filters "Adoption" intent tile. */
+    val PeachWarm: Color = Color(0xFFE8A275)
+    /** Light peach pair for the unselected state of the Adoption tile (alpha applied at call site). */
+    val PeachWarmLight: Color = Color(0xFFF6CBAA)
+    /** Darker peach used as the icon-circle background on the Filters "Adoption" tile. */
+    val PeachWarmDeep: Color = Color(0xFFD27750)
+    /** Off-white cream used as the Filters screen container background. */
+    val FiltersCream: Color = Color(0xFFFBF5F0)
 }
