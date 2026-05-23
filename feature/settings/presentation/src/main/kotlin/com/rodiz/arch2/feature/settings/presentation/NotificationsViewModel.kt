@@ -53,6 +53,17 @@ internal class NotificationsViewModel @Inject constructor(
     fun onToggleNewMessage(value: Boolean) = patch { it.copy(newMessage = value) }
     fun onToggleSomeoneLiked(value: Boolean) = patch { it.copy(someoneLiked = value) }
     fun onToggleWeeklyDigest(value: Boolean) = patch { it.copy(weeklyDigest = value) }
+    fun onToggleQuietHoursEnabled(value: Boolean) = patch { it.copy(quietHoursEnabled = value) }
+
+    /**
+     * Pushes a one-shot transient message into the existing snackbar channel.
+     * Used by the quiet-hours row's tap action while the custom-picker UI is
+     * still deferred — re-uses the [errorMessage] field rather than introducing
+     * a parallel snackbar pipeline.
+     */
+    fun showTransient(message: String) {
+        _uiState.update { it.copy(errorMessage = message) }
+    }
 
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }

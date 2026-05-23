@@ -55,11 +55,14 @@ internal class FirestoreNotificationPrefsRepository @Inject constructor(
     }
 }
 
-private fun NotificationPrefs.toMap(): Map<String, Boolean> = mapOf(
+private fun NotificationPrefs.toMap(): Map<String, Any> = mapOf(
     "newMatch" to newMatch,
     "newMessage" to newMessage,
     "someoneLiked" to someoneLiked,
     "weeklyDigest" to weeklyDigest,
+    "quietHoursEnabled" to quietHoursEnabled,
+    "quietHoursStartMinutes" to quietHoursStartMinutes,
+    "quietHoursEndMinutes" to quietHoursEndMinutes,
 )
 
 private fun Map<String, Any?>?.toPrefsOrDefault(): NotificationPrefs {
@@ -70,5 +73,11 @@ private fun Map<String, Any?>?.toPrefsOrDefault(): NotificationPrefs {
         newMessage = this["newMessage"] as? Boolean ?: d.newMessage,
         someoneLiked = this["someoneLiked"] as? Boolean ?: d.someoneLiked,
         weeklyDigest = this["weeklyDigest"] as? Boolean ?: d.weeklyDigest,
+        quietHoursEnabled = this["quietHoursEnabled"] as? Boolean ?: d.quietHoursEnabled,
+        // Firestore stores ints as Long; read via Number so both round-trip safely.
+        quietHoursStartMinutes = (this["quietHoursStartMinutes"] as? Number)?.toInt()
+            ?: d.quietHoursStartMinutes,
+        quietHoursEndMinutes = (this["quietHoursEndMinutes"] as? Number)?.toInt()
+            ?: d.quietHoursEndMinutes,
     )
 }

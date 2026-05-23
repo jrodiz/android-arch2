@@ -35,6 +35,32 @@
     <string name="blocked_empty_body">When you block an owner from chat, they\'ll show up here so you can unblock them later.</string>
     <string name="blocked_chip_cd">No blocked owners</string>
 
+    <!-- Notifications screen -->
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_back_cd">Back</string>
+
+    <string name="notifications_banner_on_title">Push notifications on</string>
+    <string name="notifications_banner_on_subtitle">We\'ll send only what you toggle on below</string>
+    <string name="notifications_banner_off_title">Push notifications off</string>
+    <string name="notifications_banner_off_subtitle">Tap to turn on in system settings</string>
+    <string name="notifications_banner_turn_on">Turn on</string>
+    <string name="notifications_banner_icon_cd">Notifications</string>
+
+    <string name="notifications_section_activity">Activity</string>
+    <string name="notifications_row_new_match_title">New match</string>
+    <string name="notifications_row_new_match_subtitle">When you and another pet match</string>
+    <string name="notifications_row_new_message_title">New message</string>
+    <string name="notifications_row_new_message_subtitle">When someone messages you</string>
+    <string name="notifications_row_liked_title">Someone liked your pet</string>
+    <string name="notifications_row_liked_subtitle">When another owner likes one of your pets</string>
+    <string name="notifications_row_digest_title">Weekly digest</string>
+    <string name="notifications_row_digest_subtitle">A summary of activity once a week</string>
+
+    <string name="notifications_section_quiet_hours">Quiet hours</string>
+    <string name="notifications_quiet_hours_subtitle">No pushes during quiet hours</string>
+    <string name="notifications_quiet_hours_picker_soon">Custom quiet-hours coming soon</string>
+    <string name="notifications_quiet_hours_window_template">%1$s → %2$s</string>
+
     <!-- Privacy screen -->
     <string name="privacy_title">Privacy</string>
     <string name="privacy_back_cd">Back</string>

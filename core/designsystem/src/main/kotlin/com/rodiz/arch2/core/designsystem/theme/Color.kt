@@ -98,4 +98,9 @@ object BrandColors {
     val LavenderInk: Color = Color(0xFF6E5DB8)
     /** Foreground glyph color for [NeutralTint] tiles. */
     val NeutralInk: Color = Color(0xFF8B807A)
+
+    /** Soft yellow icon tile background — Notifications quiet-hours row. Foreground = [MoonInk]. */
+    val MoonTint: Color = Color(0xFFFFF1C2)
+    /** Warm yellow crescent-moon glyph color for [MoonTint] tiles. */
+    val MoonInk: Color = Color(0xFFE5B73B)
 }
