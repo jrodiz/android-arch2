@@ -16,6 +16,10 @@ dependencies {
     // because it's where users come to manage their account. settings:domain is JVM-only
     // so there's no Android baggage in the transitive dep.
     implementation(project(":feature:settings:domain"))
+    // The Profile hero shows the owner's pet count + a horizontal rail of pet chips,
+    // which means we read `Pet` + `ObserveMyPetsUseCase` from pet:domain. Same precedent
+    // as settings:domain above: pet:domain is JVM-only so nothing Android leaks in.
+    implementation(project(":feature:pet:domain"))
     implementation(project(":core:navigation"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:session:domain"))
