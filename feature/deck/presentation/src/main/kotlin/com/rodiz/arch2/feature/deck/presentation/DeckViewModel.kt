@@ -90,7 +90,11 @@ internal class DeckViewModel @Inject constructor(
                         it.copy(
                             maxDistanceKm = prefs.maxDistanceKm,
                             intentsCount = prefs.intents.size,
-                            speciesCount = prefs.speciesCategories.size,
+                            // Derive a category count for the header's paw-icon strip so
+                            // it stays at 1–3 visual paws even after the underlying species
+                            // set widened to 7 granular options. The visual is "how broad
+                            // is your filter," not "exact count."
+                            speciesCount = prefs.species.map { it.category }.toSet().size,
                         )
                     }
                 }

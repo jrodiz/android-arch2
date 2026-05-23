@@ -86,7 +86,7 @@ internal class FirestoreDeckRepository @Inject constructor(
                 .filter { it.ownerId !in hideOwners }
                 .filter { it.enabled }
                 .filter { it.id.value !in sessionSwiped }
-                .filter { it.species.category in filters.speciesCategories }
+                .filter { it.species in filters.species }
                 .filter { it.intents.any { intent -> intent in filters.intents } }
                 .filter { pet -> withinDistance(myLoc, locations[pet.ownerId], maxKm) }
                 .map { pet -> DeckCard(pet = pet, owner = owners[pet.ownerId]) }

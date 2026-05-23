@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.rodiz.arch2.core.filters.domain.FilterPrefs
 import com.rodiz.arch2.core.filters.domain.FilterPrefsRepository
 import com.rodiz.arch2.feature.pet.domain.model.Intent
-import com.rodiz.arch2.feature.pet.domain.model.SpeciesCategory
+import com.rodiz.arch2.feature.pet.domain.model.Species
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -54,10 +54,16 @@ internal class FiltersViewModel @Inject constructor(
         if (next.isEmpty()) it else it.copy(intents = next)
     }
 
-    fun toggleSpecies(category: SpeciesCategory) = patch {
-        val next = if (category in it.speciesCategories) it.speciesCategories - category
-        else it.speciesCategories + category
-        if (next.isEmpty()) it else it.copy(speciesCategories = next)
+    /**
+     * Toggle a group of [Species] together (most pills map to one species; "Other"
+     * maps to two — GUINEA_PIG + OTHER_SMALL_MAMMAL — so they flip as a unit). If
+     * every species in [group] is already selected, the group is removed; otherwise
+     * the group is added. The empty set is rejected so the deck never goes blank.
+     */
+    fun toggleSpeciesGroup(group: Set<Species>) = patch {
+        val allSelected = group.all { species -> species in it.species }
+        val next = if (allSelected) it.species - group else it.species + group
+        if (next.isEmpty()) it else it.copy(species = next)
     }
 
     /** Reset everything to the canonical defaults (25km, all intents, all species). */

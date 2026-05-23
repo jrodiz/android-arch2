@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.rodiz.arch2.core.filters.domain.FilterPrefs
 import com.rodiz.arch2.core.filters.domain.FilterPrefsRepository
 import com.rodiz.arch2.feature.pet.domain.model.Intent
+import com.rodiz.arch2.feature.pet.domain.model.Species
 import com.rodiz.arch2.feature.pet.domain.model.SpeciesCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -25,9 +26,9 @@ internal class DataStoreFilterPrefsRepository @Inject constructor(
             intents = prefs[KEY_INTENTS]?.mapNotNullTo(mutableSetOf()) { name ->
                 Intent.entries.firstOrNull { it.name == name }
             }?.takeIf { it.isNotEmpty() } ?: FilterPrefs.DEFAULT.intents,
-            speciesCategories = prefs[KEY_SPECIES]?.mapNotNullTo(mutableSetOf()) { name ->
-                SpeciesCategory.entries.firstOrNull { it.name == name }
-            }?.takeIf { it.isNotEmpty() } ?: FilterPrefs.DEFAULT.speciesCategories,
+            species = prefs[KEY_SPECIES]?.let(::parseSpeciesSet)
+                ?.takeIf { it.isNotEmpty() }
+                ?: FilterPrefs.DEFAULT.species,
         )
     }
 
@@ -35,8 +36,31 @@ internal class DataStoreFilterPrefsRepository @Inject constructor(
         dataStore.edit { editor ->
             editor[KEY_MAX_DISTANCE_KM] = prefs.maxDistanceKm
             editor[KEY_INTENTS] = prefs.intents.mapTo(mutableSetOf()) { it.name }
-            editor[KEY_SPECIES] = prefs.speciesCategories.mapTo(mutableSetOf()) { it.name }
+            editor[KEY_SPECIES] = prefs.species.mapTo(mutableSetOf()) { it.name }
         }
+    }
+
+    /**
+     * Stored species names may use either the current [Species] enum (DOG, CAT, RABBIT, …)
+     * or the legacy [SpeciesCategory] enum (DOGS, CATS, SMALL_MAMMALS) from prefs written
+     * before the per-species widening landed. Resolve each name against [Species] first;
+     * any leftover that matches a legacy category is expanded into the full set of species
+     * that category contained.
+     */
+    private fun parseSpeciesSet(names: Set<String>): Set<Species> {
+        val result = mutableSetOf<Species>()
+        for (name in names) {
+            val direct = Species.entries.firstOrNull { it.name == name }
+            if (direct != null) {
+                result += direct
+                continue
+            }
+            val legacy = SpeciesCategory.entries.firstOrNull { it.name == name }
+            if (legacy != null) {
+                Species.entries.filterTo(result) { it.category == legacy }
+            }
+        }
+        return result
     }
 
     private companion object {

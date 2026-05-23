@@ -57,7 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rodiz.arch2.core.designsystem.theme.BrandColors
 import com.rodiz.arch2.feature.pet.domain.model.Intent
-import com.rodiz.arch2.feature.pet.domain.model.SpeciesCategory
+import com.rodiz.arch2.feature.pet.domain.model.Species
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,8 +99,8 @@ internal fun FiltersRoute(
                     onToggle = viewModel::toggleIntent,
                 )
                 SpeciesPanel(
-                    selectedCategories = state.prefs.speciesCategories,
-                    onToggleCategory = viewModel::toggleSpecies,
+                    selectedSpecies = state.prefs.species,
+                    onToggleGroup = viewModel::toggleSpeciesGroup,
                 )
             }
 
@@ -342,24 +342,29 @@ private fun IntentTile(
     }
 }
 
+/**
+ * Each pill represents one or more granular [Species] values. Most pills map 1:1
+ * (Dogs → DOG); "Other" buckets the two species the mock doesn't surface explicitly
+ * (Guinea pigs + an open-ended Other small mammal slot) so the pill row stays at 6.
+ */
 private enum class SpeciesPill(
     val label: String,
     val emoji: String,
-    val category: SpeciesCategory,
+    val species: Set<Species>,
 ) {
-    DOGS("Dogs", "🐶", SpeciesCategory.DOGS),
-    CATS("Cats", "🐱", SpeciesCategory.CATS),
-    RABBITS("Rabbits", "🐰", SpeciesCategory.SMALL_MAMMALS),
-    HAMSTERS("Hamsters", "🐹", SpeciesCategory.SMALL_MAMMALS),
-    FERRETS("Ferrets", "🦊", SpeciesCategory.SMALL_MAMMALS),
-    OTHER("Other", "🐾", SpeciesCategory.SMALL_MAMMALS),
+    DOGS("Dogs", "🐶", setOf(Species.DOG)),
+    CATS("Cats", "🐱", setOf(Species.CAT)),
+    RABBITS("Rabbits", "🐰", setOf(Species.RABBIT)),
+    HAMSTERS("Hamsters", "🐹", setOf(Species.HAMSTER)),
+    FERRETS("Ferrets", "🦊", setOf(Species.FERRET)),
+    OTHER("Other", "🐾", setOf(Species.GUINEA_PIG, Species.OTHER_SMALL_MAMMAL)),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SpeciesPanel(
-    selectedCategories: Set<SpeciesCategory>,
-    onToggleCategory: (SpeciesCategory) -> Unit,
+    selectedSpecies: Set<Species>,
+    onToggleGroup: (Set<Species>) -> Unit,
 ) {
     Panel {
         Text(
@@ -376,8 +381,8 @@ private fun SpeciesPanel(
             SpeciesPill.entries.forEach { pill ->
                 SpeciesChip(
                     pill = pill,
-                    selected = pill.category in selectedCategories,
-                    onToggle = { onToggleCategory(pill.category) },
+                    selected = pill.species.all { it in selectedSpecies },
+                    onToggle = { onToggleGroup(pill.species) },
                 )
             }
         }
