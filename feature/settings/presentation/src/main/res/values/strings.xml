@@ -28,4 +28,10 @@
 
     <string name="settings_sign_out">Sign out</string>
     <string name="settings_footer_template">TinPet v%1$s · Made with 🐾</string>
+
+    <!-- Blocked owners screen -->
+    <string name="blocked_title">Blocked owners</string>
+    <string name="blocked_empty_headline">No one\'s blocked</string>
+    <string name="blocked_empty_body">When you block an owner from chat, they\'ll show up here so you can unblock them later.</string>
+    <string name="blocked_chip_cd">No blocked owners</string>
 </resources>
