@@ -47,7 +47,8 @@ internal object SettingsNavModule {
         entry<SettingsPrivacy> {
             PrivacyRoute(
                 onBack = { navigator.goBack() },
-                onOpenBlockedUsers = { navigator.goTo(SettingsBlockedUsers) },
+                onOpenBlockedOwners = { navigator.goTo(SettingsBlockedUsers) },
+                onOpenDeleteAccount = { navigator.goTo(SettingsAccount) },
             )
         }
         entry<SettingsBlockedUsers> {

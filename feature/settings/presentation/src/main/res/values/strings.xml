@@ -34,4 +34,19 @@
     <string name="blocked_empty_headline">No one\'s blocked</string>
     <string name="blocked_empty_body">When you block an owner from chat, they\'ll show up here so you can unblock them later.</string>
     <string name="blocked_chip_cd">No blocked owners</string>
+
+    <!-- Privacy screen -->
+    <string name="privacy_title">Privacy</string>
+    <string name="privacy_back_cd">Back</string>
+    <string name="privacy_pause_title">Pause profile</string>
+    <string name="privacy_pause_subtitle">Hide all your pets from other owners\' decks</string>
+    <string name="privacy_section_data">Data</string>
+    <string name="privacy_section_danger_zone">Danger zone</string>
+    <string name="privacy_download_title">Download my data</string>
+    <string name="privacy_download_subtitle">Email a copy of your profile + matches</string>
+    <string name="privacy_policy_title">Privacy policy</string>
+    <string name="privacy_policy_subtitle">How TinPet uses your data</string>
+    <string name="privacy_delete_title">Delete account</string>
+    <string name="privacy_delete_subtitle">30-day grace period before hard delete</string>
+    <string name="privacy_coming_soon">Coming soon</string>
 </resources>
