@@ -56,8 +56,12 @@
 
     <string name="notifications_section_quiet_hours">Quiet hours</string>
     <string name="notifications_quiet_hours_subtitle">No pushes during quiet hours</string>
-    <string name="notifications_quiet_hours_picker_soon">Custom quiet-hours coming soon</string>
     <string name="notifications_quiet_hours_window_template">%1$s → %2$s</string>
+    <string name="notifications_quiet_hours_picker_title">Quiet hours</string>
+    <string name="notifications_quiet_hours_picker_start">Start</string>
+    <string name="notifications_quiet_hours_picker_end">End</string>
+    <string name="notifications_quiet_hours_picker_save">Save</string>
+    <string name="notifications_quiet_hours_picker_cancel">Cancel</string>
 
     <!-- Edit profile screen -->
     <string name="edit_profile_title">Edit profile</string>

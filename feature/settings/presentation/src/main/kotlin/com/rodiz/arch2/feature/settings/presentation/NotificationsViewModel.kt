@@ -56,13 +56,15 @@ internal class NotificationsViewModel @Inject constructor(
     fun onToggleQuietHoursEnabled(value: Boolean) = patch { it.copy(quietHoursEnabled = value) }
 
     /**
-     * Pushes a one-shot transient message into the existing snackbar channel.
-     * Used by the quiet-hours row's tap action while the custom-picker UI is
-     * still deferred — re-uses the [errorMessage] field rather than introducing
-     * a parallel snackbar pipeline.
+     * Save the quiet-hours window picked from the dialog. Both are minutes-of-day
+     * (0..1439). The model allows start>end to mean "wrap past midnight" (e.g.
+     * 22:00 → 08:00) so we don't validate ordering here.
      */
-    fun showTransient(message: String) {
-        _uiState.update { it.copy(errorMessage = message) }
+    fun onQuietHoursChanged(startMinutes: Int, endMinutes: Int) = patch {
+        it.copy(
+            quietHoursStartMinutes = startMinutes.coerceIn(0, 23 * 60 + 59),
+            quietHoursEndMinutes = endMinutes.coerceIn(0, 23 * 60 + 59),
+        )
     }
 
     fun clearError() {

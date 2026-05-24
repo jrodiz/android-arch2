@@ -49,6 +49,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -80,6 +81,7 @@ internal fun NotificationsRoute(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    var pickerOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let {
@@ -87,8 +89,6 @@ internal fun NotificationsRoute(
             viewModel.clearError()
         }
     }
-
-    val pickerSnackbarMessage = stringResource(R.string.notifications_quiet_hours_picker_soon)
 
     NotificationsScaffold(
         prefs = state.prefs,
@@ -99,8 +99,20 @@ internal fun NotificationsRoute(
         onToggleSomeoneLiked = viewModel::onToggleSomeoneLiked,
         onToggleWeeklyDigest = viewModel::onToggleWeeklyDigest,
         onToggleQuietHours = viewModel::onToggleQuietHoursEnabled,
-        onPickQuietHours = { viewModel.showTransient(pickerSnackbarMessage) },
+        onPickQuietHours = { pickerOpen = true },
     )
+
+    if (pickerOpen) {
+        QuietHoursPickerDialog(
+            initialStartMinutes = state.prefs.quietHoursStartMinutes,
+            initialEndMinutes = state.prefs.quietHoursEndMinutes,
+            onDismiss = { pickerOpen = false },
+            onSave = { start, end ->
+                viewModel.onQuietHoursChanged(start, end)
+                pickerOpen = false
+            },
+        )
+    }
 }
 
 @Composable
