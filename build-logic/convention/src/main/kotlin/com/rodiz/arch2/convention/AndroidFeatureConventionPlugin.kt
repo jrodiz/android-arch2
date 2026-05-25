@@ -16,6 +16,10 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             apply("tinpet.android.library")
             apply("tinpet.android.library.compose")
             apply("tinpet.android.hilt")
+            // Wires useJUnitPlatform() + the standard JUnit5/MockK/Turbine deps so
+            // unit tests in :feature:*:presentation modules actually run instead
+            // of silently reporting 0 executed.
+            apply("tinpet.android.test")
         }
 
         val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")

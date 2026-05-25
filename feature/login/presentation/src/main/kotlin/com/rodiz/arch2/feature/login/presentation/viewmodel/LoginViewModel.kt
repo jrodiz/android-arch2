@@ -12,8 +12,6 @@ import com.rodiz.arch2.feature.login.domain.usecase.LoginWithBiometricUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.SignInWithGoogleUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.ValidateEmailUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.ValidatePasswordUseCase
-import com.rodiz.arch2.feature.login.presentation.BuildConfig
-import com.rodiz.arch2.feature.login.presentation.DebugConstants
 import com.rodiz.arch2.feature.login.presentation.state.LoginAction
 import com.rodiz.arch2.feature.login.presentation.state.LoginEvent
 import com.rodiz.arch2.feature.login.presentation.state.LoginUiState
@@ -42,13 +40,7 @@ class LoginViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         LoginUiState(
-            // TODO: Remove pre-filled debug credentials before production
-            email = savedStateHandle.get<String>(KEY_EMAIL) ?: if (BuildConfig.DEBUG) {
-                DebugConstants.PREFILLED_EMAIL
-            } else {
-                ""
-            },
-            password = if (BuildConfig.DEBUG) DebugConstants.PREFILLED_PASSWORD else "",
+            email = savedStateHandle.get<String>(KEY_EMAIL).orEmpty(),
         ),
     )
     val state: StateFlow<LoginUiState> = _state.asStateFlow()
