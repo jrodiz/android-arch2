@@ -107,6 +107,26 @@ adb -s emulator-5556 logcat -d -t 200 | grep -iE 'TinPet|FATAL|ANR'
     adb -s emulator-5556 shell am start -n com.rodiz.arch2.debug/com.rodiz.arch2.MainActivity
   ```
 
+## CI
+
+GitHub Actions runs on every push to `master` and every PR targeting `master`
+(`.github/workflows/ci.yml`):
+
+- **Android job** — `./gradlew testDebugUnitTest :app:assembleDebug`. Unit
+  test reports are uploaded as an artifact on every run (success or fail)
+  so you can confirm tests actually executed — open
+  `android-unit-test-reports/.../build/reports/tests/.../index.html` and
+  check the count > 0 under `<div class="counter">`. The
+  `tinpet.android.test` convention plugin (now applied transitively by the
+  feature plugin) is the safeguard against the "0 tests silently passing"
+  regression we hit pre-CI.
+- **Functions job** — `npm ci && npm run build` inside `functions/`. Catches
+  TS compile errors before a deploy attempt.
+
+Both jobs use Gradle's configuration cache + the GitHub-Actions Gradle
+cache so warm runs are typically under 2 minutes. Concurrency-grouped on
+`workflow + ref` so a rebased PR cancels the in-flight build.
+
 ## Removing the test data
 
 There's no `unseedTestData` endpoint. To purge:
