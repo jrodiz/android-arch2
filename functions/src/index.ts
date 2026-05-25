@@ -13,3 +13,4 @@ export { purgeDeletedAccounts } from "./scheduled/purgeDeletedAccounts.js";
 
 export { backfillMatchPetIds } from "./admin/backfillMatchPetIds.js";
 export { seedTestData } from "./admin/seedTestData.js";
+export { inspectMatches } from "./admin/inspectMatches.js";
