@@ -91,12 +91,11 @@ fun ProfileRoute(
     onEditProfile: () -> Unit,
     onAddPet: () -> Unit,
     onOpenPet: (PetId) -> Unit,
+    onOpenHelpSafety: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
-    val comingSoonMessage = stringResource(R.string.profile_coming_soon)
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -139,11 +138,7 @@ fun ProfileRoute(
                 isPetsLoading = state.isPetsLoading,
                 onOpenMyPets = onOpenMyPets,
                 onOpenSettings = onOpenSettings,
-                onOpenHelp = {
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(comingSoonMessage)
-                    }
-                },
+                onOpenHelp = onOpenHelpSafety,
             )
 
             SignOutPill(onClick = { viewModel.signOut(onSignedOut) })

@@ -68,6 +68,7 @@ import com.rodiz.arch2.core.designsystem.theme.TinPetTheme
 internal fun PrivacyRoute(
     onBack: () -> Unit,
     onOpenBlockedOwners: () -> Unit,
+    onOpenPrivacyPolicy: () -> Unit,
     onAccountDeleted: () -> Unit,
     viewModel: PrivacyViewModel = hiltViewModel(),
     deleteSheetViewModel: DeleteAccountSheetViewModel = hiltViewModel(),
@@ -172,6 +173,7 @@ internal fun PrivacyRoute(
                 viewModel.onRequestDataExport()
                 viewModel.notifyComingSoon(exportStartedMsg)
             },
+            onOpenPrivacyPolicy = onOpenPrivacyPolicy,
             onComingSoon = { viewModel.notifyComingSoon(comingSoonMessage) },
         )
 
@@ -202,6 +204,7 @@ private fun PrivacyContent(
     onOpenBlockedOwners: () -> Unit,
     onOpenDeleteAccount: () -> Unit,
     onDownloadData: () -> Unit,
+    onOpenPrivacyPolicy: () -> Unit,
     onComingSoon: () -> Unit,
 ) {
     Column(
@@ -274,7 +277,7 @@ private fun PrivacyContent(
                 title = stringResource(R.string.privacy_policy_title),
                 subtitle = stringResource(R.string.privacy_policy_subtitle),
                 titleColor = MaterialTheme.colorScheme.onSurface,
-                onClick = onComingSoon,
+                onClick = onOpenPrivacyPolicy,
                 trailing = { ChevronTrailing() },
                 testTag = "privacy_row_policy",
             )
@@ -557,6 +560,7 @@ private fun PrivacyScreenPreviewDefault() {
                 onOpenBlockedOwners = {},
                 onOpenDeleteAccount = {},
                 onDownloadData = {},
+                onOpenPrivacyPolicy = {},
                 onComingSoon = {},
             )
         }
@@ -579,6 +583,7 @@ private fun PrivacyScreenPreviewPopulated() {
                 onOpenBlockedOwners = {},
                 onOpenDeleteAccount = {},
                 onDownloadData = {},
+                onOpenPrivacyPolicy = {},
                 onComingSoon = {},
             )
         }

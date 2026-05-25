@@ -145,4 +145,40 @@
         <item quantity="one">%1$d match and all chats</item>
         <item quantity="other">%1$d matches and all chats</item>
     </plurals>
+
+    <!-- Legal pages — shared across Privacy/Settings/SignUp/Profile entry points -->
+    <string name="legal_draft_notice_title">Heads up</string>
+    <string name="legal_draft_notice_body">This page is a working draft for the TinPet beta. The final version will be reviewed by legal counsel before launch — until then, treat what\'s here as a faithful summary of how the app behaves, not a binding contract.</string>
+
+    <string name="legal_privacy_policy_title">Privacy policy</string>
+    <string name="legal_privacy_what_we_collect_title">What we collect</string>
+    <string name="legal_privacy_what_we_collect_body">When you create an account we collect your name, email, profile photo, and (if you grant the location permission) the rough location of your device. For each pet you add, we store the name, age, species, photos, and any optional fields you choose to fill in (bio, breed, size, energy, intent tags).</string>
+    <string name="legal_privacy_how_we_use_title">How we use it</string>
+    <string name="legal_privacy_how_we_use_body">Your pets are surfaced in other owners\' decks based on distance, intent, and species filters. Messages you send to matches are visible to the other participant of that match — no one else. We use your email to send sign-in emails and (optionally) the activity notifications you toggle on in Settings → Notifications.</string>
+    <string name="legal_privacy_sharing_title">Who can see your data</string>
+    <string name="legal_privacy_sharing_body">Other signed-in TinPet users can see your owner first name + avatar, your pets\' names, photos, age, species, and intent tags — that\'s the public side of the app. They cannot see your email, your exact location, your notification preferences, or any pet you\'ve hidden. We never sell your data to third parties.</string>
+    <string name="legal_privacy_rights_title">Your rights</string>
+    <string name="legal_privacy_rights_body">You can download a JSON copy of everything we have on you from Privacy → Download my data. You can delete your account from Privacy → Delete account — that schedules a 30-day grace deletion. Within that 30 days, signing back in restores everything; after 30 days, all data is hard-deleted from Firestore, Storage, and Auth.</string>
+
+    <string name="legal_terms_title">Terms of service</string>
+    <string name="legal_terms_eligibility_title">Who can use TinPet</string>
+    <string name="legal_terms_eligibility_body">You must be at least 18 years old and the responsible adult for any pet you list. One human, one account. Bot, fake, or duplicate accounts may be removed without notice.</string>
+    <string name="legal_terms_conduct_title">Be a good owner</string>
+    <string name="legal_terms_conduct_body">TinPet is for connecting pets — not for selling, breeding-for-profit, or running giveaways. Don\'t harass other owners, post stolen photos, or use the chat to spam, scam, or solicit. Repeated reports lead to a block + account review.</string>
+    <string name="legal_terms_content_title">Your photos and copy</string>
+    <string name="legal_terms_content_body">You keep ownership of the photos and bios you upload. You grant TinPet a non-exclusive license to display them inside the app to the audience appropriate for each surface (your deck, your matches\' chat, etc.) for as long as you keep your account.</string>
+    <string name="legal_terms_termination_title">Ending the relationship</string>
+    <string name="legal_terms_termination_body">You can leave any time via Privacy → Delete account. We can terminate your access for violations of these terms or applicable law. If we do, we\'ll tell you why through the email on file unless the law requires otherwise.</string>
+
+    <string name="legal_help_safety_title">Help &amp; safety</string>
+    <string name="legal_help_blocking_title">Block someone</string>
+    <string name="legal_help_blocking_body">Open the chat with the owner you want to block, tap the menu (top-right), and pick Block. Blocking is instant + mutual — neither side sees the other in the deck anymore. You can unblock from Settings → Privacy → Blocked owners.</string>
+    <string name="legal_help_reporting_title">Report someone</string>
+    <string name="legal_help_reporting_body">From the same chat menu, pick Report. Choose a reason (spam, harassment, fake account, other) and optionally add a note. Reports go to our moderation queue and are reviewed within 48 hours. We never tell the reported account that you reported them.</string>
+    <string name="legal_help_in_person_title">Meeting up in person</string>
+    <string name="legal_help_in_person_body">Meet in a public, pet-friendly space (a park, a pet-store patio, a designated dog beach). Let a friend know where you\'ll be. Both pets should be on lead until the introduction is clearly going well. If something feels off, leave — your gut is right.</string>
+    <string name="legal_help_account_title">Account &amp; data questions</string>
+    <string name="legal_help_account_body">For data exports, deletion, and account changes, head to Settings → Privacy. The 30-day grace period after deletion gives you a safety net — sign back in within that window to restore everything.</string>
+    <string name="legal_help_contact_title">Still stuck?</string>
+    <string name="legal_help_contact_body">Email support@tinpet.example.com (we\'ll firm up the real address before launch). Include the email on your account and a brief description of what you ran into.</string>
 </resources>

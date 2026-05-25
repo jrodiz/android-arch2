@@ -11,6 +11,8 @@ import com.rodiz.arch2.feature.login.presentation.screen.ForgotPasswordStubScree
 import com.rodiz.arch2.feature.login.presentation.screen.LoginRoute
 import com.rodiz.arch2.feature.login.presentation.screen.SignUpRoute
 import com.rodiz.arch2.feature.notifications.nav.NotificationRationaleOnboarding
+import com.rodiz.arch2.feature.settings.nav.SettingsPrivacyPolicy
+import com.rodiz.arch2.feature.settings.nav.SettingsTerms
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,6 +42,8 @@ internal object LoginNavModule {
             SignUpRoute(
                 onNavigateHome = { navigator.replaceAll(NotificationRationaleOnboarding) },
                 onNavigateBack = { navigator.goBack() },
+                onOpenTerms = { navigator.goTo(SettingsTerms) },
+                onOpenPrivacyPolicy = { navigator.goTo(SettingsPrivacyPolicy) },
             )
         }
     }

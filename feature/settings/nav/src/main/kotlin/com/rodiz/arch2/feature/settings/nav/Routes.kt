@@ -19,3 +19,12 @@ data object SettingsPrivacy
 
 @Serializable
 data object SettingsBlockedUsers
+
+@Serializable
+data object SettingsPrivacyPolicy
+
+@Serializable
+data object SettingsTerms
+
+@Serializable
+data object SettingsHelpSafety

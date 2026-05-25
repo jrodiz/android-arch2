@@ -92,8 +92,8 @@ class SignUpViewModel @Inject constructor(
             SignUpAction.DismissError -> _state.update { it.copy(transientError = null) }
             SignUpAction.ToggleTerms ->
                 _state.update { it.copy(termsAccepted = !it.termsAccepted) }
-            SignUpAction.TermsLinkTapped,
-            SignUpAction.PrivacyLinkTapped -> emit(SignUpEvent.ShowComingSoon(R.string.signup_coming_soon))
+            SignUpAction.TermsLinkTapped -> emit(SignUpEvent.OpenTerms)
+            SignUpAction.PrivacyLinkTapped -> emit(SignUpEvent.OpenPrivacyPolicy)
         }
     }
 

@@ -29,6 +29,8 @@ import java.io.File
 fun SignUpRoute(
     onNavigateHome: () -> Unit,
     onNavigateBack: () -> Unit,
+    onOpenTerms: () -> Unit,
+    onOpenPrivacyPolicy: () -> Unit,
     viewModel: SignUpViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -73,6 +75,8 @@ fun SignUpRoute(
                 }
                 is SignUpEvent.ShowComingSoon ->
                     snackbarHostState.showSnackbar(context.getString(event.resId))
+                SignUpEvent.OpenTerms -> onOpenTerms()
+                SignUpEvent.OpenPrivacyPolicy -> onOpenPrivacyPolicy()
             }
         }
     }

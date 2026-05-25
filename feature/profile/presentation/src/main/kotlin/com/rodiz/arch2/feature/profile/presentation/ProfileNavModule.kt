@@ -9,6 +9,7 @@ import com.rodiz.arch2.feature.pet.nav.EditPet
 import com.rodiz.arch2.feature.pet.nav.MyPets
 import com.rodiz.arch2.feature.profile.nav.ProfileHome
 import com.rodiz.arch2.feature.settings.nav.SettingsEditProfile
+import com.rodiz.arch2.feature.settings.nav.SettingsHelpSafety
 import com.rodiz.arch2.feature.settings.nav.SettingsHome
 import dagger.Module
 import dagger.Provides
@@ -30,6 +31,7 @@ internal object ProfileNavModule {
                 onEditProfile = { navigator.goTo(SettingsEditProfile) },
                 onAddPet = { navigator.goTo(AddPet) },
                 onOpenPet = { petId -> navigator.goTo(EditPet(petId.value)) },
+                onOpenHelpSafety = { navigator.goTo(SettingsHelpSafety) },
             )
         }
     }

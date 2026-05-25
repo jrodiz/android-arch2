@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":feature:login:domain"))
     implementation(project(":feature:deck:nav"))
     implementation(project(":feature:notifications:nav"))
+    implementation(project(":feature:settings:nav"))
     implementation(project(":core:navigation"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:ui"))
