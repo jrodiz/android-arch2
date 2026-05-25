@@ -141,6 +141,7 @@ internal fun ChatScreen(
             ChatTopBar(
                 other = state.other,
                 otherPetName = state.otherPet?.name,
+                otherPetAvatarUrl = state.otherPet?.avatarUrl,
                 onBack = onBack,
                 menuOpen = menuOpen,
                 onMenuTap = { menuOpen = true },
@@ -246,6 +247,7 @@ internal fun ChatScreen(
 private fun ChatTopBar(
     other: OwnerDisplay?,
     otherPetName: String?,
+    otherPetAvatarUrl: String?,
     onBack: () -> Unit,
     menuOpen: Boolean,
     onMenuTap: () -> Unit,
@@ -274,7 +276,9 @@ private fun ChatTopBar(
                     tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
-            HeaderAvatar(avatarUrl = other?.avatarUrl)
+            // Pet photo first — same fallback chain as the inbox row/rail since
+            // Google sign-in often leaves owner.avatarUrl null.
+            HeaderAvatar(avatarUrl = otherPetAvatarUrl ?: other?.avatarUrl)
             Spacer(Modifier.size(12.dp))
             Column(modifier = Modifier
                 .weight(1f)

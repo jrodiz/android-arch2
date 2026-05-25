@@ -16,9 +16,13 @@ import javax.inject.Inject
 
 internal data class InboxUiState(
     val snapshot: InboxSnapshot = InboxSnapshot(emptyList(), emptyList()),
-    // Initial state assumes "no matches" so we don't show a spinner that hangs on
-    // empty / permission-denied snapshots (same lesson as the deck).
-    val isReady: Boolean = true,
+    /**
+     * False until the first snapshot lands (or until we know there's no signed-in
+     * user to query). The screen distinguishes this from `isReady && snapshot
+     * empty` so a cold start no longer flashes "No matches yet" before the
+     * snapshot listener has had a chance to fire.
+     */
+    val isReady: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -34,10 +38,19 @@ internal class InboxViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val uid = sessionRepo.current()?.userId
-            if (uid == null) return@launch
+            if (uid == null) {
+                // No signed-in user — flip ready so the empty state renders instead
+                // of hanging forever on the loading spinner.
+                _uiState.update { it.copy(isReady = true) }
+                return@launch
+            }
             observeInbox(uid)
-                .catch { e -> _uiState.update { it.copy(errorMessage = e.message) } }
-                .collect { snap -> _uiState.update { it.copy(snapshot = snap) } }
+                .catch { e ->
+                    _uiState.update { it.copy(isReady = true, errorMessage = e.message) }
+                }
+                .collect { snap ->
+                    _uiState.update { it.copy(isReady = true, snapshot = snap) }
+                }
         }
     }
 

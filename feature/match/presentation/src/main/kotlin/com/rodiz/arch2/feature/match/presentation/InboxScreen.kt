@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bolt
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -96,7 +97,15 @@ internal fun InboxRoute(
         val snap = state.snapshot
         val empty = snap.newMatches.isEmpty() && snap.conversations.isEmpty()
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (empty) {
+            if (!state.isReady) {
+                CircularProgressIndicator(
+                    color = BrandColors.CoralDeep,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(28.dp),
+                    strokeWidth = 2.5.dp,
+                )
+            } else if (empty) {
                 EmptyTabState(
                     icon = Icons.Outlined.Bolt,
                     headline = "No matches yet",
@@ -265,7 +274,10 @@ private fun RailAvatar(row: MatchSummary, onClick: () -> Unit) {
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center,
             ) {
-                val url = row.other?.avatarUrl
+                // Prefer the pet photo for the rail — visually richer than the
+                // owner avatar (Google sign-in often leaves owner.avatarUrl null
+                // anyway). Falls back to owner avatar → person glyph.
+                val url = row.otherPet?.avatarUrl ?: row.other?.avatarUrl
                 if (url != null) {
                     AsyncImage(
                         model = url,
@@ -308,7 +320,7 @@ private fun ConversationRow(row: MatchSummary, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        OwnerAvatar(avatarUrl = row.other?.avatarUrl, size = 56)
+        OwnerAvatar(avatarUrl = row.otherPet?.avatarUrl ?: row.other?.avatarUrl, size = 56)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = row.displayTitle(),

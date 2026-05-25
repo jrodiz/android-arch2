@@ -52,11 +52,17 @@ private fun DocumentSnapshot.toPetDisplay(): PetDisplay? {
     val ownerId = getString("ownerId") ?: return null
     val name = getString("name") ?: return null
     val species = getString("species")
-    // The pet doc stores its photos under a `photos` array of objects with `url` keys;
-    // surface the first one as a simple avatar URL so cross-feature display surfaces
-    // can render a quick thumbnail without parsing the full photo schema.
+    // The pet doc stores its photos under a `photos` array of objects with
+    // {id, storagePath, downloadUrl} keys (see PetMappers.buildPetMap); surface
+    // the first one's downloadUrl as a simple avatar URL so cross-feature display
+    // surfaces (chat header, inbox rail) can render a quick thumbnail without
+    // parsing the full photo schema. Earlier this read `entry["url"]` — a key
+    // the schema has never used — so every cross-feature avatar was silently
+    // null and surfaces fell back to the person glyph.
     val photos = get("photos") as? List<*>
-    val avatarUrl = photos?.firstNotNullOfOrNull { (it as? Map<*, *>)?.get("url") as? String }
+    val avatarUrl = photos?.firstNotNullOfOrNull {
+        (it as? Map<*, *>)?.get("downloadUrl") as? String
+    }
     val intents = (get("intents") as? List<*>)
         ?.mapNotNullTo(mutableSetOf()) { it as? String }
         ?: emptySet()
