@@ -74,8 +74,14 @@ internal fun PrivacyRoute(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val deleteState by deleteSheetViewModel.state.collectAsStateWithLifecycle()
+    val exportStatus by viewModel.exportStatus.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val comingSoonMessage = stringResource(R.string.privacy_coming_soon)
+    val exportStartedMsg = stringResource(R.string.privacy_export_started)
+    val exportReadyMsg = stringResource(R.string.privacy_export_ready)
+    val exportOpenLabel = stringResource(R.string.privacy_export_open)
+    val exportFailedMsg = stringResource(R.string.privacy_export_failed)
+    val context = androidx.compose.ui.platform.LocalContext.current
     var sheetOpen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.errorMessage) {
@@ -88,6 +94,33 @@ internal fun PrivacyRoute(
         state.transientMessage?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearTransient()
+        }
+    }
+    LaunchedEffect(exportStatus) {
+        when (val status = exportStatus) {
+            is com.rodiz.arch2.feature.settings.domain.model.DataExportStatus.Ready -> {
+                val result = snackbarHostState.showSnackbar(
+                    message = exportReadyMsg,
+                    actionLabel = exportOpenLabel,
+                    duration = androidx.compose.material3.SnackbarDuration.Long,
+                )
+                if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                    runCatching {
+                        context.startActivity(
+                            android.content.Intent(
+                                android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse(status.downloadUrl),
+                            ),
+                        )
+                    }
+                }
+                viewModel.onExportAcknowledged()
+            }
+            is com.rodiz.arch2.feature.settings.domain.model.DataExportStatus.Failed -> {
+                snackbarHostState.showSnackbar(status.reason ?: exportFailedMsg)
+                viewModel.onExportAcknowledged()
+            }
+            else -> Unit
         }
     }
     val deleteErrorMessage = deleteState.errorRes?.let { stringResource(it) }
@@ -127,12 +160,17 @@ internal fun PrivacyRoute(
             paused = state.paused,
             blockedCount = state.blockedCount,
             deletionDaysRemaining = deleteState.pendingDeletion?.let { deleteState.daysRemaining.toInt() },
+            isExportPending = exportStatus is com.rodiz.arch2.feature.settings.domain.model.DataExportStatus.Pending,
             onBack = onBack,
             onTogglePause = viewModel::onTogglePause,
             onOpenBlockedOwners = onOpenBlockedOwners,
             onOpenDeleteAccount = {
                 deleteSheetViewModel.onSheetOpen()
                 sheetOpen = true
+            },
+            onDownloadData = {
+                viewModel.onRequestDataExport()
+                viewModel.notifyComingSoon(exportStartedMsg)
             },
             onComingSoon = { viewModel.notifyComingSoon(comingSoonMessage) },
         )
@@ -158,10 +196,12 @@ private fun PrivacyContent(
     paused: Boolean,
     blockedCount: Int,
     deletionDaysRemaining: Int?,
+    isExportPending: Boolean,
     onBack: () -> Unit,
     onTogglePause: (Boolean) -> Unit,
     onOpenBlockedOwners: () -> Unit,
     onOpenDeleteAccount: () -> Unit,
+    onDownloadData: () -> Unit,
     onComingSoon: () -> Unit,
 ) {
     Column(
@@ -206,10 +246,24 @@ private fun PrivacyContent(
                 iconBackground = BrandColors.MintTint,
                 iconTint = BrandColors.MintLeaf,
                 title = stringResource(R.string.privacy_download_title),
-                subtitle = stringResource(R.string.privacy_download_subtitle),
+                subtitle = if (isExportPending) {
+                    stringResource(R.string.privacy_download_subtitle_pending)
+                } else {
+                    stringResource(R.string.privacy_download_subtitle)
+                },
                 titleColor = MaterialTheme.colorScheme.onSurface,
-                onClick = onComingSoon,
-                trailing = { ChevronTrailing() },
+                onClick = onDownloadData,
+                trailing = {
+                    if (isExportPending) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = BrandColors.CoralDeep,
+                        )
+                    } else {
+                        ChevronTrailing()
+                    }
+                },
                 testTag = "privacy_row_download",
             )
             RowDivider()
@@ -497,10 +551,12 @@ private fun PrivacyScreenPreviewDefault() {
                 paused = false,
                 blockedCount = 0,
                 deletionDaysRemaining = null,
+                isExportPending = false,
                 onBack = {},
                 onTogglePause = {},
                 onOpenBlockedOwners = {},
                 onOpenDeleteAccount = {},
+                onDownloadData = {},
                 onComingSoon = {},
             )
         }
@@ -517,10 +573,12 @@ private fun PrivacyScreenPreviewPopulated() {
                 paused = true,
                 blockedCount = 3,
                 deletionDaysRemaining = 27,
+                isExportPending = false,
                 onBack = {},
                 onTogglePause = {},
                 onOpenBlockedOwners = {},
                 onOpenDeleteAccount = {},
+                onDownloadData = {},
                 onComingSoon = {},
             )
         }

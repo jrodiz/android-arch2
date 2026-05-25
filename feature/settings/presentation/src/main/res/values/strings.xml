@@ -100,7 +100,12 @@
     <string name="privacy_section_data">Data</string>
     <string name="privacy_section_danger_zone">Danger zone</string>
     <string name="privacy_download_title">Download my data</string>
-    <string name="privacy_download_subtitle">Email a copy of your profile + matches</string>
+    <string name="privacy_download_subtitle">A JSON copy of your profile, pets, matches, likes</string>
+    <string name="privacy_download_subtitle_pending">Generating your export…</string>
+    <string name="privacy_export_started">Generating your data export — we\'ll let you know when it\'s ready.</string>
+    <string name="privacy_export_ready">Your data export is ready</string>
+    <string name="privacy_export_open">Open</string>
+    <string name="privacy_export_failed">Couldn\'t generate your data export. Try again later.</string>
     <string name="privacy_policy_title">Privacy policy</string>
     <string name="privacy_policy_subtitle">How TinPet uses your data</string>
     <string name="privacy_delete_title">Delete account</string>

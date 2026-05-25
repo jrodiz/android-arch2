@@ -119,6 +119,17 @@ service cloud.firestore {
       allow write:  if request.auth != null && uid == request.auth.uid;
     }
 
+    // Data-export requests — private per user. Clients can create with just
+    // a `requestedAt` timestamp; the Cloud Function fills in status / downloadUrl
+    // / expiresAt server-side. Reads are scoped so a client can observe its own
+    // request progress.
+    match /dataExports/{uid} {
+      allow read:   if request.auth != null && uid == request.auth.uid;
+      allow create: if request.auth != null && uid == request.auth.uid;
+      allow update: if false;
+      allow delete: if request.auth != null && uid == request.auth.uid;
+    }
+
     // FCM tokens are write-only from clients (Cloud Functions read them with admin
     // privileges to fan out push notifications).
     match /fcmTokens/{tokenId} {
