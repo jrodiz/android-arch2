@@ -107,6 +107,12 @@
     <string name="privacy_delete_subtitle">30-day grace period before hard delete</string>
     <string name="privacy_coming_soon">Coming soon</string>
 
+    <!-- Filters -->
+    <plurals name="filters_apply_cta_pets">
+        <item quantity="one">%1$d pet</item>
+        <item quantity="other">%1$d pets</item>
+    </plurals>
+
     <!-- Delete account bottom sheet -->
     <string name="delete_sheet_headline">Delete your account?</string>
     <string name="delete_sheet_body_30_days">30 days</string>

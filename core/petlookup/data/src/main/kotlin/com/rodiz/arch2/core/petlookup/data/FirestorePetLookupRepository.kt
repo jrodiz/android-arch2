@@ -57,11 +57,15 @@ private fun DocumentSnapshot.toPetDisplay(): PetDisplay? {
     // can render a quick thumbnail without parsing the full photo schema.
     val photos = get("photos") as? List<*>
     val avatarUrl = photos?.firstNotNullOfOrNull { (it as? Map<*, *>)?.get("url") as? String }
+    val intents = (get("intents") as? List<*>)
+        ?.mapNotNullTo(mutableSetOf()) { it as? String }
+        ?: emptySet()
     return PetDisplay(
         id = id,
         ownerId = ownerId,
         name = name,
         species = species,
         avatarUrl = avatarUrl,
+        intents = intents,
     )
 }

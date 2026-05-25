@@ -13,4 +13,10 @@ data class PetDisplay(
     val name: String,
     val species: String?,
     val avatarUrl: String?,
+    /**
+     * Intent enum names (PLAYDATE / ADOPTION / FRIENDSHIP). Stored as strings so
+     * this module stays a pure JVM module with no dependency on `:feature:pet:domain`;
+     * consumers that need the typed enum convert via `Intent.valueOf(name)`.
+     */
+    val intents: Set<String> = emptySet(),
 )

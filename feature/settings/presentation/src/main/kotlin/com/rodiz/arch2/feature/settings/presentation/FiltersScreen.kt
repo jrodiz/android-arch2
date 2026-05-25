@@ -105,6 +105,7 @@ internal fun FiltersRoute(
             }
 
             ApplyCta(
+                count = state.matchingPetCount,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(horizontal = 20.dp, vertical = 20.dp),
@@ -438,6 +439,7 @@ private fun SpeciesChip(
 
 @Composable
 private fun ApplyCta(
+    count: Int?,
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
@@ -452,8 +454,18 @@ private fun ApplyCta(
             .fillMaxWidth()
             .height(60.dp),
     ) {
+        val label = if (count != null) {
+            val petsLabel = androidx.compose.ui.res.pluralStringResource(
+                id = R.plurals.filters_apply_cta_pets,
+                count = count,
+                count,
+            )
+            "Apply filters · $petsLabel"
+        } else {
+            "Apply filters"
+        }
         Text(
-            text = "Apply filters",
+            text = label,
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
             color = Color.White,
         )

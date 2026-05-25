@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodiz.arch2.core.filters.domain.FilterPrefs
 import com.rodiz.arch2.core.filters.domain.FilterPrefsRepository
+import com.rodiz.arch2.core.petlookup.domain.PetLookupRepository
+import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.pet.domain.model.Intent
 import com.rodiz.arch2.feature.pet.domain.model.Species
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,11 +23,21 @@ import javax.inject.Inject
 internal data class FiltersUiState(
     val isLoading: Boolean = true,
     val prefs: FilterPrefs = FilterPrefs.DEFAULT,
+    /**
+     * Approximate count of pets that would survive the current filter prefs, used
+     * by the Apply CTA suffix. Approximate because we filter on species + intents
+     * client-side over the [PetLookupRepository] snapshot — distance, blocked owners,
+     * paused pets, and own-pet exclusion aren't applied here. Null while the first
+     * pet snapshot is loading.
+     */
+    val matchingPetCount: Int? = null,
 )
 
 @HiltViewModel
 internal class FiltersViewModel @Inject constructor(
     private val repo: FilterPrefsRepository,
+    private val petLookup: PetLookupRepository,
+    private val sessionRepository: SessionRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FiltersUiState())
@@ -34,13 +47,25 @@ internal class FiltersViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            repo.observePrefs()
+            combine(repo.observePrefs(), petLookup.observeAll()) { prefs, pets ->
+                prefs to pets
+            }
                 .catch { /* swallow — UI stays on whatever it already had */ }
-                .collect { prefs ->
+                .collect { (prefs, pets) ->
+                    val myUid = sessionRepository.current()?.userId
+                    val speciesNames = prefs.species.mapTo(mutableSetOf()) { it.name }
+                    val intentNames = prefs.intents.mapTo(mutableSetOf()) { it.name }
+                    val count = pets.values.count { pet ->
+                        pet.ownerId != myUid &&
+                            pet.species in speciesNames &&
+                            pet.intents.any { it in intentNames }
+                    }
                     if (debounceJob?.isActive != true) {
-                        _uiState.update { it.copy(isLoading = false, prefs = prefs) }
+                        _uiState.update {
+                            it.copy(isLoading = false, prefs = prefs, matchingPetCount = count)
+                        }
                     } else {
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update { it.copy(isLoading = false, matchingPetCount = count) }
                     }
                 }
         }
