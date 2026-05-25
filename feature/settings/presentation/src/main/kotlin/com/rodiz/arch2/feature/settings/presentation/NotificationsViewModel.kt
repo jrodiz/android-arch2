@@ -72,7 +72,12 @@ internal class NotificationsViewModel @Inject constructor(
     }
 
     private fun patch(mutate: (NotificationPrefs) -> NotificationPrefs) {
-        val next = mutate(_uiState.value.prefs)
+        // Stamp the current device IANA timezone on every write so the Cloud
+        // Function evaluates quiet-hours against the user's wall clock instead
+        // of server UTC. java.util.TimeZone.getDefault().id is "America/New_York"
+        // style on modern devices — exactly what Intl.DateTimeFormat expects
+        // server-side.
+        val next = mutate(_uiState.value.prefs).copy(timezone = java.util.TimeZone.getDefault().id)
         _uiState.update { it.copy(prefs = next) }
         debounceJob?.cancel()
         // 200ms debounce — multiple toggles in a row coalesce into one write.

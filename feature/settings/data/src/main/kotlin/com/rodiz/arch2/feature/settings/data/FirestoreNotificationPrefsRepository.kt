@@ -55,7 +55,7 @@ internal class FirestoreNotificationPrefsRepository @Inject constructor(
     }
 }
 
-private fun NotificationPrefs.toMap(): Map<String, Any> = mapOf(
+private fun NotificationPrefs.toMap(): Map<String, Any?> = mapOf(
     "newMatch" to newMatch,
     "newMessage" to newMessage,
     "someoneLiked" to someoneLiked,
@@ -63,6 +63,7 @@ private fun NotificationPrefs.toMap(): Map<String, Any> = mapOf(
     "quietHoursEnabled" to quietHoursEnabled,
     "quietHoursStartMinutes" to quietHoursStartMinutes,
     "quietHoursEndMinutes" to quietHoursEndMinutes,
+    "tz" to timezone,
 )
 
 private fun Map<String, Any?>?.toPrefsOrDefault(): NotificationPrefs {
@@ -79,5 +80,6 @@ private fun Map<String, Any?>?.toPrefsOrDefault(): NotificationPrefs {
             ?: d.quietHoursStartMinutes,
         quietHoursEndMinutes = (this["quietHoursEndMinutes"] as? Number)?.toInt()
             ?: d.quietHoursEndMinutes,
+        timezone = this["tz"] as? String,
     )
 }

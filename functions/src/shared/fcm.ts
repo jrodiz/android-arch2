@@ -20,6 +20,8 @@ interface NotificationPrefs {
   quietHoursEnabled?: boolean;
   quietHoursStartMinutes?: number;
   quietHoursEndMinutes?: number;
+  /** IANA timezone id written by the Android client (e.g. "America/New_York"). */
+  tz?: string;
 }
 
 /**
@@ -30,11 +32,9 @@ interface NotificationPrefs {
  *   - the user enabled quiet hours and the server clock is currently inside
  *     that window (caveat below)
  *
- * Quiet-hours TZ caveat: the user's timezone isn't stored yet, so the window
- * is evaluated against server UTC. This is wrong for users not on UTC — a
- * follow-up adds `notifications.tz` to /owners/{uid} so the client can write
- * its IANA zone alongside the start/end minutes. For now: acceptable v1
- * because the alternative is zero server-side enforcement.
+ * Quiet hours are evaluated against the user's local wall clock using the IANA
+ * timezone the Android client stamps on every prefs write (`notifications.tz`).
+ * Prefs written before that field existed fall back to UTC.
  *
  * Stale tokens (UNREGISTERED / INVALID_ARGUMENT from FCM) are deleted in-place
  * so the next push doesn't waste a multicast slot on them.
@@ -111,11 +111,34 @@ function isInQuietHours(prefs: NotificationPrefs): boolean {
   const start = prefs.quietHoursStartMinutes;
   const end = prefs.quietHoursEndMinutes;
   if (typeof start !== "number" || typeof end !== "number" || start === end) return false;
-  const now = new Date();
-  const nowMinutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const nowMinutes = nowMinutesInTz(prefs.tz);
   if (start < end) {
     return nowMinutes >= start && nowMinutes < end;
   }
   // Wrap past midnight: e.g. 22:00 → 08:00 means nowMinutes >= 22:00 OR < 08:00.
   return nowMinutes >= start || nowMinutes < end;
+}
+
+/**
+ * Minutes-of-day for `new Date()` evaluated in the given IANA timezone. Falls
+ * back to UTC when `tz` is null/undefined (legacy prefs) or an unknown id
+ * (`Intl.DateTimeFormat` throws on invalid zones).
+ */
+function nowMinutesInTz(tz?: string): number {
+  const now = new Date();
+  if (!tz) return now.getUTCHours() * 60 + now.getUTCMinutes();
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(now);
+    const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
+    const minute = Number(parts.find((p) => p.type === "minute")?.value ?? "0");
+    return hour * 60 + minute;
+  } catch {
+    logger.warn(`Invalid quiet-hours tz "${tz}", falling back to UTC`);
+    return now.getUTCHours() * 60 + now.getUTCMinutes();
+  }
 }
