@@ -68,6 +68,7 @@ private const val MAX_ACTIVE_PETS = 5
 internal fun MyPetsRoute(
     onAddPet: () -> Unit,
     onOpenPet: (PetId) -> Unit,
+    onEditPet: (PetId) -> Unit,
     onBack: () -> Unit,
     viewModel: MyPetsViewModel = hiltViewModel(),
 ) {
@@ -105,6 +106,7 @@ internal fun MyPetsRoute(
                     archived = state.archivedPets,
                     onAddPet = onAddPet,
                     onOpenPet = onOpenPet,
+                    onEditPet = onEditPet,
                     onRestore = viewModel::restore,
                 )
             }
@@ -315,6 +317,7 @@ private fun PetsGrid(
     archived: List<Pet>,
     onAddPet: () -> Unit,
     onOpenPet: (PetId) -> Unit,
+    onEditPet: (PetId) -> Unit,
     onRestore: (Pet) -> Unit,
 ) {
     var showArchived by remember { mutableStateOf(false) }
@@ -333,7 +336,7 @@ private fun PetsGrid(
             PetThumbnailCard(
                 pet = pet,
                 onClick = { onOpenPet(pet.id) },
-                onEdit = { onOpenPet(pet.id) },
+                onEdit = { onEditPet(pet.id) },
             )
         }
         if (showAddTile) {
@@ -355,7 +358,7 @@ private fun PetsGrid(
                         PetThumbnailCard(
                             pet = pet,
                             onClick = { onOpenPet(pet.id) },
-                            onEdit = { onOpenPet(pet.id) },
+                            onEdit = { onEditPet(pet.id) },
                             modifier = Modifier.alpha(0.7f),
                         )
                         Spacer(Modifier.height(6.dp))

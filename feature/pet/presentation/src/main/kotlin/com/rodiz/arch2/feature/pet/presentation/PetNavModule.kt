@@ -24,6 +24,8 @@ internal object PetNavModule {
             MyPetsRoute(
                 onAddPet = { navigator.goTo(AddPet) },
                 onOpenPet = { navigator.goTo(PetDetail(it.value)) },
+                // Pencil overlay skips the detail preview and jumps straight to Edit.
+                onEditPet = { navigator.goTo(EditPet(it.value)) },
                 onBack = { navigator.goBack() },
             )
         }

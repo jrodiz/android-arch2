@@ -3,6 +3,8 @@ package com.rodiz.arch2.feature.deck.presentation
 import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -44,7 +47,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -188,7 +193,14 @@ private fun PhotoBlock(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier) {
-        val photoUrl = pet.photos.firstOrNull()?.let { p ->
+        // Stories-style photo cycling: tap left half = previous, right half = next.
+        // Wraps at the ends so a single tap-tap-tap pattern naturally scrolls
+        // through every photo without forcing the user to backtrack.
+        var currentIndex by remember(pet.id.value) { mutableStateOf(0) }
+        val photoCount = pet.photos.size.coerceAtLeast(1)
+        val clampedIndex = currentIndex.coerceIn(0, photoCount - 1)
+        val currentPhoto = pet.photos.getOrNull(clampedIndex)
+        val photoUrl = currentPhoto?.let { p ->
             (p.source as? PhotoSource.Remote)?.downloadUrl
                 ?: (p.source as? PhotoSource.Local)?.uri
         }
@@ -248,8 +260,39 @@ private fun PhotoBlock(
             }
         }
 
-        // Story segment row (decorative — photo cycling is deferred per plan §3).
-        val segmentCount = pet.photos.size.coerceIn(1, 6)
+        // Invisible tap-targets for stories-style cycling. Left half = previous
+        // photo (with wraparound to the last), right half = next (with wrap to
+        // the first). Placed beneath the back chevron + segment row so taps on
+        // those still take precedence.
+        if (photoCount > 1) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {
+                            currentIndex = (clampedIndex - 1 + photoCount) % photoCount
+                        },
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .weight(1f)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {
+                            currentIndex = (clampedIndex + 1) % photoCount
+                        },
+                )
+            }
+        }
+
+        // Story segment row — highlights the active index now that cycling is wired.
+        val segmentCount = photoCount.coerceAtMost(6)
         Row(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -265,7 +308,7 @@ private fun PhotoBlock(
                         .weight(1f)
                         .clip(RoundedCornerShape(percent = 50))
                         .background(
-                            if (index == 0) Color.White else Color.White.copy(alpha = 0.35f),
+                            if (index == clampedIndex) Color.White else Color.White.copy(alpha = 0.35f),
                         ),
                 )
             }
