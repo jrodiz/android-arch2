@@ -200,6 +200,48 @@ class SignUpViewModelTest {
         }
     }
 
+    @Test
+    fun `canSubmit is false when terms are unchecked even with all fields valid`() = runTest(testDispatcher) {
+        val vm = newViewModel()
+        fillValid(vm)
+        // Default termsAccepted = false; canSubmit should still be false.
+        assertFalse(vm.state.value.termsAccepted)
+        assertFalse(vm.state.value.canSubmit)
+    }
+
+    @Test
+    fun `ToggleTerms flips termsAccepted and unlocks canSubmit when all valid`() =
+        runTest(testDispatcher) {
+            val vm = newViewModel()
+            fillValid(vm)
+            assertFalse(vm.state.value.canSubmit)
+            vm.onAction(SignUpAction.ToggleTerms)
+            assertTrue(vm.state.value.termsAccepted)
+            assertTrue(vm.state.value.canSubmit)
+            // Toggling again should re-block.
+            vm.onAction(SignUpAction.ToggleTerms)
+            assertFalse(vm.state.value.termsAccepted)
+            assertFalse(vm.state.value.canSubmit)
+        }
+
+    @Test
+    fun `TermsLinkTapped emits OpenTerms`() = runTest(testDispatcher) {
+        val vm = newViewModel()
+        vm.events.test {
+            vm.onAction(SignUpAction.TermsLinkTapped)
+            assertEquals(SignUpEvent.OpenTerms, awaitItem())
+        }
+    }
+
+    @Test
+    fun `PrivacyLinkTapped emits OpenPrivacyPolicy`() = runTest(testDispatcher) {
+        val vm = newViewModel()
+        vm.events.test {
+            vm.onAction(SignUpAction.PrivacyLinkTapped)
+            assertEquals(SignUpEvent.OpenPrivacyPolicy, awaitItem())
+        }
+    }
+
     private fun fillValid(vm: SignUpViewModel) {
         fillValidExceptConfirm(vm)
         vm.onAction(SignUpAction.ConfirmPasswordChanged("password1"))
