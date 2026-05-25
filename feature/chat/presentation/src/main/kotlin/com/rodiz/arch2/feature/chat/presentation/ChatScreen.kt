@@ -500,11 +500,14 @@ private fun DateSeparator(label: String) {
 
 @Composable
 private fun MessageRow(message: Message, isMine: Boolean, tz: TimeZone) {
-    val textColor = if (isMine) Color.White else MaterialTheme.colorScheme.onSurface
-    // Ghost-white outgoing text is intentionally low-contrast per the mock.
-    // See plan §10 for the accessibility fallback if QA pushes back.
+    // Brand-coral for outgoing messages — readable on the cream background (AA Large
+    // for body text, much better than the prior pure-white at ~1:1) while keeping
+    // the brand differentiation between mine (coral, right-aligned) and theirs
+    // (dark, left-aligned). Replaces the documented contrast compromise from the
+    // chat-redesign-conversation.md §10 ghost-white fallback.
+    val textColor = if (isMine) BrandColors.CoralDeep else MaterialTheme.colorScheme.onSurface
     val timestampColor = if (isMine) {
-        Color.White.copy(alpha = 0.85f)
+        BrandColors.CoralDeep.copy(alpha = 0.75f)
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
     }
