@@ -323,7 +323,7 @@ private fun LikeCard(
     val nowMs = remember { System.currentTimeMillis() }
     val likedAtMs = like.likedAt.toEpochMilliseconds()
     val timeLabel = relativeTimeLabel(nowMs = nowMs, thenMs = likedAtMs)
-    val distanceBucket = remember(like.key.value) { syntheticDistanceBucket(like.key.value) }
+    val distanceBucket = like.distanceBucket
     val intent = remember(like.anchorPet.intents) { displayIntent(like.anchorPet.intents) }
 
     Surface(
@@ -426,7 +426,8 @@ private fun LikeCard(
                     )
                     Spacer(Modifier.width(3.dp))
                     Text(
-                        text = distanceLabel(distanceBucket),
+                        text = distanceBucket?.let { distanceLabel(it) }
+                            ?: stringResource(R.string.likes_distance_unknown),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White.copy(alpha = 0.85f),
                     )
@@ -562,18 +563,6 @@ private fun displayIntent(intents: Set<PetIntent>): PetIntent? = when {
     PetIntent.FRIENDSHIP in intents -> PetIntent.FRIENDSHIP
     PetIntent.ADOPTION in intents -> PetIntent.ADOPTION
     else -> null
-}
-
-/**
- * Stand-in for a real per-card distance bucket. Hashes the like key so every card stays stable
- * across recompositions. Swap to a real `IncomingLike.distanceBucket` when the data layer threads
- * owner locations through — tracked in `plans/likes-you-redesign-grid.md` decision D3.
- */
-// TODO(distance): replace with `like.distanceBucket` once IncomingLike carries one.
-private fun syntheticDistanceBucket(keyValue: String): DistanceBucket {
-    val cases = DistanceBucket.entries
-    val idx = (keyValue.hashCode().ushr(1)) % cases.size
-    return cases[idx]
 }
 
 @Composable

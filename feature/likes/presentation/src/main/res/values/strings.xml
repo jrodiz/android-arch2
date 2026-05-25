@@ -32,4 +32,5 @@
     <string name="likes_distance_5_15">5–15 km</string>
     <string name="likes_distance_15_50">15–50 km</string>
     <string name="likes_distance_over_50">50+ km</string>
+    <string name="likes_distance_unknown">Distance unknown</string>
 </resources>

@@ -10,6 +10,7 @@ import com.rodiz.arch2.core.common.geo.Haversine
 import com.rodiz.arch2.core.ownerlookup.domain.OwnerLookupRepository
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.deck.domain.model.DeckCard
+import com.rodiz.arch2.feature.deck.domain.model.DistanceBucket
 import com.rodiz.arch2.feature.deck.domain.model.DeckSnapshot
 import com.rodiz.arch2.feature.deck.domain.model.DeckState
 import com.rodiz.arch2.core.filters.domain.FilterPrefs
@@ -89,7 +90,19 @@ internal class FirestoreDeckRepository @Inject constructor(
                 .filter { it.species in filters.species }
                 .filter { it.intents.any { intent -> intent in filters.intents } }
                 .filter { pet -> withinDistance(myLoc, locations[pet.ownerId], maxKm) }
-                .map { pet -> DeckCard(pet = pet, owner = owners[pet.ownerId]) }
+                .map { pet ->
+                    val theirLoc = locations[pet.ownerId]
+                    val bucket = if (myLoc != null && theirLoc != null) {
+                        val km = Haversine.distanceKm(
+                            myLoc.latitude, myLoc.longitude,
+                            theirLoc.latitude, theirLoc.longitude,
+                        )
+                        DistanceBucket.fromKm(km)
+                    } else {
+                        null
+                    }
+                    DeckCard(pet = pet, owner = owners[pet.ownerId], distanceBucket = bucket)
+                }
             val state = if (cards.isEmpty()) DeckState.EXHAUSTED else DeckState.READY
             DeckSnapshot(cards, state)
         }.collect { emit(it) }

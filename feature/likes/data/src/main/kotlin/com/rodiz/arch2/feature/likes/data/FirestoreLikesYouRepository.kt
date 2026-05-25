@@ -5,8 +5,11 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
+import com.rodiz.arch2.core.common.geo.Haversine
 import com.rodiz.arch2.core.session.domain.SessionRepository
+import com.rodiz.arch2.feature.deck.domain.model.DistanceBucket
 import com.rodiz.arch2.feature.deck.domain.model.SwipeAction
 import com.rodiz.arch2.feature.deck.domain.model.SwipeResult
 import com.rodiz.arch2.feature.deck.domain.repository.DeckRepository
@@ -44,6 +47,7 @@ internal class FirestoreLikesYouRepository @Inject constructor(
     private val likesCol get() = firestore.collection("likes")
     private val passedLikesCol get() = firestore.collection("passedLikes")
     private val petsCol get() = firestore.collection("pets")
+    private val ownersCol get() = firestore.collection("owners")
 
     override fun observeLikesYou(): Flow<List<IncomingLike>> = callbackFlow {
         val uid = sessionRepo.current()?.userId
@@ -70,16 +74,20 @@ internal class FirestoreLikesYouRepository @Inject constructor(
                 // we don't block the snapshot callback thread (the listener runs on main by default).
                 launch {
                     val passedSet = loadPassedSet(uid)
+                    val myLoc = loadOwnerLocation(uid)
                     val raws = docs.mapNotNull { it.toRawLikeOrNull() }
                         .filterNot { passedKey(uid, it) in passedSet }
                     val resolved = raws.mapNotNull { raw ->
                         val anchor = resolveAnchorPet(raw.fromOwnerId) ?: return@mapNotNull null
+                        val theirLoc = loadOwnerLocation(raw.fromOwnerId)
+                        val bucket = bucketBetween(myLoc, theirLoc)
                         IncomingLike(
                             key = LikeKey(raw.key),
                             fromOwnerId = raw.fromOwnerId,
                             toPetId = PetId(raw.toPetId),
                             anchorPet = anchor,
                             likedAt = raw.createdAt,
+                            distanceBucket = bucket,
                         )
                     }
                     send(resolved)
@@ -94,6 +102,21 @@ internal class FirestoreLikesYouRepository @Inject constructor(
 
     private fun passedKey(uid: String, raw: RawLike): String =
         "${uid}_${raw.fromOwnerId}_${raw.toPetId}"
+
+    /**
+     * Reads an owner's stored GeoPoint, or null when the doc / location is absent.
+     * Best-effort: any Firestore failure resolves to null so a transient network
+     * error doesn't block the whole likes flow from emitting.
+     */
+    private suspend fun loadOwnerLocation(ownerId: String): FirestoreGeoPoint? = runCatching {
+        ownersCol.document(ownerId).get().await().get("location") as? FirestoreGeoPoint
+    }.getOrNull()
+
+    private fun bucketBetween(mine: FirestoreGeoPoint?, theirs: FirestoreGeoPoint?): DistanceBucket? {
+        if (mine == null || theirs == null) return null
+        val km = Haversine.distanceKm(mine.latitude, mine.longitude, theirs.latitude, theirs.longitude)
+        return DistanceBucket.fromKm(km)
+    }
 
     /** Picks the liker's most-recently-updated ACTIVE pet. Returns null if they have none. */
     private suspend fun resolveAnchorPet(fromOwnerId: String): Pet? {
