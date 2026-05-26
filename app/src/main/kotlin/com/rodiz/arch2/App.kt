@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.pm.ApplicationInfo
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.getSystemService
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
@@ -30,9 +31,19 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        forceLightTheme()
         createNotificationChannels()
         configureCrashlyticsCollection()
         observeSession()
+    }
+
+    // Compose composables paint via TinPetTheme (forced to LightScheme), but
+    // AppCompat-rendered surfaces — system dialogs, DatePicker / TimePicker
+    // for quiet hours, the action bar in third-party activities — still
+    // respect the system night mode. Pinning AppCompat to MODE_NIGHT_NO keeps
+    // those consistent until we color-audit the dark palette for v2.
+    private fun forceLightTheme() {
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
     }
 
     private fun createNotificationChannels() {
