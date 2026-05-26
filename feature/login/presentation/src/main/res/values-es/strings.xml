@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_welcome_title">Hola de nuevo</string>
+    <string name="login_welcome_subtitle">Encontremos un nuevo amigo para tu mascota</string>
+    <string name="login_tab_sign_in">Iniciar sesión</string>
+    <string name="login_tab_sign_up">Crear cuenta</string>
+    <string name="login_email_label">Correo</string>
+    <string name="login_email_placeholder">rodiz@tinpet.com</string>
+    <string name="login_password_label">Contraseña</string>
+    <string name="login_password_placeholder">ingresa tu contraseña</string>
+    <string name="login_password_show">Mostrar contraseña</string>
+    <string name="login_password_hide">Ocultar contraseña</string>
+    <string name="login_submit">Iniciar sesión</string>
+    <string name="login_email_form_show">Iniciar con correo</string>
+    <string name="login_forgot">¿Olvidaste tu contraseña?</string>
+    <string name="login_biometric">Entrar con biometría</string>
+    <string name="login_or_divider">o continúa con</string>
+    <string name="login_continue_google">Continuar con Google</string>
+    <string name="login_google_icon_description">Google</string>
+    <string name="login_biometric_title">Confirma que eres tú</string>
+    <string name="login_biometric_subtitle">Usa la autenticación biométrica para entrar</string>
+    <string name="login_biometric_cancel">Cancelar</string>
+    <string name="login_error_dismiss">Descartar error</string>
+
+    <string name="login_error_invalid_credentials">Correo o contraseña incorrectos.</string>
+    <string name="login_error_no_network">Sin conexión. Revisa tu internet e inténtalo de nuevo.</string>
+    <string name="login_error_timeout">La solicitud tardó demasiado. Inténtalo de nuevo.</string>
+    <string name="login_error_server">Error del servidor (%1$d). Inténtalo más tarde.</string>
+    <string name="login_error_unknown">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="login_google_cancelled">Inicio con Google cancelado.</string>
+    <string name="login_google_no_account">No hay cuenta de Google en este dispositivo. Agrega una en Ajustes → Cuentas y vuelve a intentarlo.</string>
+    <string name="login_google_failed">No pudimos iniciar sesión con Google. Inténtalo de nuevo.</string>
+
+    <string name="login_validation_email_empty">El correo es obligatorio.</string>
+    <string name="login_validation_email_malformed">Ingresa un correo válido.</string>
+    <string name="login_validation_password_empty">La contraseña es obligatoria.</string>
+    <string name="login_validation_password_short">La contraseña debe tener al menos %1$d caracteres.</string>
+
+    <string name="signup_title">Crear cuenta</string>
+    <string name="signup_subtitle">En dos minutos empiezas a hacer match con mascotas cerca.</string>
+    <string name="signup_first_name">Nombre</string>
+    <string name="signup_first_name_placeholder">p. ej. Steve</string>
+    <string name="signup_last_name">Apellido</string>
+    <string name="signup_last_name_placeholder">p. ej. Rogers</string>
+    <string name="signup_confirm_password">Confirmar contraseña</string>
+    <string name="signup_submit">Crear cuenta</string>
+    <string name="signup_avatar_picker_cd">Elegir foto de perfil</string>
+    <string name="signup_avatar_picker_label">Agrega una foto (opcional) — a los dueños les encantan las caras</string>
+    <string name="signup_terms_prefix">"Acepto los "</string>
+    <string name="signup_terms_link">Términos</string>
+    <string name="signup_terms_conjunction">" y la "</string>
+    <string name="signup_privacy_link">Privacidad</string>
+    <string name="signup_coming_soon">Próximamente</string>
+    <string name="signup_avatar_clear">Quitar foto</string>
+    <string name="signup_avatar_source_title">Agregar foto de perfil</string>
+    <string name="signup_avatar_source_gallery">Elegir de la galería</string>
+    <string name="signup_avatar_source_camera">Tomar foto</string>
+    <string name="signup_warning_avatar_upload_failed">Cuenta creada, pero no pudimos subir tu foto. Puedes volver a intentarlo desde tu perfil.</string>
+    <string name="signup_validation_first_name_empty">El nombre es obligatorio.</string>
+    <string name="signup_validation_last_name_empty">El apellido es obligatorio.</string>
+    <string name="signup_validation_name_too_long">El nombre no puede tener más de %1$d caracteres.</string>
+    <string name="signup_validation_confirm_mismatch">Las contraseñas no coinciden.</string>
+    <string name="signup_error_email_in_use">Ya existe una cuenta con ese correo.</string>
+    <string name="signup_error_weak_password">Esa contraseña es muy débil — elige una más fuerte.</string>
+
+    <string name="forgot_stub_title">Olvidé mi contraseña (próximamente)</string>
+    <string name="common_back">Atrás</string>
+</resources>

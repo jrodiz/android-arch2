@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="deck_overline">Descubrir</string>
+    <string name="deck_headline">Mascotas cerca de ti</string>
+    <string name="deck_filter_action">Filtros</string>
+    <string name="deck_notifications_action">Notificaciones</string>
+    <string name="deck_distance_km_format">%1$d km</string>
+    <string name="deck_owner_with_format">con %1$s</string>
+    <string name="deck_owner_with_unknown">con alguien</string>
+    <string name="deck_action_pass">Pasar</string>
+    <string name="deck_action_rewind">Deshacer</string>
+    <string name="deck_action_boost">Boost</string>
+    <string name="deck_action_like">Like</string>
+    <string name="deck_bio_quote_format">“%1$s”</string>
+    <string name="deck_distance_unknown">Cerca</string>
+    <string name="deck_back">Atrás</string>
+    <string name="deck_add_pet_action">Agregar</string>
+    <string name="deck_petless_title">Agrega tu propia mascota para devolver el like</string>
+    <string name="deck_petless_body">Puedes mirar libremente, pero para dar like necesitas tener al menos una mascota tuya.</string>
+    <string name="deck_empty_no_more_title">No hay más mascotas cerca</string>
+    <string name="deck_empty_no_more_body">Vuelve más tarde — entran nuevas mascotas todo el tiempo.</string>
+    <string name="deck_empty_petless_title">Agrega una mascota para empezar</string>
+    <string name="deck_empty_petless_body">En TinPet las mascotas son tuyas. Toca abajo para agregar la primera.</string>
+    <string name="deck_empty_petless_action">Agregar mascota</string>
+
+    <!-- Pet details bottom-sheet (opened by tapping a deck card). -->
+    <string name="deck_detail_open_to">ABIERTO A</string>
+    <string name="deck_detail_about">SOBRE</string>
+    <string name="deck_detail_stats">DATOS</string>
+    <string name="deck_detail_size_small">Pequeño</string>
+    <string name="deck_detail_size_medium">Mediano</string>
+    <string name="deck_detail_size_large">Grande</string>
+    <string name="deck_detail_energy_calm">Tranquilo</string>
+    <string name="deck_detail_energy_medium">Medio</string>
+    <string name="deck_detail_energy_high">Alto</string>
+    <string name="deck_detail_intent_playdate">Para jugar</string>
+    <string name="deck_detail_intent_friendship">Amistad</string>
+    <string name="deck_detail_intent_adoption">Adopción</string>
+    <string name="deck_detail_like_format">Dar like a %1$s</string>
+    <string name="deck_detail_pass_action">Pasar</string>
+    <string name="deck_detail_back_action">Atrás</string>
+    <string name="deck_detail_no_bio_format">%1$s todavía no comparte su historia.</string>
+    <string name="deck_detail_unavailable">Esta mascota ya no está disponible.</string>
+    <string name="deck_detail_age_year_format">%1$s · %2$d a</string>
+    <string name="deck_detail_age_year_approx_format">%1$s · ~%2$d a</string>
+    <string name="deck_detail_species_distance_format">%1$s · %2$s</string>
+
+    <plurals name="deck_intents_count">
+        <item quantity="one">1 intención</item>
+        <item quantity="other">%1$d intenciones</item>
+    </plurals>
+</resources>

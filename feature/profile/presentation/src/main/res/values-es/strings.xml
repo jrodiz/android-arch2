@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_title">Perfil</string>
+    <string name="profile_signed_in_as">Sesión iniciada como %1$s</string>
+    <string name="profile_sign_out">Cerrar sesión</string>
+
+    <!-- Redesigned profile screen -->
+    <string name="profile_section_my_pets">Mis mascotas</string>
+    <string name="profile_section_manage">Administrar</string>
+    <string name="profile_see_all">Ver todas</string>
+    <string name="profile_stat_pets">Mascotas</string>
+    <string name="profile_stat_matches">Matches</string>
+    <string name="profile_stat_member">Miembro</string>
+    <string name="profile_stat_unavailable">—</string>
+    <string name="profile_welcome_fallback">Bienvenido</string>
+    <string name="profile_pet_age_short">%1$d a</string>
+    <string name="profile_manage_my_pets_subtitle_plural">%1$d mascotas</string>
+    <string name="profile_manage_my_pets_subtitle_one">1 mascota</string>
+    <string name="profile_manage_my_pets_subtitle_empty">Agrega tu primera mascota</string>
+    <string name="profile_manage_settings_title">Ajustes</string>
+    <string name="profile_manage_settings_subtitle">Filtros, privacidad, cuenta</string>
+    <string name="profile_manage_help_title">Ayuda y seguridad</string>
+    <string name="profile_manage_help_subtitle">Reportar, bloquear, preguntas frecuentes</string>
+    <string name="profile_add_pet_cd">Agregar mascota</string>
+    <string name="profile_edit_cd">Editar perfil</string>
+    <string name="profile_coming_soon">Próximamente</string>
+</resources>

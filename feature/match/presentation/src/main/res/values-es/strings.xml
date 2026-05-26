@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="match_inbox_eyebrow">Tu bandeja</string>
+    <string name="match_inbox_title">Matches</string>
+    <string name="match_section_new">Matches nuevos</string>
+    <string name="match_section_conversations">Conversaciones</string>
+    <string name="match_see_all">Ver todos</string>
+    <string name="match_search_cd">Buscar en matches</string>
+    <string name="match_coming_soon">Próximamente</string>
+    <string name="match_row_default_preview">Salúdalo</string>
+</resources>

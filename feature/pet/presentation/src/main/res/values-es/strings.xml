@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pet_screen_title">Mis mascotas</string>
+
+    <string name="pet_a11y_back">Atrás</string>
+    <string name="pet_a11y_add">Agregar mascota</string>
+    <string name="pet_a11y_edit_pet">Editar a %1$s</string>
+    <string name="pet_a11y_feature_pet">Destacar a %1$s en la pantalla de inicio</string>
+    <string name="pet_a11y_unfeature_pet">Dejar de destacar a %1$s</string>
+    <string name="pet_featured_limit_reached">Puedes destacar hasta 3 mascotas</string>
+
+    <string name="pet_banner_subtitle_below_quota">Más mascotas = más matches. Hasta %1$d por cuenta.</string>
+    <string name="pet_banner_subtitle_at_quota">Llegaste al límite de %1$d mascotas.</string>
+
+    <string name="pet_status_active">activo</string>
+    <string name="pet_status_paused">pausado</string>
+
+    <string name="pet_intent_playdate">Para jugar</string>
+    <string name="pet_intent_friendship">Amistad</string>
+    <string name="pet_intent_adoption">Adopción</string>
+
+    <string name="pet_add_another_tile">Agregar otra mascota</string>
+
+    <string name="pet_archived_header">Archivadas</string>
+    <string name="pet_archived_show">Mostrar</string>
+    <string name="pet_archived_hide">Ocultar</string>
+    <string name="pet_restore">Restaurar</string>
+
+    <string name="pet_empty_title">Aún sin mascotas</string>
+    <string name="pet_empty_subtitle">Agrega tu primera mascota para empezar a hacer matches.</string>
+    <string name="pet_empty_cta">Agregar primera mascota</string>
+
+    <string name="pet_subtitle_approx_age">~%1$d a · %2$s</string>
+    <string name="pet_subtitle_exact_age">%1$d a · %2$s</string>
+
+    <plurals name="pet_active_count">
+        <item quantity="one">%d mascota activa</item>
+        <item quantity="other">%d mascotas activas</item>
+    </plurals>
+
+    <!-- Add a pet — Step 1 -->
+    <string name="addpet_title">Agregar mascota</string>
+    <string name="addpet_step_indicator">Paso %1$d / %2$d</string>
+    <string name="addpet_dropzone_title">Agrega hasta 6 fotos</string>
+    <string name="addpet_dropzone_hint">La primera foto es la portada de la tarjeta</string>
+    <string name="addpet_label_name">Nombre</string>
+    <string name="addpet_label_age">Edad</string>
+    <string name="addpet_label_species">Especie</string>
+    <string name="addpet_label_open_to">Abierto a (elige al menos una)</string>
+    <string name="addpet_placeholder_name">p. ej. Galleta</string>
+    <string name="addpet_placeholder_age">p. ej. 3 años</string>
+    <string name="addpet_placeholder_species">Elige especie</string>
+    <string name="addpet_action_save_draft">Guardar borrador</string>
+    <string name="addpet_action_continue">Continuar</string>
+    <string name="addpet_snackbar_draft_saved">Borrador guardado</string>
+    <string name="addpet_error_name_missing">Agrega el nombre de tu mascota</string>
+    <string name="addpet_error_photos_missing">Agrega al menos una foto</string>
+    <string name="addpet_error_species_missing">Elige una especie</string>
+    <string name="addpet_error_intent_missing">Elige al menos una intención</string>
+    <string name="addpet_a11y_remove_photo">Quitar foto</string>
+
+    <!-- Add a pet — Step 2 (personality) -->
+    <string name="addpet2_intro">Un poco de personalidad ayuda mucho. Todo esto es opcional.</string>
+    <string name="addpet2_label_breed">Raza</string>
+    <string name="addpet2_breed_placeholder">¿Qué tipo de %1$s? p. ej. Corgi</string>
+    <string name="addpet2_breed_placeholder_generic">Raza — p. ej. Corgi, Maine Coon</string>
+    <string name="addpet2_label_bio">Bio</string>
+    <string name="addpet2_bio_placeholder">Cuéntales a otros dueños cómo es %1$s — snack favorito, tarde ideal, manías…</string>
+    <string name="addpet2_bio_placeholder_generic">Cuéntales a otros dueños cómo es tu mascota — snack favorito, tarde ideal, manías…</string>
+    <string name="addpet2_bio_counter">%1$d / %2$d</string>
+    <string name="addpet2_label_size">Tamaño</string>
+    <string name="addpet2_label_energy">Energía</string>
+    <string name="addpet_action_back">Atrás</string>
+
+    <!-- Add a pet — Step 3 (review + publish) -->
+    <string name="addpet3_intro">Una última revisión. Toca Atrás para corregir algo; si no, toca Publicar.</string>
+    <string name="addpet3_section_photos">Fotos</string>
+    <string name="addpet3_section_basics">Lo básico</string>
+    <string name="addpet3_section_personality">Personalidad</string>
+    <string name="addpet3_field_bio">Bio</string>
+    <string name="addpet3_field_size">Tamaño</string>
+    <string name="addpet3_field_energy">Energía</string>
+    <string name="addpet3_field_intents">Abierto a</string>
+    <string name="addpet3_value_empty">— sin definir</string>
+    <string name="addpet3_action_publish">Publicar mascota</string>
+    <string name="addpet3_subtitle_approx">~%1$d a · %2$s</string>
+    <string name="addpet3_subtitle_exact">%1$d a · %2$s</string>
+    <string name="addpet3_error_generic">No pudimos publicar tu mascota. Inténtalo de nuevo.</string>
+</resources>

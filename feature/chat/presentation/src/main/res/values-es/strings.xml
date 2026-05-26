@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="chat_active_now">Activo ahora · &lt; 5 km</string>
+    <string name="chat_back_cd">Atrás</string>
+    <string name="chat_options_cd">Opciones del chat</string>
+    <string name="chat_options_unmatch">Deshacer match</string>
+    <string name="chat_options_block">Bloquear</string>
+    <string name="chat_options_report">Reportar</string>
+    <string name="chat_banner_title_template">Hiciste match con %1$s</string>
+    <string name="chat_banner_subtitle">Saluda · proponé un plan para jugar</string>
+    <string name="chat_date_today">Hoy</string>
+    <string name="chat_composer_placeholder_default">Mensaje…</string>
+    <string name="chat_composer_placeholder_template">Mensaje para %1$s…</string>
+    <string name="chat_send_cd">Enviar</string>
+    <string name="chat_emoji_cd">Emoji</string>
+</resources>

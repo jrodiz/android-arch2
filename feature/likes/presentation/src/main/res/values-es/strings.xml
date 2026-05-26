@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="likes_eyebrow">Recibidos</string>
+    <string name="likes_headline">Te dieron like</string>
+    <string name="likes_subtitle">Toca cualquier mascota para devolver el like y hacer match</string>
+    <string name="likes_count_format">%1$d nuevos</string>
+
+    <string name="likes_filter_all">Todos</string>
+    <string name="likes_filter_playdate">Para jugar</string>
+    <string name="likes_filter_adoption">Adopción</string>
+    <string name="likes_filter_friendship">Amistad</string>
+
+    <string name="likes_intent_playdate">Para jugar</string>
+    <string name="likes_intent_friendship">Amistad</string>
+    <string name="likes_intent_adoption">Adopción</string>
+
+    <string name="likes_card_new">NUEVO</string>
+    <string name="likes_card_age_format">%1$s, %2$d</string>
+
+    <string name="likes_empty_headline">Aún no hay nadie</string>
+    <string name="likes_empty_body">Cuando alguien le dé like a una de tus mascotas, aparecerá aquí.</string>
+    <string name="likes_empty_cta">Ir al mazo</string>
+    <string name="likes_filtered_empty_format">Aún no hay likes de %1$s</string>
+
+    <string name="likes_time_just_now">ahora</string>
+    <string name="likes_time_minutes_format">%1$dm</string>
+    <string name="likes_time_hours_format">%1$dh</string>
+    <string name="likes_time_days_format">%1$dd</string>
+    <string name="likes_time_weeks_format">%1$dsem</string>
+
+    <string name="likes_distance_under_5">&lt; 5 km</string>
+    <string name="likes_distance_5_15">5–15 km</string>
+    <string name="likes_distance_15_50">15–50 km</string>
+    <string name="likes_distance_over_50">50+ km</string>
+    <string name="likes_distance_unknown">Distancia desconocida</string>
+</resources>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_back_cd">Atrás</string>
+
+    <string name="settings_section_account">Cuenta</string>
+    <string name="settings_row_profile_title">Perfil</string>
+    <string name="settings_row_profile_subtitle">Nombre, avatar, bio</string>
+
+    <string name="settings_section_matching">Matching</string>
+    <string name="settings_row_filters_title">Filtros</string>
+    <string name="settings_row_filters_subtitle">Distancia, intención, especie</string>
+    <string name="settings_row_featured_title">Destacadas al iniciar sesión</string>
+    <string name="settings_row_featured_subtitle">Elige hasta 3 mascotas</string>
+
+    <string name="settings_featured_title">Destacadas al iniciar sesión</string>
+    <string name="settings_featured_subtitle">Estas mascotas se ven en la pantalla de inicio — incluso después de cerrar sesión.</string>
+    <string name="settings_featured_quota_format">%1$d de %2$d seleccionadas</string>
+    <string name="settings_featured_empty_title">Agrega una mascota primero</string>
+    <string name="settings_featured_empty_subtitle">Cuando agregues una mascota, podrás destacarla en la pantalla de inicio.</string>
+    <string name="settings_featured_empty_cta">Agregar primera mascota</string>
+    <string name="settings_featured_limit_reached">Puedes destacar hasta 3 mascotas</string>
+    <string name="settings_row_notifications_title">Notificaciones</string>
+    <string name="settings_row_notifications_subtitle">Matches, mensajes, likes</string>
+    <string name="settings_row_pause_title">Pausar perfil</string>
+    <string name="settings_row_pause_subtitle">Oculta tus mascotas del mazo</string>
+
+    <string name="settings_section_safety">Seguridad</string>
+    <string name="settings_row_privacy_title">Privacidad</string>
+    <string name="settings_row_privacy_subtitle">Usuarios bloqueados, datos</string>
+    <string name="settings_row_blocked_title">Dueños bloqueados</string>
+    <plurals name="settings_row_blocked_subtitle">
+        <item quantity="one">%1$d bloqueado</item>
+        <item quantity="other">%1$d bloqueados</item>
+    </plurals>
+
+    <string name="settings_sign_out">Cerrar sesión</string>
+    <string name="settings_footer_template">TinPet v%1$s · Hecho con 🐾</string>
+
+    <!-- Blocked owners screen -->
+    <string name="blocked_title">Dueños bloqueados</string>
+    <string name="blocked_empty_headline">Nadie está bloqueado</string>
+    <string name="blocked_empty_body">Cuando bloquees a un dueño desde el chat, aparecerá aquí para que puedas desbloquearlo después.</string>
+    <string name="blocked_chip_cd">Sin dueños bloqueados</string>
+
+    <!-- Notifications screen -->
+    <string name="notifications_title">Notificaciones</string>
+    <string name="notifications_back_cd">Atrás</string>
+
+    <string name="notifications_banner_on_title">Notificaciones push activas</string>
+    <string name="notifications_banner_on_subtitle">Solo te enviaremos lo que actives abajo</string>
+    <string name="notifications_banner_off_title">Notificaciones push desactivadas</string>
+    <string name="notifications_banner_off_subtitle">Toca para activarlas en los ajustes del sistema</string>
+    <string name="notifications_banner_turn_on">Activar</string>
+    <string name="notifications_banner_icon_cd">Notificaciones</string>
+
+    <string name="notifications_section_activity">Actividad</string>
+    <string name="notifications_row_new_match_title">Nuevo match</string>
+    <string name="notifications_row_new_match_subtitle">Cuando haces match con otra mascota</string>
+    <string name="notifications_row_new_message_title">Nuevo mensaje</string>
+    <string name="notifications_row_new_message_subtitle">Cuando alguien te escribe</string>
+    <string name="notifications_row_liked_title">Alguien le dio like a tu mascota</string>
+    <string name="notifications_row_liked_subtitle">Cuando otro dueño da like a una de tus mascotas</string>
+    <string name="notifications_row_digest_title">Resumen semanal</string>
+    <string name="notifications_row_digest_subtitle">Un resumen de la actividad una vez por semana</string>
+
+    <string name="notifications_section_quiet_hours">Horas en silencio</string>
+    <string name="notifications_quiet_hours_subtitle">Sin notificaciones durante las horas en silencio</string>
+    <string name="notifications_quiet_hours_window_template">%1$s → %2$s</string>
+    <string name="notifications_quiet_hours_picker_title">Horas en silencio</string>
+    <string name="notifications_quiet_hours_picker_start">Inicio</string>
+    <string name="notifications_quiet_hours_picker_end">Fin</string>
+    <string name="notifications_quiet_hours_picker_save">Guardar</string>
+    <string name="notifications_quiet_hours_picker_cancel">Cancelar</string>
+
+    <!-- Edit profile screen -->
+    <string name="edit_profile_title">Editar perfil</string>
+    <string name="edit_profile_back_cd">Atrás</string>
+    <string name="edit_profile_save">Guardar</string>
+    <string name="edit_profile_saving">Guardando…</string>
+    <string name="edit_profile_saved">Perfil guardado</string>
+    <string name="edit_profile_change_photo">Cambiar foto</string>
+    <string name="edit_profile_label_first_name">Nombre</string>
+    <string name="edit_profile_placeholder_first_name">Tu nombre</string>
+    <string name="edit_profile_label_bio">Bio</string>
+    <string name="edit_profile_placeholder_bio">Cuéntales a otros dueños sobre ti y tus mascotas</string>
+    <string name="edit_profile_bio_counter">%1$d / %2$d</string>
+    <string name="edit_profile_location_subtitle_set">Se usa para encontrar mascotas cerca de ti</string>
+    <string name="edit_profile_location_subtitle_empty">Toca Actualizar para encontrar mascotas cerca</string>
+    <string name="edit_profile_location_empty_title">Agrega tu ciudad</string>
+    <string name="edit_profile_location_update">Actualizar</string>
+    <string name="edit_profile_location_updating">…</string>
+    <string name="edit_profile_email_verified_title">Correo verificado</string>
+    <string name="edit_profile_email_unverified_title">Correo sin verificar</string>
+    <string name="edit_profile_email_missing">Sin correo registrado</string>
+    <string name="edit_profile_avatar_cd">Foto de perfil</string>
+    <string name="edit_profile_avatar_badge_cd">Cambiar foto</string>
+    <string name="edit_profile_avatar_source_title">Cambiar foto de perfil</string>
+    <string name="edit_profile_avatar_source_gallery">Elegir de la galería</string>
+    <string name="edit_profile_avatar_source_camera">Tomar foto</string>
+    <string name="edit_profile_location_permission_denied">Permiso de ubicación denegado</string>
+    <string name="edit_profile_location_unavailable">Ubicación no disponible — intenta al aire libre con el GPS activado.</string>
+    <string name="edit_profile_location_fetch_failed">No se pudo obtener la ubicación</string>
+
+    <!-- Privacy screen -->
+    <string name="privacy_title">Privacidad</string>
+    <string name="privacy_back_cd">Atrás</string>
+    <string name="privacy_pause_title">Pausar perfil</string>
+    <string name="privacy_pause_subtitle">Oculta todas tus mascotas del mazo de otros dueños</string>
+    <string name="privacy_section_data">Datos</string>
+    <string name="privacy_section_danger_zone">Zona de riesgo</string>
+    <string name="privacy_download_title">Descargar mis datos</string>
+    <string name="privacy_download_subtitle">Una copia JSON de tu perfil, mascotas, matches y likes</string>
+    <string name="privacy_download_subtitle_pending">Generando tu exportación…</string>
+    <string name="privacy_export_started">Generando tu exportación de datos — te avisaremos cuando esté lista.</string>
+    <string name="privacy_export_ready">Tu exportación de datos está lista</string>
+    <string name="privacy_export_open">Abrir</string>
+    <string name="privacy_export_failed">No pudimos generar tu exportación. Inténtalo más tarde.</string>
+    <string name="privacy_policy_title">Política de privacidad</string>
+    <string name="privacy_policy_subtitle">Cómo usa TinPet tus datos</string>
+    <string name="privacy_delete_title">Eliminar cuenta</string>
+    <string name="privacy_delete_subtitle">30 días de gracia antes del borrado definitivo</string>
+    <string name="privacy_coming_soon">Próximamente</string>
+
+    <!-- Filters -->
+    <plurals name="filters_apply_cta_pets">
+        <item quantity="one">%1$d mascota</item>
+        <item quantity="other">%1$d mascotas</item>
+    </plurals>
+
+    <!-- Delete account bottom sheet -->
+    <string name="delete_sheet_headline">¿Eliminar tu cuenta?</string>
+    <string name="delete_sheet_body_30_days">30 días</string>
+    <string name="delete_sheet_body_format">Guardaremos tus datos por %1$s. Inicia sesión otra vez en ese plazo para restaurar todo.</string>
+    <string name="delete_sheet_will_remove">Esto eliminará</string>
+    <string name="delete_sheet_profile_row">Tu perfil y tus fotos</string>
+    <string name="delete_sheet_confirm_eyebrow">Escribe DELETE para confirmar</string>
+    <string name="delete_sheet_placeholder">DELETE</string>
+    <string name="delete_account_cta">Eliminar cuenta</string>
+    <string name="delete_sheet_keep">Conservar mi cuenta</string>
+    <string name="delete_sheet_close">Cerrar</string>
+    <string name="delete_sheet_grace_headline">Eliminación programada</string>
+    <string name="delete_sheet_grace_body_format">Tu cuenta se eliminará permanentemente en %1$s. Inicia sesión antes de ese plazo para conservarla.</string>
+    <string name="delete_sheet_grace_days_format">%1$d días</string>
+    <string name="delete_sheet_cancel_cta">Cancelar eliminación</string>
+    <string name="delete_sheet_pill_format">Programada · %1$d días</string>
+    <string name="delete_sheet_error_generic">No se pudo programar la eliminación. Inténtalo de nuevo.</string>
+    <string name="delete_sheet_error_cancel">No se pudo cancelar la eliminación. Inténtalo de nuevo.</string>
+    <string name="delete_sheet_icon_cd">Eliminar cuenta</string>
+    <plurals name="delete_summary_pets">
+        <item quantity="one">%1$d mascota — %2$s</item>
+        <item quantity="other">%1$d mascotas — %2$s</item>
+    </plurals>
+    <plurals name="delete_summary_matches">
+        <item quantity="one">%1$d match y todos los chats</item>
+        <item quantity="other">%1$d matches y todos los chats</item>
+    </plurals>
+
+    <!-- Legal pages — shared across Privacy/Settings/SignUp/Profile entry points -->
+    <string name="legal_draft_notice_title">Atento</string>
+    <string name="legal_draft_notice_body">Esta página es un borrador en desarrollo para la beta de TinPet. La versión final será revisada por nuestros abogados antes del lanzamiento — hasta entonces, considera lo que ves aquí como un resumen fiel de cómo se comporta la app, no como un contrato vinculante.</string>
+
+    <string name="legal_privacy_policy_title">Política de privacidad</string>
+    <string name="legal_privacy_what_we_collect_title">Qué recopilamos</string>
+    <string name="legal_privacy_what_we_collect_body">Al crear una cuenta recopilamos tu nombre, correo, foto de perfil y (si das permiso de ubicación) la ubicación aproximada de tu dispositivo. Por cada mascota que agregas, guardamos el nombre, edad, especie, fotos y los campos opcionales que decidas completar (bio, raza, tamaño, energía, etiquetas de intención).</string>
+    <string name="legal_privacy_how_we_use_title">Cómo los usamos</string>
+    <string name="legal_privacy_how_we_use_body">Tus mascotas aparecen en el mazo de otros dueños según los filtros de distancia, intención y especie. Los mensajes que envías a tus matches los ve solamente la otra persona en ese match — nadie más. Usamos tu correo para enviar correos de inicio de sesión y (opcionalmente) las notificaciones de actividad que actives en Ajustes → Notificaciones.</string>
+    <string name="legal_privacy_sharing_title">Quién puede ver tus datos</string>
+    <string name="legal_privacy_sharing_body">Otros usuarios con sesión iniciada en TinPet pueden ver tu nombre de dueño y tu avatar, además de los nombres, fotos, edad, especie y etiquetas de intención de tus mascotas — esa es la parte pública de la app. No pueden ver tu correo, tu ubicación exacta, tus preferencias de notificaciones ni ninguna mascota que hayas ocultado. Nunca vendemos tus datos a terceros.</string>
+    <string name="legal_privacy_rights_title">Tus derechos</string>
+    <string name="legal_privacy_rights_body">Puedes descargar una copia en JSON de todo lo que tenemos sobre ti desde Privacidad → Descargar mis datos. Puedes eliminar tu cuenta desde Privacidad → Eliminar cuenta — eso programa una eliminación con 30 días de gracia. Dentro de esos 30 días, iniciar sesión otra vez restaura todo; tras los 30 días, todos los datos se borran definitivamente de Firestore, Storage y Auth.</string>
+
+    <string name="legal_terms_title">Términos del servicio</string>
+    <string name="legal_terms_eligibility_title">Quién puede usar TinPet</string>
+    <string name="legal_terms_eligibility_body">Debes tener al menos 18 años y ser el adulto responsable de cada mascota que publiques. Una persona, una cuenta. Las cuentas bot, falsas o duplicadas pueden eliminarse sin aviso.</string>
+    <string name="legal_terms_conduct_title">Sé un buen dueño</string>
+    <string name="legal_terms_conduct_body">TinPet sirve para conectar mascotas — no para vender, criar con fines de lucro o hacer sorteos. No acoses a otros dueños, no publiques fotos robadas y no uses el chat para spam, estafas o solicitudes. Los reportes reiterados llevan a un bloqueo y revisión de cuenta.</string>
+    <string name="legal_terms_content_title">Tus fotos y textos</string>
+    <string name="legal_terms_content_body">Mantienes la propiedad de las fotos y bios que subes. Le otorgas a TinPet una licencia no exclusiva para mostrarlas dentro de la app a la audiencia adecuada en cada superficie (tu mazo, el chat de tus matches, etc.) mientras conserves tu cuenta.</string>
+    <string name="legal_terms_termination_title">Terminar la relación</string>
+    <string name="legal_terms_termination_body">Puedes irte en cualquier momento desde Privacidad → Eliminar cuenta. Nosotros podemos terminar tu acceso por violaciones a estos términos o a la ley aplicable. Si lo hacemos, te diremos por qué a través del correo registrado salvo que la ley exija lo contrario.</string>
+
+    <string name="legal_help_safety_title">Ayuda y seguridad</string>
+    <string name="legal_help_blocking_title">Bloquear a alguien</string>
+    <string name="legal_help_blocking_body">Abre el chat con el dueño que quieras bloquear, toca el menú (arriba a la derecha) y elige Bloquear. El bloqueo es instantáneo y mutuo — ninguno de los dos volverá a verse en el mazo. Puedes desbloquear desde Ajustes → Privacidad → Dueños bloqueados.</string>
+    <string name="legal_help_reporting_title">Reportar a alguien</string>
+    <string name="legal_help_reporting_body">Desde el mismo menú del chat, elige Reportar. Selecciona un motivo (spam, acoso, cuenta falsa, otro) y, si quieres, agrega una nota. Los reportes van a nuestra cola de moderación y se revisan en menos de 48 horas. Nunca le diremos a la cuenta reportada que tú la reportaste.</string>
+    <string name="legal_help_in_person_title">Encontrarse en persona</string>
+    <string name="legal_help_in_person_body">Encuéntrense en un lugar público y pet-friendly (un parque, la terraza de una tienda de mascotas, una playa para perros). Avísale a un amigo dónde vas a estar. Las dos mascotas deberían ir con correa hasta que la presentación vaya claramente bien. Si algo se siente raro, vete — tu instinto tiene razón.</string>
+    <string name="legal_help_account_title">Cuenta y datos</string>
+    <string name="legal_help_account_body">Para exportaciones, eliminación y cambios en la cuenta, ve a Ajustes → Privacidad. Los 30 días de gracia tras la eliminación son tu red de seguridad — inicia sesión otra vez en ese plazo para restaurar todo.</string>
+    <string name="legal_help_contact_title">¿Sigues atascado?</string>
+    <string name="legal_help_contact_body">Escribe a support@tinpet.example.com (confirmaremos el correo real antes del lanzamiento). Incluye el correo de tu cuenta y una breve descripción de lo que te pasó.</string>
+</resources>
