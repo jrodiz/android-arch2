@@ -5,7 +5,9 @@ import android.net.Uri
 import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
+import com.google.firebase.storage.storageMetadata
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
+import com.rodiz.arch2.core.firebase.image.AvatarImageProcessor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.TimeoutCancellationException
@@ -20,6 +22,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class AvatarUploader @Inject constructor(
     @ApplicationContext private val context: Context,
     private val storage: FirebaseStorage,
+    private val imageProcessor: AvatarImageProcessor,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) {
     // Re-uses the users/{uid}/avatar.jpg path that sign-up writes to, so editing
@@ -41,18 +44,16 @@ internal class AvatarUploader @Inject constructor(
         try {
             withTimeout(20.seconds) {
                 val ref = storage.reference.child("users/$uid/avatar.jpg")
-                Log.i(TAG, "upload: opening input stream for $source")
-                val mimeType = context.contentResolver.getType(source)
-                Log.i(TAG, "upload: source mimeType=$mimeType")
-                context.contentResolver.openInputStream(source).use { stream ->
-                    requireNotNull(stream) { "Cannot open avatar source" }
-                    Log.i(TAG, "upload: stream opened, starting putStream")
-                    val snapshot = ref.putStream(stream).await()
-                    Log.i(
-                        TAG,
-                        "upload: putStream complete bytes=${snapshot.bytesTransferred}/${snapshot.totalByteCount}",
-                    )
-                }
+                Log.i(TAG, "upload: source mimeType=${context.contentResolver.getType(source)}")
+                Log.i(TAG, "upload: processing image (downscale + re-encode)")
+                val bytes = imageProcessor.process(source)
+                Log.i(TAG, "upload: processed to ${bytes.size} bytes, starting putBytes")
+                val metadata = storageMetadata { contentType = "image/jpeg" }
+                val snapshot = ref.putBytes(bytes, metadata).await()
+                Log.i(
+                    TAG,
+                    "upload: putBytes complete bytes=${snapshot.bytesTransferred}/${snapshot.totalByteCount}",
+                )
                 Log.i(TAG, "upload: requesting downloadUrl")
                 val url = ref.downloadUrl.await().toString()
                 Log.i(

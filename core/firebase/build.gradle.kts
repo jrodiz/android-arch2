@@ -11,6 +11,8 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:session:domain"))
 
+    implementation(libs.androidx.exifinterface)
+
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)

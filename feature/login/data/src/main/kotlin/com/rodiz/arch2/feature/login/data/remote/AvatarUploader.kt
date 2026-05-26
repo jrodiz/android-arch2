@@ -1,10 +1,10 @@
 package com.rodiz.arch2.feature.login.data.remote
 
-import android.content.Context
 import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.storageMetadata
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.rodiz.arch2.core.firebase.image.AvatarImageProcessor
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -24,18 +24,17 @@ import kotlin.time.Duration.Companion.seconds
  */
 @Singleton
 internal class AvatarUploader @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val storage: FirebaseStorage,
+    private val imageProcessor: AvatarImageProcessor,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) {
     suspend fun upload(uid: String, source: Uri): Result<String> = withContext(io) {
         runCatching {
             withTimeout(20.seconds) {
                 val ref = storage.reference.child("users/$uid/avatar.jpg")
-                context.contentResolver.openInputStream(source).use { stream ->
-                    requireNotNull(stream) { "Cannot open avatar source" }
-                    ref.putStream(stream).await()
-                }
+                val bytes = imageProcessor.process(source)
+                val metadata = storageMetadata { contentType = "image/jpeg" }
+                ref.putBytes(bytes, metadata).await()
                 ref.downloadUrl.await().toString()
             }
         }
