@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -107,11 +108,13 @@ internal fun EditProfileRoute(
     LaunchedEffect(state.avatarSavedAtMillis) {
         if (state.avatarSavedAtMillis != null) {
             snackbarHostState.showSnackbar(avatarSavedMessage)
+            viewModel.onAvatarSavedShown()
         }
     }
     LaunchedEffect(state.savedAtMillis) {
         if (state.savedAtMillis != null) {
             snackbarHostState.showSnackbar(savedMessage)
+            viewModel.onSavedShown()
         }
     }
 
@@ -175,11 +178,18 @@ internal fun EditProfileRoute(
         )
     }
 
+    // Dismiss the IME when Save is tapped — otherwise the snackbar lives
+    // behind the keyboard on small phones and the user has to manually
+    // collapse it to see the confirmation.
+    val keyboardController = LocalSoftwareKeyboardController.current
     EditProfileScaffold(
         state = state,
         snackbarHostState = snackbarHostState,
         onBack = onBack,
-        onSave = viewModel::save,
+        onSave = {
+            keyboardController?.hide()
+            viewModel.save()
+        },
         onFirstNameChange = viewModel::onFirstNameChange,
         onBioChange = viewModel::onBioChange,
         onChangePhoto = { showSourceSheet = true },

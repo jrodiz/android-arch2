@@ -180,6 +180,21 @@ internal class EditProfileViewModel @Inject constructor(
         _uiState.update { it.copy(errorMessageRes = null) }
     }
 
+    /**
+     * Called by the screen once the "Profile saved" snackbar has been shown
+     * so re-entering the screen later doesn't flash the same toast again.
+     * Without this, the LaunchedEffect's key stays at a non-null Long across
+     * VM retention, so the first composition on re-entry re-fires it.
+     */
+    fun onSavedShown() {
+        _uiState.update { it.copy(savedAtMillis = null) }
+    }
+
+    /** Mirror of [onSavedShown] for the avatar-upload success sentinel. */
+    fun onAvatarSavedShown() {
+        _uiState.update { it.copy(avatarSavedAtMillis = null) }
+    }
+
     fun onLocationFetched(lat: Double, lng: Double, cityLabel: String?) {
         if (_uiState.value.isUpdatingLocation) return
         viewModelScope.launch {
