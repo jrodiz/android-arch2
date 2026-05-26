@@ -5,7 +5,7 @@ import com.rodiz.arch2.core.navigation.EntryProviderInstaller
 import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.deck.nav.DeckHome
 import com.rodiz.arch2.feature.notifications.nav.NotificationRationale
-import com.rodiz.arch2.feature.notifications.nav.NotificationRationaleOnboarding
+import com.rodiz.arch2.feature.notifications.nav.PermissionsOnboarding
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,9 +22,10 @@ internal object NotificationsNavModule {
             // Settings entry — bounce back to wherever the user came from.
             NotificationRationaleRoute(onDone = { navigator.goBack() })
         }
-        entry<NotificationRationaleOnboarding> {
-            // Post-signup entry — clear the back stack and land on Deck regardless of choice.
-            NotificationRationaleRoute(onDone = { navigator.replaceAll(DeckHome) })
+        entry<PermissionsOnboarding> {
+            // Post-signup entry — combined location + notifications permissions screen.
+            // onDone lands on DeckHome regardless of what the user granted.
+            PermissionsOnboardingRoute(onDone = { navigator.replaceAll(DeckHome) })
         }
     }
 }

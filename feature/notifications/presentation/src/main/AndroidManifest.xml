@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- PermissionsOnboarding asks for COARSE during sign-up so the user lands
+         on a Deck that already knows where they are. Same precision (geohash p6 ≈ 1.2km)
+         the deck queries use; matches the duplicate declaration in :feature:settings:presentation. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+</manifest>

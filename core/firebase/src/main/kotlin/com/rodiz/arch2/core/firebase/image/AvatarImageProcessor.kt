@@ -56,7 +56,7 @@ class AvatarImageProcessor @Inject constructor(
                     TAG,
                     "process: original=${originalBytes}B (${originalBytes / 1024}KB) -> " +
                         "processed=${result.size}B (${result.size / 1024}KB) " +
-                        "[${pct}% of original] outDims=${bitmap.width}x${bitmap.height} q=$QUALITY",
+                        "[$pct% of original] outDims=${bitmap.width}x${bitmap.height} q=$QUALITY",
                 )
                 result
             }

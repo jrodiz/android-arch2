@@ -16,4 +16,16 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons)
     implementation(libs.kotlinx.coroutines.android)
+
+    // PermissionsOnboarding screen pulls the user's last-known location after
+    // they grant ACCESS_COARSE_LOCATION at onboarding.
+    implementation(libs.play.services.location)
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    // PrimaryButton + ErrorBanner used by the permissions screen.
+    implementation(project(":core:ui"))
+
+    // JUnit5 + MockK + Turbine + coroutines-test come from tinpet.android.test
+    // (applied transitively by the feature convention plugin).
+    testImplementation(project(":core:testing"))
 }

@@ -10,7 +10,7 @@ import com.rodiz.arch2.feature.login.nav.SignUpHome
 import com.rodiz.arch2.feature.login.presentation.screen.ForgotPasswordStubScreen
 import com.rodiz.arch2.feature.login.presentation.screen.LoginRoute
 import com.rodiz.arch2.feature.login.presentation.screen.SignUpRoute
-import com.rodiz.arch2.feature.notifications.nav.NotificationRationaleOnboarding
+import com.rodiz.arch2.feature.notifications.nav.PermissionsOnboarding
 import com.rodiz.arch2.feature.settings.nav.SettingsPrivacyPolicy
 import com.rodiz.arch2.feature.settings.nav.SettingsTerms
 import dagger.Module
@@ -38,9 +38,11 @@ internal object LoginNavModule {
             ForgotPasswordStubScreen(onBack = { navigator.goBack() })
         }
         entry<SignUpHome> {
-            // New account — route through the notification rationale before landing on Deck.
+            // New account — route through the combined permissions onboarding screen
+            // (location + notifications) before landing on Deck. See
+            // plans/onboarding-permissions-screen.md for the full flow.
             SignUpRoute(
-                onNavigateHome = { navigator.replaceAll(NotificationRationaleOnboarding) },
+                onNavigateHome = { navigator.replaceAll(PermissionsOnboarding) },
                 onNavigateBack = { navigator.goBack() },
                 onOpenTerms = { navigator.goTo(SettingsTerms) },
                 onOpenPrivacyPolicy = { navigator.goTo(SettingsPrivacyPolicy) },

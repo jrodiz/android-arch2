@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- PermissionsOnboarding — combined post-signup location + notifications screen. -->
+    <string name="permissions_onboarding_headline">Configura TinPet</string>
+    <string name="permissions_onboarding_body">Dos permisos rápidos y estás listo para hacer match.</string>
+
+    <string name="permissions_onboarding_location_title">Encuentra mascotas cerca</string>
+    <string name="permissions_onboarding_location_subtitle_default">Usa tu ubicación aproximada para mostrarte mascotas cerca.</string>
+    <string name="permissions_onboarding_location_subtitle_working">Obteniendo tu zona…</string>
+    <string name="permissions_onboarding_location_subtitle_allowed">Activado</string>
+    <string name="permissions_onboarding_location_subtitle_allowed_with_city">Activado · %1$s</string>
+    <string name="permissions_onboarding_location_subtitle_denied">Denegado — puedes cambiarlo en Ajustes.</string>
+
+    <string name="permissions_onboarding_notifications_title">Avisos de matches</string>
+    <string name="permissions_onboarding_notifications_subtitle_default">Recibe avisos de matches y mensajes.</string>
+    <string name="permissions_onboarding_notifications_subtitle_allowed">Activado</string>
+    <string name="permissions_onboarding_notifications_subtitle_denied">Denegado — actívalo desde Ajustes → Notificaciones.</string>
+
+    <string name="permissions_onboarding_action_allow">Permitir</string>
+    <string name="permissions_onboarding_continue">Continuar</string>
+    <string name="permissions_onboarding_maybe_later">Más tarde</string>
+</resources>
