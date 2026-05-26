@@ -99,6 +99,8 @@
     <string name="edit_profile_avatar_source_gallery">Elegir de la galería</string>
     <string name="edit_profile_avatar_source_camera">Tomar foto</string>
     <string name="edit_profile_avatar_timeout">La subida tardó demasiado — revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="edit_profile_avatar_uploading">Subiendo…</string>
+    <string name="edit_profile_avatar_saved">Foto de perfil actualizada</string>
     <string name="edit_profile_location_permission_denied">Permiso de ubicación denegado</string>
     <string name="edit_profile_location_unavailable">Ubicación no disponible — intenta al aire libre con el GPS activado.</string>
     <string name="edit_profile_location_fetch_failed">No se pudo obtener la ubicación</string>

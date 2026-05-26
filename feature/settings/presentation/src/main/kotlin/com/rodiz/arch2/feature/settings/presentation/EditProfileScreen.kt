@@ -91,6 +91,7 @@ internal fun EditProfileRoute(
     val savedMessage = stringResource(R.string.edit_profile_saved)
 
     val ctx = LocalContext.current
+    val avatarSavedMessage = stringResource(R.string.edit_profile_avatar_saved)
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let {
             snackbarHostState.showSnackbar(it)
@@ -101,6 +102,11 @@ internal fun EditProfileRoute(
         state.errorMessageRes?.let { resId ->
             snackbarHostState.showSnackbar(ctx.getString(resId))
             viewModel.onErrorMessageResShown()
+        }
+    }
+    LaunchedEffect(state.avatarSavedAtMillis) {
+        if (state.avatarSavedAtMillis != null) {
+            snackbarHostState.showSnackbar(avatarSavedMessage)
         }
     }
     LaunchedEffect(state.savedAtMillis) {

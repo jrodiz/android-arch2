@@ -42,6 +42,12 @@ internal data class EditProfileUiState(
      */
     val errorMessageRes: Int? = null,
     val savedAtMillis: Long? = null,
+    /**
+     * Sentinel timestamp set on a successful avatar upload — drives the
+     * "Profile photo updated" snackbar. Distinct from [savedAtMillis] (which
+     * is the Save-button success sentinel) so the two can fire independently.
+     */
+    val avatarSavedAtMillis: Long? = null,
     val original: OwnerProfile? = null,
 ) {
     val isNameValid: Boolean = firstNameField.trim().length in 1..30
@@ -148,6 +154,14 @@ internal class EditProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isUploadingAvatar = true) }
             runCatching { updateAvatar(localUri) }
+                .onSuccess {
+                    // Stamp the success sentinel so the screen surfaces a
+                    // "Profile photo updated" snackbar. The avatar circle
+                    // also re-renders when the Firestore listener pushes
+                    // the new avatarUrl, but the snackbar is the explicit
+                    // confirmation users asked for.
+                    _uiState.update { it.copy(avatarSavedAtMillis = System.currentTimeMillis()) }
+                }
                 .onFailure { e ->
                     // TimeoutCancellationException → user-friendly localized
                     // message ("Upload timed out — check your connection").
