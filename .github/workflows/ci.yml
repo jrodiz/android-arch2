@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   android:
-    name: Android · ktlint + unit tests + assembleDebug
+    name: Android · ktlint + unit tests + assembleDebug + assembleRelease
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -47,6 +47,12 @@ jobs:
 
       - name: Assemble debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
+
+      # Exercise the full R8 + resource-shrink + lintVital pipeline so a
+      # dependency bump that drops a consumer-rules.pro doesn't slip past
+      # CI. Unsigned APK is fine — we're proving the build, not shipping.
+      - name: Assemble release APK (R8 + lintVital)
+        run: ./gradlew :app:assembleRelease --stacktrace
 
       # Always upload test reports so a contributor can diff their local run
       # against the CI run; on success they're handy for "did my test really
