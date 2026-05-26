@@ -8,13 +8,19 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Uploads avatar images to Firebase Storage at users/{uid}/avatar.jpg and returns
  * the public download URL on success. Soft-fail: callers should keep going if the
  * upload returns null — account creation already succeeded by the time this runs.
+ *
+ * Wrapped in a 60s timeout so a blocked TCP socket (Samsung Sleeping-Apps
+ * firewall, captive portal, etc.) surfaces as a Result.failure with a
+ * TimeoutCancellationException instead of hanging the sign-up flow forever.
  */
 @Singleton
 internal class AvatarUploader @Inject constructor(
@@ -24,12 +30,14 @@ internal class AvatarUploader @Inject constructor(
 ) {
     suspend fun upload(uid: String, source: Uri): Result<String> = withContext(io) {
         runCatching {
-            val ref = storage.reference.child("users/$uid/avatar.jpg")
-            context.contentResolver.openInputStream(source).use { stream ->
-                requireNotNull(stream) { "Cannot open avatar source" }
-                ref.putStream(stream).await()
+            withTimeout(60.seconds) {
+                val ref = storage.reference.child("users/$uid/avatar.jpg")
+                context.contentResolver.openInputStream(source).use { stream ->
+                    requireNotNull(stream) { "Cannot open avatar source" }
+                    ref.putStream(stream).await()
+                }
+                ref.downloadUrl.await().toString()
             }
-            ref.downloadUrl.await().toString()
         }
     }
 }

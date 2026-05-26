@@ -90,10 +90,17 @@ internal fun EditProfileRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val savedMessage = stringResource(R.string.edit_profile_saved)
 
+    val ctx = LocalContext.current
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
+        }
+    }
+    LaunchedEffect(state.errorMessageRes) {
+        state.errorMessageRes?.let { resId ->
+            snackbarHostState.showSnackbar(ctx.getString(resId))
+            viewModel.onErrorMessageResShown()
         }
     }
     LaunchedEffect(state.savedAtMillis) {
@@ -108,7 +115,6 @@ internal fun EditProfileRoute(
         uri?.let { viewModel.onAvatarPicked(it.toString()) }
     }
 
-    val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
     val locationClient = remember { LocationServices.getFusedLocationProviderClient(ctx) }
     val locationUnavailable = stringResource(R.string.edit_profile_location_unavailable)

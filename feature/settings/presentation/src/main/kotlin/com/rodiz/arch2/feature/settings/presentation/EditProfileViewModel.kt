@@ -11,6 +11,7 @@ import com.rodiz.arch2.feature.profile.domain.usecase.UpdateBioUseCase
 import com.rodiz.arch2.feature.profile.domain.usecase.UpdateFirstNameUseCase
 import com.rodiz.arch2.feature.profile.domain.usecase.UpdateLocationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -33,6 +34,13 @@ internal data class EditProfileUiState(
     val isUploadingAvatar: Boolean = false,
     val isUpdatingLocation: Boolean = false,
     val errorMessage: String? = null,
+    /**
+     * Localized snackbar trigger for errors whose message is resource-backed
+     * (timeouts, etc.). Separate from [errorMessage] which carries
+     * backend-supplied strings. UI consumes via `LaunchedEffect` + clears
+     * via [onErrorMessageResShown].
+     */
+    val errorMessageRes: Int? = null,
     val savedAtMillis: Long? = null,
     val original: OwnerProfile? = null,
 ) {
@@ -141,10 +149,21 @@ internal class EditProfileViewModel @Inject constructor(
             _uiState.update { it.copy(isUploadingAvatar = true) }
             runCatching { updateAvatar(localUri) }
                 .onFailure { e ->
-                    _uiState.update { it.copy(errorMessage = e.message ?: "Avatar upload failed") }
+                    // TimeoutCancellationException → user-friendly localized
+                    // message ("Upload timed out — check your connection").
+                    // Anything else falls through to the SDK-supplied string.
+                    if (e is TimeoutCancellationException) {
+                        _uiState.update { it.copy(errorMessageRes = R.string.edit_profile_avatar_timeout) }
+                    } else {
+                        _uiState.update { it.copy(errorMessage = e.message ?: "Avatar upload failed") }
+                    }
                 }
             _uiState.update { it.copy(isUploadingAvatar = false) }
         }
+    }
+
+    fun onErrorMessageResShown() {
+        _uiState.update { it.copy(errorMessageRes = null) }
     }
 
     fun onLocationFetched(lat: Double, lng: Double, cityLabel: String?) {
