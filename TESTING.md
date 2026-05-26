@@ -131,6 +131,35 @@ Both jobs use Gradle's configuration cache + the GitHub-Actions Gradle
 cache so warm runs are typically under 2 minutes. Concurrency-grouped on
 `workflow + ref` so a rebased PR cancels the in-flight build.
 
+## Compose stability metrics
+
+Opt-in compiler reports for diagnosing recomposition issues. Pass
+`-Pcompose.metrics=true` on any build:
+
+```bash
+JAVA_HOME=... ./gradlew :feature:deck:presentation:compileDebugKotlin \
+  -Pcompose.metrics=true --rerun-tasks
+```
+
+Reports land under `<module>/build/compose_compiler/`:
+
+- `*-composables.txt` — each composable's classification (`restartable`,
+  `skippable`, `inline`) with per-parameter stability annotations. Grep for
+  `unstable ` to find params that block smart-skipping.
+- `*-classes.txt` — stability classification of every class a composable
+  touches. Watch for `unstable class Foo` — usually because `Foo` has a
+  `var` field, a non-data-class member, or a collection that isn't
+  `kotlinx.collections.immutable`.
+- `*-module.json` — per-module summary (counts of skippable vs restartable,
+  unstable arguments, inferred stable/unstable classes). Useful for
+  before/after comparisons.
+
+Off by default — generating the reports adds ~10% to compile time, so
+CI doesn't carry the cost. Wiring lives in
+`build-logic/convention/.../ComposeCompilerMetrics.kt`; applied to every
+`:feature:*:presentation` module via the feature convention plugin and to
+`:app` via `tinpet.compose.metrics`.
+
 ## Removing the test data
 
 There's no `unseedTestData` endpoint. To purge:

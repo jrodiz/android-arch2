@@ -16,6 +16,8 @@ class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
             buildFeatures.compose = true
         }
 
+        configureComposeCompilerMetrics(this)
+
         val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
         dependencies {
             val bom = libs.findLibrary("androidx-compose-bom").get()

@@ -12,6 +12,7 @@ java {
 dependencies {
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
+    compileOnly(libs.compose.compiler.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     implementation(libs.google.services.plugin)
     implementation(libs.firebase.crashlytics.plugin)
@@ -54,6 +55,10 @@ gradlePlugin {
         register("androidTest") {
             id = "tinpet.android.test"
             implementationClass = "com.rodiz.arch2.convention.AndroidTestConventionPlugin"
+        }
+        register("composeMetrics") {
+            id = "tinpet.compose.metrics"
+            implementationClass = "com.rodiz.arch2.convention.ComposeMetricsConventionPlugin"
         }
     }
 }

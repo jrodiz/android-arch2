@@ -94,6 +94,7 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 # Convention plugin support (Gradle plugins exposed as libraries so build-logic can apply them via id())
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 google-services-plugin = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
 firebase-crashlytics-plugin = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "firebaseCrashlyticsPlugin" }
@@ -128,3 +129,4 @@ tinpet-android-firebase = { id = "tinpet.android.firebase" }
 tinpet-jvm-library = { id = "tinpet.jvm.library" }
 tinpet-kotlin-serialization = { id = "tinpet.kotlin.serialization" }
 tinpet-android-test = { id = "tinpet.android.test" }
+tinpet-compose-metrics = { id = "tinpet.compose.metrics" }

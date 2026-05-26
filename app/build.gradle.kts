@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.tinpet.android.hilt)
     alias(libs.plugins.tinpet.kotlin.serialization)
     alias(libs.plugins.tinpet.android.firebase)
+    alias(libs.plugins.tinpet.compose.metrics)
 }
 
 android {
