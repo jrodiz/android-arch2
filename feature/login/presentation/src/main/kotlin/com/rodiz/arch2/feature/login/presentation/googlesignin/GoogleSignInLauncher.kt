@@ -47,12 +47,35 @@ object GoogleSignInLauncher {
             Try.Failure(AuthError.GoogleSignInFailed)
         }
     } catch (e: GetCredentialCancellationException) {
-        Try.Failure(AuthError.GoogleSignInCancelled)
+        // Two distinct paths surface here:
+        //   1. The user dismissed the picker → genuine cancel.
+        //   2. GMS aborted because there's no eligible Google account on the
+        //      device (status code 28433); current Credential Manager versions
+        //      route this through cancellation rather than NoCredentialException.
+        // Disambiguate by sniffing the wrapped status code in the message — fragile
+        // (the string isn't part of any public API), but the alternative is a
+        // generic "cancelled" toast for a real configuration issue.
+        if (e.isNoGoogleAccountSignal()) {
+            Try.Failure(AuthError.GoogleNoAccount)
+        } else {
+            Try.Failure(AuthError.GoogleSignInCancelled)
+        }
     } catch (e: NoCredentialException) {
-        Try.Failure(AuthError.GoogleSignInFailed)
+        Try.Failure(AuthError.GoogleNoAccount)
     } catch (e: GetCredentialException) {
         Try.Failure(AuthError.GoogleSignInFailed)
     } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
         Try.Failure(AuthError.GoogleSignInFailed)
+    }
+
+    /**
+     * Heuristic: GMS's "no eligible credential" outcome surfaces inside a
+     * GetCredentialCancellationException whose message embeds the GoogleIdService
+     * status code `28433`. Match the digits rather than the surrounding `chuk:[…]`
+     * formatting so this still matches if Google reformats the message later.
+     */
+    private fun GetCredentialCancellationException.isNoGoogleAccountSignal(): Boolean {
+        val haystack = (message.orEmpty() + " " + (cause?.message.orEmpty()))
+        return "28433" in haystack
     }
 }

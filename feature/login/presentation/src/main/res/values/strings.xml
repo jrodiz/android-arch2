@@ -28,6 +28,7 @@
     <string name="login_error_server">Server error (%1$d). Please try again later.</string>
     <string name="login_error_unknown">Something went wrong. Please try again.</string>
     <string name="login_google_cancelled">Google sign-in was cancelled.</string>
+    <string name="login_google_no_account">No Google account on this device. Add one in Settings → Accounts, then try again.</string>
     <string name="login_google_failed">Couldn\'t sign in with Google. Try again.</string>
 
     <string name="login_validation_email_empty">Email is required.</string>

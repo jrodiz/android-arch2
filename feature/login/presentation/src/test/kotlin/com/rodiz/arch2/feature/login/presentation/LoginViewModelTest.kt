@@ -128,6 +128,7 @@ class LoginViewModelTest {
     fun `onGoogleIdToken failure sets transientError and clears isSubmitting`() = runTest(testDispatcher) {
         val errors: List<AuthError> = listOf(
             AuthError.GoogleSignInCancelled,
+            AuthError.GoogleNoAccount,
             AuthError.GoogleSignInFailed,
             AuthError.NoNetwork,
             AuthError.Unknown,

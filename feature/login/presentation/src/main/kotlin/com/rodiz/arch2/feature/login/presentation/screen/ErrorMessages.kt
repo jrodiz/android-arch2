@@ -13,6 +13,7 @@ internal fun AuthError.localized(): String = when (this) {
     AuthError.Timeout -> stringResource(R.string.login_error_timeout)
     is AuthError.Server -> stringResource(R.string.login_error_server, code)
     AuthError.GoogleSignInCancelled -> stringResource(R.string.login_google_cancelled)
+    AuthError.GoogleNoAccount -> stringResource(R.string.login_google_no_account)
     AuthError.GoogleSignInFailed -> stringResource(R.string.login_google_failed)
     AuthError.EmailAlreadyInUse -> stringResource(R.string.signup_error_email_in_use)
     AuthError.WeakPassword -> stringResource(R.string.signup_error_weak_password)
