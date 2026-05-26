@@ -4,6 +4,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
+import com.rodiz.arch2.core.common.logging.CrashReporter
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.tasks.await
@@ -22,6 +23,7 @@ class FcmTokenSync @Inject constructor(
     private val sessionRepo: SessionRepository,
     private val firestore: FirebaseFirestore,
     private val messaging: FirebaseMessaging,
+    private val crashReporter: CrashReporter,
     @IoDispatcher private val io: CoroutineDispatcher,
 ) {
     suspend fun syncForSignedInUser() = withContext(io) {
@@ -41,7 +43,11 @@ class FcmTokenSync @Inject constructor(
 
     suspend fun clearForSignOut(token: String) = withContext(io) {
         val hash = sha256(token).take(40)
+        // Sign-out path: we don't want a network failure here to surface as a
+        // user-visible error, but we also don't want a silently-orphaned token
+        // doc to be invisible — log it as a non-fatal so dashboards still notice.
         runCatching { firestore.collection("fcmTokens").document(hash).delete().await() }
+            .onFailure { crashReporter.recordException(it, "FcmTokenSync.clearForSignOut failed") }
     }
 
     private fun sha256(input: String): String {

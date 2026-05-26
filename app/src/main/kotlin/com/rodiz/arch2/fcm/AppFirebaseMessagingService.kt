@@ -3,6 +3,7 @@ package com.rodiz.arch2.fcm
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.rodiz.arch2.core.common.logging.CrashReporter
 import com.rodiz.arch2.core.firebase.FcmTokenSync
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -15,12 +16,16 @@ import javax.inject.Inject
 class AppFirebaseMessagingService : FirebaseMessagingService() {
 
     @Inject lateinit var fcmTokenSync: FcmTokenSync
+    @Inject lateinit var crashReporter: CrashReporter
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        scope.launch { runCatching { fcmTokenSync.syncForSignedInUser() } }
+        scope.launch {
+            runCatching { fcmTokenSync.syncForSignedInUser() }
+                .onFailure { crashReporter.recordException(it, "FCM onNewToken sync failed") }
+        }
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
