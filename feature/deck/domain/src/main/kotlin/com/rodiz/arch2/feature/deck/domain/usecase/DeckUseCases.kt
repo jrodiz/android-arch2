@@ -1,7 +1,7 @@
 package com.rodiz.arch2.feature.deck.domain.usecase
 
-import com.rodiz.arch2.feature.deck.domain.model.DeckSnapshot
 import com.rodiz.arch2.core.filters.domain.FilterPrefs
+import com.rodiz.arch2.feature.deck.domain.model.DeckSnapshot
 import com.rodiz.arch2.feature.deck.domain.model.SwipeAction
 import com.rodiz.arch2.feature.deck.domain.model.SwipeResult
 import com.rodiz.arch2.feature.deck.domain.repository.DeckRepository

@@ -16,7 +16,6 @@ import com.rodiz.arch2.core.firebase.model.UserProfile
 import com.rodiz.arch2.core.session.domain.Session
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.login.data.local.CredentialVault
-import com.rodiz.arch2.feature.login.data.mapper.toSession
 import com.rodiz.arch2.feature.login.data.remote.AvatarUploader
 import com.rodiz.arch2.feature.login.data.remote.FakeAuthRemoteDataSource
 import com.rodiz.arch2.feature.login.domain.model.AuthError

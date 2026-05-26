@@ -1,0 +1,66 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+max_line_length = 140
+
+[*.{kt,kts}]
+# Allow trailing commas — they reduce churn in multi-line argument lists.
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+# --- ktlint rule overrides ---
+#
+# We adopt ktlint for the genuinely-load-bearing rules — unused imports,
+# import ordering, no-multi-spaces, no-trailing-whitespace, etc. The
+# opinionated formatters below are disabled because they rewrite large
+# bodies of already-readable code with no real win.
+
+# Compose composables use PascalCase; ktlint's default function-naming
+# rule flags them as violations.
+ktlint_standard_function-naming = disabled
+
+# Splits multi-line expressions onto a new line; rewrites things like
+#   foo(.. ?: bar { ... })
+# into a 3-line form that's harder to scan.
+ktlint_standard_multiline-expression-wrapping = disabled
+ktlint_standard_chain-method-continuation = disabled
+
+# Forces an opinionated `class Foo\n  @Inject\n  constructor(...)` split
+# that adds an extra indent level to every method in the class. Adds
+# noise without making code more readable.
+ktlint_standard_function-signature = disabled
+ktlint_standard_class-signature = disabled
+ktlint_standard_parameter-list-wrapping = disabled
+ktlint_standard_argument-list-wrapping = disabled
+
+# Wraps short if/else expressions across multiple lines.
+ktlint_standard_if-else-wrapping = disabled
+ktlint_standard_multiline-if-else = disabled
+ktlint_standard_condition-wrapping = disabled
+ktlint_standard_statement-wrapping = disabled
+ktlint_standard_blank-line-before-declaration = disabled
+ktlint_standard_no-empty-first-line-in-class-body = disabled
+
+# Reformats annotation placement above declarations; doesn't catch real
+# bugs and produces a lot of diff.
+ktlint_standard_annotation = disabled
+ktlint_standard_spacing-between-declarations-with-annotations = disabled
+ktlint_standard_spacing-between-declarations-with-comments = disabled
+
+# Trailing commas are allowed but we don't want ktlint to require them
+# on every declaration — many concise single-line lists are fine without.
+ktlint_standard_trailing-comma-on-declaration-site = disabled
+ktlint_standard_trailing-comma-on-call-site = disabled
+
+# Filename rule misfires on Compose preview-only files where the
+# top-level class is intentionally a different name than the file.
+ktlint_standard_filename = disabled
+
+[*.{yml,yaml,json}]
+indent_size = 2

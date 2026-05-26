@@ -8,7 +8,7 @@ android {
 
 dependencies {
     implementation(project(":feature:notifications:nav"))
-    implementation(project(":feature:deck:nav"))         // post-onboarding lands on DeckHome
+    implementation(project(":feature:deck:nav")) // post-onboarding lands on DeckHome
     implementation(project(":core:common"))
     implementation(project(":core:firebase"))
     implementation(project(":core:navigation"))

@@ -44,7 +44,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -60,9 +59,9 @@ import com.rodiz.arch2.core.designsystem.component.EmptyTabState
 import com.rodiz.arch2.core.designsystem.theme.BrandColors
 import com.rodiz.arch2.feature.deck.domain.model.DistanceBucket
 import com.rodiz.arch2.feature.likes.domain.model.IncomingLike
-import com.rodiz.arch2.feature.pet.domain.model.Intent as PetIntent
 import com.rodiz.arch2.feature.pet.domain.model.PetId
 import com.rodiz.arch2.feature.pet.domain.model.PhotoSource
+import com.rodiz.arch2.feature.pet.domain.model.Intent as PetIntent
 
 @Composable
 internal fun LikesYouRoute(
@@ -555,7 +554,7 @@ private fun FilteredEmptyBody(filter: LikesFilter) {
     }
 }
 
-/* ---------- helpers ---------- */
+// ---------- helpers ----------
 
 /** Choose a single intent chip per card in a stable order: Playdate > Friendship > Adoption. */
 private fun displayIntent(intents: Set<PetIntent>): PetIntent? = when {

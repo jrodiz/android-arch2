@@ -8,7 +8,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
 import com.rodiz.arch2.core.session.domain.SessionRepository
-import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
 import com.rodiz.arch2.feature.profile.domain.model.GeoPoint
 import com.rodiz.arch2.feature.profile.domain.model.OwnerProfile
 import com.rodiz.arch2.feature.profile.domain.repository.OwnerProfileRepository
@@ -25,6 +24,7 @@ import kotlinx.datetime.toJavaInstant
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
 
 @Singleton
 internal class FirestoreOwnerProfileRepository @Inject constructor(

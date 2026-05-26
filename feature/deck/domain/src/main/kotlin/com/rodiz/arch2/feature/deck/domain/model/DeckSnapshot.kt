@@ -4,7 +4,7 @@ enum class DeckState {
     LOADING,
     READY,
     EXHAUSTED,
-    REQUIRES_PET,        // owner has no active pet; browse-only, Like disabled
+    REQUIRES_PET, // owner has no active pet; browse-only, Like disabled
 }
 
 data class DeckSnapshot(

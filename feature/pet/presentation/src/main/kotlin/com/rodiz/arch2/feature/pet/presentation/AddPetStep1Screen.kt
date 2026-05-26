@@ -75,17 +75,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.rodiz.arch2.core.designsystem.theme.BrandColors
-import kotlinx.coroutines.launch
 import com.rodiz.arch2.feature.pet.domain.model.Intent
 import com.rodiz.arch2.feature.pet.domain.model.PetDraft
 import com.rodiz.arch2.feature.pet.domain.model.PetPhoto
 import com.rodiz.arch2.feature.pet.domain.model.PhotoId
 import com.rodiz.arch2.feature.pet.domain.model.PhotoSource
 import com.rodiz.arch2.feature.pet.domain.model.Species
+import kotlinx.coroutines.launch
 
 internal const val ADD_PET_STEP_TOTAL = 3
 private const val PHOTO_SLOT_COUNT = PetDraft.PHOTOS_MAX

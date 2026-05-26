@@ -52,7 +52,6 @@ import coil.compose.AsyncImage
 import com.rodiz.arch2.core.designsystem.component.EmptyTabState
 import com.rodiz.arch2.core.designsystem.theme.BrandColors
 import com.rodiz.arch2.feature.match.domain.model.MatchSummary
-import com.rodiz.arch2.feature.match.presentation.R
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
@@ -440,4 +439,3 @@ private fun Month.shortLabel(): String = when (this) {
     Month.DECEMBER -> "Dec"
     else -> name.take(3)
 }
-

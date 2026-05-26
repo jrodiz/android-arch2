@@ -82,7 +82,6 @@ import com.rodiz.arch2.core.ownerlookup.domain.OwnerDisplay
 import com.rodiz.arch2.feature.chat.domain.model.Message
 import com.rodiz.arch2.feature.chat.domain.model.ReportReason
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Instant
@@ -90,6 +89,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
+import javax.inject.Inject
 
 @HiltViewModel
 internal class ChatFactoryHolder @Inject constructor(
@@ -280,9 +280,11 @@ private fun ChatTopBar(
             // Google sign-in often leaves owner.avatarUrl null.
             HeaderAvatar(avatarUrl = otherPetAvatarUrl ?: other?.avatarUrl)
             Spacer(Modifier.size(12.dp))
-            Column(modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp)) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            ) {
                 Text(
                     text = chatHeaderTitle(
                         ownerFirstName = other?.firstName,
@@ -766,4 +768,3 @@ private fun formatTime(instant: Instant, tz: TimeZone): String {
     val mm = ldt.minute.toString().padStart(2, '0')
     return "$hh:$mm"
 }
-

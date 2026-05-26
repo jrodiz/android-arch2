@@ -29,7 +29,7 @@ internal sealed interface LikesFilter {
 
 internal data class LikesYouUiState(
     val likes: List<IncomingLike> = emptyList(),
-    val expandedKey: LikeKey? = null,    // unused by the redesigned UI; kept to preserve VM API
+    val expandedKey: LikeKey? = null, // unused by the redesigned UI; kept to preserve VM API
     val matchMessage: String? = null,
     val errorMessage: String? = null,
     val isLoading: Boolean = true,

@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   android:
-    name: Android · unit tests + assembleDebug
+    name: Android · ktlint + unit tests + assembleDebug
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -32,6 +32,12 @@ jobs:
         # Caches the Gradle dependency cache + the configuration cache, dramatically
         # speeding up subsequent runs on the same branch.
         uses: gradle/actions/setup-gradle@v3
+
+      # Style check first — cheap, fails fast, and a failure is usually an
+      # IDE save with the wrong settings rather than a broken build. Run
+      # `./gradlew ktlintFormat` locally to auto-fix.
+      - name: ktlint
+        run: ./gradlew ktlintCheck --stacktrace
 
       # Run all module unit tests. AndroidFeatureConventionPlugin now wires
       # useJUnitPlatform() so :feature:*:presentation tests actually execute

@@ -130,9 +130,10 @@ internal fun PetPreviewRoute(
             onDismissRequest = { confirmDelete = false },
             title = { Text("Delete ${state.pet?.name ?: "this pet"}?") },
             text = {
+                val petName = state.pet?.name ?: "your pet"
                 Text(
-                    "This will hide ${state.pet?.name ?: "your pet"} from the deck. You can restore it within 7 days from the Archived section. " +
-                        "If you want a reversible hide that keeps everything, use Disable instead.",
+                    "This will hide $petName from the deck. You can restore it within 7 days from the " +
+                        "Archived section. If you want a reversible hide that keeps everything, use Disable instead.",
                 )
             },
             confirmButton = {

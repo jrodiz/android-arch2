@@ -445,11 +445,13 @@ private fun CircularActionButton(
     } else {
         baseModifier
     }
-    val finalModifier = (if (borderModifierNeeded(borderColor)) {
-        shadowModifier.border(width = 1.5.dp, color = borderColor!!, shape = CircleShape)
-    } else {
-        shadowModifier
-    })
+    val finalModifier = (
+        if (borderModifierNeeded(borderColor)) {
+            shadowModifier.border(width = 1.5.dp, color = borderColor!!, shape = CircleShape)
+        } else {
+            shadowModifier
+        }
+    )
         .background(color = background, shape = CircleShape)
         .clickable(enabled = enabled, onClick = onClick)
     Box(

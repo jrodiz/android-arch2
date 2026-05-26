@@ -4,6 +4,6 @@ enum class SwipeAction { LIKE, PASS }
 
 sealed interface SwipeResult {
     data object Pending : SwipeResult
-    data class  Match(val matchId: String) : SwipeResult
+    data class Match(val matchId: String) : SwipeResult
     data object RequiresPet : SwipeResult
 }

@@ -27,7 +27,7 @@ object Geohash {
         val out = StringBuilder(precision)
         var bit = 0
         var ch = 0
-        var even = true  // even step → longitude, odd step → latitude
+        var even = true // even step → longitude, odd step → latitude
 
         while (out.length < precision) {
             if (even) {

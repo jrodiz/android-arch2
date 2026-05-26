@@ -5,7 +5,6 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
 import com.rodiz.arch2.core.common.geo.Haversine
 import com.rodiz.arch2.core.session.domain.SessionRepository
@@ -35,6 +34,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
 
 @Singleton
 internal class FirestoreLikesYouRepository @Inject constructor(
@@ -119,17 +119,15 @@ internal class FirestoreLikesYouRepository @Inject constructor(
     }
 
     /** Picks the liker's most-recently-updated ACTIVE pet. Returns null if they have none. */
-    private suspend fun resolveAnchorPet(fromOwnerId: String): Pet? {
-        return runCatching {
-            val snap = petsCol
-                .whereEqualTo("ownerId", fromOwnerId)
-                .whereEqualTo("state", PetState.ACTIVE.name)
-                .orderBy("updatedAt", Query.Direction.DESCENDING)
-                .limit(1)
-                .get().await()
-            snap.documents.firstOrNull()?.toPetOrNull()
-        }.getOrNull()
-    }
+    private suspend fun resolveAnchorPet(fromOwnerId: String): Pet? = runCatching {
+        val snap = petsCol
+            .whereEqualTo("ownerId", fromOwnerId)
+            .whereEqualTo("state", PetState.ACTIVE.name)
+            .orderBy("updatedAt", Query.Direction.DESCENDING)
+            .limit(1)
+            .get().await()
+        snap.documents.firstOrNull()?.toPetOrNull()
+    }.getOrNull()
 
     override suspend fun pass(key: LikeKey) {
         withContext(io) {
@@ -153,7 +151,7 @@ internal class FirestoreLikesYouRepository @Inject constructor(
         val parts = key.value.split("_", limit = 2)
         val fromOwnerId = parts[0]
         val anchor = resolveAnchorPet(fromOwnerId)
-            ?: return@withContext SwipeResult.Pending  // liker has no pet to like back on
+            ?: return@withContext SwipeResult.Pending // liker has no pet to like back on
         deckRepo.submitSwipe(anchor.id, SwipeAction.LIKE)
     }
 }

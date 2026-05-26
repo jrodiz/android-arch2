@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import com.rodiz.arch2.core.session.domain.Session
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.core.testing.MainDispatcherExtension
-import com.rodiz.arch2.feature.match.domain.model.InboxSnapshot
 import com.rodiz.arch2.feature.match.domain.model.Match
 import com.rodiz.arch2.feature.match.domain.model.MatchId
 import com.rodiz.arch2.feature.match.domain.model.MatchSummary
@@ -18,10 +17,10 @@ import com.rodiz.arch2.feature.pet.domain.model.Species
 import com.rodiz.arch2.feature.pet.domain.repository.PetRepository
 import com.rodiz.arch2.feature.pet.domain.usecase.ObserveMyPetsUseCase
 import com.rodiz.arch2.feature.settings.domain.model.AccountDeletion
+import com.rodiz.arch2.feature.settings.domain.repository.AccountDeletionRepository
 import com.rodiz.arch2.feature.settings.domain.usecase.CancelAccountDeletionUseCase
 import com.rodiz.arch2.feature.settings.domain.usecase.ObservePendingDeletionUseCase
 import com.rodiz.arch2.feature.settings.domain.usecase.RequestAccountDeletionUseCase
-import com.rodiz.arch2.feature.settings.domain.repository.AccountDeletionRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk

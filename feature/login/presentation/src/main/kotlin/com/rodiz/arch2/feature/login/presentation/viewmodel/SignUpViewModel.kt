@@ -13,7 +13,6 @@ import com.rodiz.arch2.feature.login.domain.usecase.ValidateConfirmPasswordUseCa
 import com.rodiz.arch2.feature.login.domain.usecase.ValidateEmailUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.ValidateNameUseCase
 import com.rodiz.arch2.feature.login.domain.usecase.ValidatePasswordUseCase
-import com.rodiz.arch2.feature.login.presentation.R
 import com.rodiz.arch2.feature.login.presentation.state.SignUpAction
 import com.rodiz.arch2.feature.login.presentation.state.SignUpEvent
 import com.rodiz.arch2.feature.login.presentation.state.SignUpUiState

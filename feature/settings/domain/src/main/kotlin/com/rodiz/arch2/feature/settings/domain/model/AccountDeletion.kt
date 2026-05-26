@@ -4,5 +4,5 @@ import kotlinx.datetime.Instant
 
 data class AccountDeletion(
     val requestedAt: Instant,
-    val hardDeleteAt: Instant,    // requestedAt + 30 days
+    val hardDeleteAt: Instant, // requestedAt + 30 days
 )

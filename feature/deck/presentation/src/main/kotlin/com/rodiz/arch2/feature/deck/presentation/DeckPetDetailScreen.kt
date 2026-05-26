@@ -69,13 +69,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.rodiz.arch2.core.designsystem.theme.BrandColors
 import com.rodiz.arch2.core.ownerlookup.domain.OwnerDisplay
-import com.rodiz.arch2.feature.pet.domain.model.Intent as PetIntent
 import com.rodiz.arch2.feature.pet.domain.model.Pet
 import com.rodiz.arch2.feature.pet.domain.model.PetEnergy
 import com.rodiz.arch2.feature.pet.domain.model.PetSize
 import com.rodiz.arch2.feature.pet.domain.model.PhotoSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import com.rodiz.arch2.feature.pet.domain.model.Intent as PetIntent
 
 @HiltViewModel
 internal class DeckPetDetailFactoryHolder @Inject constructor(

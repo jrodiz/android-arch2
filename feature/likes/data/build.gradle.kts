@@ -10,7 +10,7 @@ android {
 dependencies {
     implementation(project(":feature:likes:domain"))
     implementation(project(":feature:pet:domain"))
-    implementation(project(":feature:deck:domain"))     // DeckRepository for likeBack delegation
+    implementation(project(":feature:deck:domain")) // DeckRepository for likeBack delegation
     implementation(project(":core:firebase"))
     implementation(project(":core:common"))
     implementation(project(":core:session:domain"))

@@ -112,9 +112,13 @@ adb -s emulator-5556 logcat -d -t 200 | grep -iE 'TinPet|FATAL|ANR'
 GitHub Actions runs on every push to `master` and every PR targeting `master`
 (`.github/workflows/ci.yml`):
 
-- **Android job** — `./gradlew testDebugUnitTest :app:assembleDebug`. Unit
-  test reports are uploaded as an artifact on every run (success or fail)
-  so you can confirm tests actually executed — open
+- **Android job** — `./gradlew ktlintCheck testDebugUnitTest :app:assembleDebug`.
+  ktlint runs first (cheap, fails fast); run `./gradlew ktlintFormat`
+  locally to auto-fix style violations. Rule overrides live in the
+  `.editorconfig` at the repo root — see the inline comments there for
+  which formatters we've muted and why. Unit test reports are uploaded
+  as an artifact on every run (success or fail) so you can confirm
+  tests actually executed — open
   `android-unit-test-reports/.../build/reports/tests/.../index.html` and
   check the count > 0 under `<div class="counter">`. The
   `tinpet.android.test` convention plugin (now applied transitively by the

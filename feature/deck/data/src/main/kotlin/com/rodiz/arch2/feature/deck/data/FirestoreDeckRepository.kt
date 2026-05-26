@@ -3,17 +3,16 @@ package com.rodiz.arch2.feature.deck.data
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
 import com.google.firebase.firestore.Query
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
 import com.rodiz.arch2.core.common.geo.Haversine
+import com.rodiz.arch2.core.filters.domain.FilterPrefs
 import com.rodiz.arch2.core.ownerlookup.domain.OwnerLookupRepository
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.deck.domain.model.DeckCard
-import com.rodiz.arch2.feature.deck.domain.model.DistanceBucket
 import com.rodiz.arch2.feature.deck.domain.model.DeckSnapshot
 import com.rodiz.arch2.feature.deck.domain.model.DeckState
-import com.rodiz.arch2.core.filters.domain.FilterPrefs
+import com.rodiz.arch2.feature.deck.domain.model.DistanceBucket
 import com.rodiz.arch2.feature.deck.domain.model.SwipeAction
 import com.rodiz.arch2.feature.deck.domain.model.SwipeResult
 import com.rodiz.arch2.feature.deck.domain.repository.DeckRepository
@@ -34,6 +33,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
 
 @Singleton
 internal class FirestoreDeckRepository @Inject constructor(
@@ -256,6 +256,6 @@ internal class FirestoreDeckRepository @Inject constructor(
         }
         sessionSwiped.remove(last.petId.value)
         lastSwipe = null
-        null  // The deck snapshot will re-include the pet on next observation tick.
+        null // The deck snapshot will re-include the pet on next observation tick.
     }
 }

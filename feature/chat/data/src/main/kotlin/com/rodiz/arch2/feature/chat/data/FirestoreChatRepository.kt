@@ -60,17 +60,23 @@ internal class FirestoreChatRepository @Inject constructor(
         val msgRef = matchRef.collection("messages").document()
 
         firestore.runBatch { batch ->
-            batch.set(msgRef, mapOf(
-                "fromOwnerId" to me,
-                "text" to trimmed,
-                "createdAt" to FieldValue.serverTimestamp(),
-                "readBy" to mapOf(me to FieldValue.serverTimestamp()),
-            ))
-            batch.update(matchRef, mapOf(
-                "lastMessageAt" to FieldValue.serverTimestamp(),
-                "lastMessagePreview" to trimmed.take(60),
-                "lastMessageFromOwnerId" to me,
-            ))
+            batch.set(
+                msgRef,
+                mapOf(
+                    "fromOwnerId" to me,
+                    "text" to trimmed,
+                    "createdAt" to FieldValue.serverTimestamp(),
+                    "readBy" to mapOf(me to FieldValue.serverTimestamp()),
+                )
+            )
+            batch.update(
+                matchRef,
+                mapOf(
+                    "lastMessageAt" to FieldValue.serverTimestamp(),
+                    "lastMessagePreview" to trimmed.take(60),
+                    "lastMessageFromOwnerId" to me,
+                )
+            )
         }.await()
 
         // Return a locally-constructed Message; the snapshot listener will emit the canonical version too.

@@ -14,7 +14,7 @@ data class IncomingLike(
     val key: LikeKey,
     val fromOwnerId: String,
     val toPetId: PetId,
-    val anchorPet: Pet,              // a representative pet of the liker (their most-recent active pet)
+    val anchorPet: Pet, // a representative pet of the liker (their most-recent active pet)
     val likedAt: Instant,
     /**
      * Distance bucket of the liker's owner location from mine, computed in the
