@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.tinpet.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -6,6 +8,35 @@ plugins {
     alias(libs.plugins.tinpet.android.firebase)
     alias(libs.plugins.tinpet.compose.metrics)
 }
+
+// Pulls release-signing credentials from (in priority order):
+//   1. `signing.*` keys in /local.properties (gitignored; per-machine).
+//   2. RELEASE_KEYSTORE_* environment variables (for CI when we set up secrets).
+//   3. None — `assembleRelease` falls back to the debug signing config so the
+//      output is still installable, just not Play-store-shippable. This is
+//      intentional: it keeps CI green without secrets, and a local
+//      `:app:installRelease` works the day you hook up a device.
+val releaseSigning: SigningCredentials? = run {
+    val local = Properties().apply {
+        val file = rootProject.file("local.properties")
+        if (file.exists()) file.inputStream().use { load(it) }
+    }
+    fun pick(key: String, env: String) =
+        local.getProperty(key) ?: System.getenv(env)
+
+    val storeFilePath = pick("signing.storeFile", "RELEASE_KEYSTORE_PATH") ?: return@run null
+    val storePassword = pick("signing.storePassword", "RELEASE_KEYSTORE_PASSWORD") ?: return@run null
+    val keyAlias = pick("signing.keyAlias", "RELEASE_KEY_ALIAS") ?: return@run null
+    val keyPassword = pick("signing.keyPassword", "RELEASE_KEY_PASSWORD") ?: return@run null
+    SigningCredentials(file(storeFilePath), storePassword, keyAlias, keyPassword)
+}
+
+data class SigningCredentials(
+    val storeFile: File,
+    val storePassword: String,
+    val keyAlias: String,
+    val keyPassword: String,
+)
 
 android {
     namespace = "com.rodiz.arch2"
@@ -20,6 +51,21 @@ android {
         compose = true
     }
 
+    signingConfigs {
+        // Only register `release` when real credentials are present — if we
+        // declared the block unconditionally and the storeFile was missing,
+        // every `assembleRelease` would fail with a confusing
+        // "Keystore file not set" error.
+        releaseSigning?.let { creds ->
+            create("release") {
+                storeFile = creds.storeFile
+                storePassword = creds.storePassword
+                keyAlias = creds.keyAlias
+                keyPassword = creds.keyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -28,6 +74,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Use the real release signing config if credentials are wired in,
+            // otherwise the debug config so the APK is still installable on
+            // a connected emulator / device for smoke-testing.
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
         debug {
             isMinifyEnabled = false
