@@ -18,4 +18,9 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons)
     implementation(libs.coil.compose)
+
+    // JUnit5 + MockK + Turbine + coroutines-test come from tinpet.android.test
+    // (applied transitively by the feature convention plugin).
+    testImplementation(project(":core:testing"))
+    testImplementation(libs.kotlinx.datetime)
 }
