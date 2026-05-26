@@ -5,6 +5,9 @@
     <string name="pet_a11y_back">Back</string>
     <string name="pet_a11y_add">Add a pet</string>
     <string name="pet_a11y_edit_pet">Edit %1$s</string>
+    <string name="pet_a11y_feature_pet">Feature %1$s on login screen</string>
+    <string name="pet_a11y_unfeature_pet">Unfeature %1$s</string>
+    <string name="pet_featured_limit_reached">You can feature up to 3 pets</string>
 
     <string name="pet_banner_subtitle_below_quota">More pets = more matches. Up to %1$d per account.</string>
     <string name="pet_banner_subtitle_at_quota">You’ve reached the %1$d-pet limit.</string>

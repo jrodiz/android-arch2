@@ -8,6 +8,7 @@ import androidx.core.content.getSystemService
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
 import com.rodiz.arch2.core.common.logging.CrashReporter
+import com.rodiz.arch2.core.featuredpets.data.FeaturedPetsSessionGate
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineDispatcher
@@ -23,6 +24,7 @@ class App : Application() {
 
     @Inject lateinit var sessionRepository: SessionRepository
     @Inject lateinit var crashReporter: CrashReporter
+    @Inject lateinit var featuredPetsGate: FeaturedPetsSessionGate
 
     @Inject @IoDispatcher lateinit var io: CoroutineDispatcher
 
@@ -30,7 +32,7 @@ class App : Application() {
         super.onCreate()
         createNotificationChannels()
         configureCrashlyticsCollection()
-        observeSessionForCrashAttribution()
+        observeSession()
     }
 
     private fun createNotificationChannels() {
@@ -66,14 +68,20 @@ class App : Application() {
         FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = !debuggable
     }
 
-    // Forwards uid changes (sign-in, account switch, sign-out) to Crashlytics so
-    // every report carries the active user, and so sign-out detaches the previous
-    // identity instead of attributing a later crash to a stale account.
-    private fun observeSessionForCrashAttribution() {
+    // Single uid-change observer that drives multiple downstream concerns:
+    //   1. Crashlytics user attribution (so reports carry the active user, and
+    //      sign-out detaches the prior identity).
+    //   2. Featured-pets cache lifecycle (a different uid signing in wipes the
+    //      previous user's Login-screen pet selection; sign-out preserves it
+    //      so the Login hero can still render those pets).
+    private fun observeSession() {
         val scope = CoroutineScope(SupervisorJob() + io)
         sessionRepository.observe()
             .distinctUntilChanged { a, b -> a?.userId == b?.userId }
-            .onEach { crashReporter.setUserId(it?.userId) }
+            .onEach { session ->
+                crashReporter.setUserId(session?.userId)
+                featuredPetsGate.onSessionChanged(session?.userId)
+            }
             .launchIn(scope)
     }
 

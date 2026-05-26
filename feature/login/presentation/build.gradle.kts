@@ -30,6 +30,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
     implementation(project(":core:session:domain"))
+    implementation(project(":core:featuredpets:domain"))
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.compose.material.icons)

@@ -74,10 +74,17 @@ internal fun MyPetsRoute(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.clearError()
+        }
+    }
+    LaunchedEffect(state.snackbarMessageRes) {
+        state.snackbarMessageRes?.let { resId ->
+            snackbarHostState.showSnackbar(context.getString(resId))
+            viewModel.onSnackbarShown()
         }
     }
 
@@ -104,10 +111,12 @@ internal fun MyPetsRoute(
                 else -> PetsGrid(
                     active = state.activePets,
                     archived = state.archivedPets,
+                    featuredIds = state.featuredIds,
                     onAddPet = onAddPet,
                     onOpenPet = onOpenPet,
                     onEditPet = onEditPet,
                     onRestore = viewModel::restore,
+                    onTogglePin = viewModel::onTogglePin,
                 )
             }
         }
@@ -315,10 +324,12 @@ private fun AddAnotherPetTile(
 private fun PetsGrid(
     active: List<Pet>,
     archived: List<Pet>,
+    featuredIds: Set<String>,
     onAddPet: () -> Unit,
     onOpenPet: (PetId) -> Unit,
     onEditPet: (PetId) -> Unit,
     onRestore: (Pet) -> Unit,
+    onTogglePin: (Pet) -> Unit,
 ) {
     var showArchived by remember { mutableStateOf(false) }
     val showAddTile = active.size < MAX_ACTIVE_PETS
@@ -337,6 +348,8 @@ private fun PetsGrid(
                 pet = pet,
                 onClick = { onOpenPet(pet.id) },
                 onEdit = { onEditPet(pet.id) },
+                isFeatured = pet.id.value in featuredIds,
+                onToggleFeature = { onTogglePin(pet) },
             )
         }
         if (showAddTile) {
@@ -360,6 +373,9 @@ private fun PetsGrid(
                             onClick = { onOpenPet(pet.id) },
                             onEdit = { onEditPet(pet.id) },
                             modifier = Modifier.alpha(0.7f),
+                            // Archived pets aren't eligible to be featured on Login —
+                            // hide the pin entirely so it can't be tapped.
+                            showPin = false,
                         )
                         Spacer(Modifier.height(6.dp))
                         OutlinedButton(

@@ -26,6 +26,7 @@ dependencies {
     implementation(project(":feature:notifications:nav"))
     implementation(project(":feature:login:nav"))
     implementation(project(":core:filters:domain"))
+    implementation(project(":core:featuredpets:domain"))
 
     implementation(libs.coil.compose)
     implementation(libs.play.services.location)

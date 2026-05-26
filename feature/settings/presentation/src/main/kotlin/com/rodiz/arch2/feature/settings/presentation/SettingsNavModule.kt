@@ -6,6 +6,7 @@ import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.login.nav.LoginHome
 import com.rodiz.arch2.feature.settings.nav.SettingsBlockedUsers
 import com.rodiz.arch2.feature.settings.nav.SettingsEditProfile
+import com.rodiz.arch2.feature.settings.nav.SettingsFeaturedPets
 import com.rodiz.arch2.feature.settings.nav.SettingsFilters
 import com.rodiz.arch2.feature.settings.nav.SettingsHelpSafety
 import com.rodiz.arch2.feature.settings.nav.SettingsHome
@@ -31,10 +32,14 @@ internal object SettingsNavModule {
                 onOpenEditProfile = { navigator.goTo(SettingsEditProfile) },
                 onOpenNotifications = { navigator.goTo(SettingsNotifications) },
                 onOpenFilters = { navigator.goTo(SettingsFilters) },
+                onOpenFeaturedPets = { navigator.goTo(SettingsFeaturedPets) },
                 onOpenPrivacy = { navigator.goTo(SettingsPrivacy) },
                 onOpenBlockedOwners = { navigator.goTo(SettingsBlockedUsers) },
                 onSignedOut = { navigator.replaceAll(LoginHome) },
             )
+        }
+        entry<SettingsFeaturedPets> {
+            FeaturedPetsRoute(onBack = { navigator.goBack() })
         }
         entry<SettingsEditProfile> {
             EditProfileRoute(onBack = { navigator.goBack() })

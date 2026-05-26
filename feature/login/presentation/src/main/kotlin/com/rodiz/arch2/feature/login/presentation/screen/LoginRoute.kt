@@ -19,6 +19,7 @@ import com.rodiz.arch2.feature.login.presentation.biometric.BiometricResult
 import com.rodiz.arch2.feature.login.presentation.googlesignin.GoogleSignInLauncher
 import com.rodiz.arch2.feature.login.presentation.state.LoginAction
 import com.rodiz.arch2.feature.login.presentation.state.LoginEvent
+import com.rodiz.arch2.feature.login.presentation.viewmodel.LoginFeaturedPetsViewModel
 import com.rodiz.arch2.feature.login.presentation.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 
@@ -28,8 +29,10 @@ fun LoginRoute(
     onForgot: () -> Unit,
     onSignUp: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel(),
+    featuredViewModel: LoginFeaturedPetsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val featured by featuredViewModel.featured.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -77,5 +80,5 @@ fun LoginRoute(
         }
     }
 
-    LoginScreen(state = state, onAction = viewModel::onAction)
+    LoginScreen(state = state, onAction = viewModel::onAction, featured = featured)
 }

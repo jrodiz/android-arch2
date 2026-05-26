@@ -27,6 +27,7 @@ import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PauseCircleOutline
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.HorizontalDivider
@@ -68,6 +69,7 @@ internal fun SettingsHomeRoute(
     onOpenEditProfile: () -> Unit,
     onOpenNotifications: () -> Unit,
     onOpenFilters: () -> Unit,
+    onOpenFeaturedPets: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenBlockedOwners: () -> Unit,
     onSignedOut: () -> Unit,
@@ -124,6 +126,27 @@ internal fun SettingsHomeRoute(
                         onClick = onOpenFilters,
                         trailing = { ChevronTrailing() },
                         testTag = "settings_row_filters",
+                    )
+                    RowDivider()
+                    SettingsRow(
+                        icon = Icons.Outlined.PushPin,
+                        iconBackground = BrandColors.CoralTint,
+                        iconTint = BrandColors.CoralDeep,
+                        title = stringResource(R.string.settings_row_featured_title),
+                        subtitle = stringResource(R.string.settings_row_featured_subtitle),
+                        onClick = onOpenFeaturedPets,
+                        trailing = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                if (state.featuredCount > 0) {
+                                    CountPill(count = state.featuredCount)
+                                }
+                                ChevronTrailing()
+                            }
+                        },
+                        testTag = "settings_row_featured",
                     )
                     RowDivider()
                     SettingsRow(

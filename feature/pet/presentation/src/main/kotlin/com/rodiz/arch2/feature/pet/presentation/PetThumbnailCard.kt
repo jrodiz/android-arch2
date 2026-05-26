@@ -18,10 +18,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Pets
+import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -56,6 +58,9 @@ internal fun PetThumbnailCard(
     onClick: () -> Unit,
     onEdit: () -> Unit,
     modifier: Modifier = Modifier,
+    isFeatured: Boolean = false,
+    onToggleFeature: () -> Unit = {},
+    showPin: Boolean = true,
 ) {
     Surface(
         onClick = onClick,
@@ -65,7 +70,13 @@ internal fun PetThumbnailCard(
         modifier = modifier.fillMaxWidth(),
     ) {
         Column {
-            PetPhotoBox(pet = pet, onEdit = onEdit)
+            PetPhotoBox(
+                pet = pet,
+                onEdit = onEdit,
+                isFeatured = isFeatured,
+                onToggleFeature = onToggleFeature,
+                showPin = showPin,
+            )
             Column(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -112,7 +123,13 @@ internal fun PetThumbnailCard(
 }
 
 @Composable
-private fun PetPhotoBox(pet: Pet, onEdit: () -> Unit) {
+private fun PetPhotoBox(
+    pet: Pet,
+    onEdit: () -> Unit,
+    isFeatured: Boolean,
+    onToggleFeature: () -> Unit,
+    showPin: Boolean,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,22 +167,51 @@ private fun PetPhotoBox(pet: Pet, onEdit: () -> Unit) {
                 .padding(10.dp),
         )
 
-        val editLabel = stringResource(R.string.pet_a11y_edit_pet, pet.name)
-        Box(
+        // Top-end overlays stack vertically: pin (when shown) on top, edit pencil
+        // below. Keeping both at 30dp / 16dp icon size matches the existing pattern.
+        Column(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(10.dp)
-                .size(30.dp)
-                .background(Color.Black.copy(alpha = 0.35f), CircleShape)
-                .clickable(onClick = onEdit),
-            contentAlignment = Alignment.Center,
+                .padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Edit,
-                contentDescription = editLabel,
-                tint = Color.White,
-                modifier = Modifier.size(16.dp),
-            )
+            if (showPin) {
+                val pinLabel = stringResource(
+                    if (isFeatured) R.string.pet_a11y_unfeature_pet else R.string.pet_a11y_feature_pet,
+                    pet.name,
+                )
+                val pinBg = if (isFeatured) BrandColors.CoralDeep else Color.Black.copy(alpha = 0.35f)
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .background(pinBg, CircleShape)
+                        .clickable(onClick = onToggleFeature),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = if (isFeatured) Icons.Filled.PushPin else Icons.Outlined.PushPin,
+                        contentDescription = pinLabel,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
+
+            val editLabel = stringResource(R.string.pet_a11y_edit_pet, pet.name)
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .background(Color.Black.copy(alpha = 0.35f), CircleShape)
+                    .clickable(onClick = onEdit),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Edit,
+                    contentDescription = editLabel,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
         }
     }
 }

@@ -10,6 +10,16 @@
     <string name="settings_section_matching">Matching</string>
     <string name="settings_row_filters_title">Filters</string>
     <string name="settings_row_filters_subtitle">Distance, intent, species</string>
+    <string name="settings_row_featured_title">Featured on login</string>
+    <string name="settings_row_featured_subtitle">Choose up to 3 pets</string>
+
+    <string name="settings_featured_title">Featured on login</string>
+    <string name="settings_featured_subtitle">These pets show on the sign-in screen — even after you sign out.</string>
+    <string name="settings_featured_quota_format">%1$d of %2$d selected</string>
+    <string name="settings_featured_empty_title">Add a pet first</string>
+    <string name="settings_featured_empty_subtitle">Once you add a pet, you can feature it on the sign-in screen.</string>
+    <string name="settings_featured_empty_cta">Add your first pet</string>
+    <string name="settings_featured_limit_reached">You can feature up to 3 pets</string>
     <string name="settings_row_notifications_title">Notifications</string>
     <string name="settings_row_notifications_subtitle">Matches, messages, likes</string>
     <string name="settings_row_pause_title">Pause profile</string>

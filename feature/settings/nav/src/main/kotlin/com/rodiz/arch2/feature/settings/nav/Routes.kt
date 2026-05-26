@@ -15,6 +15,9 @@ data object SettingsNotifications
 data object SettingsFilters
 
 @Serializable
+data object SettingsFeaturedPets
+
+@Serializable
 data object SettingsPrivacy
 
 @Serializable

@@ -2,6 +2,8 @@ package com.rodiz.arch2.feature.settings.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rodiz.arch2.core.featuredpets.domain.FeaturedPetsRepository
+import com.rodiz.arch2.core.featuredpets.domain.FeaturedPetsState
 import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.profile.domain.usecase.ObserveMyProfileUseCase
 import com.rodiz.arch2.feature.profile.domain.usecase.SetPausedUseCase
@@ -22,6 +24,7 @@ internal data class SettingsHomeUiState(
     val isLoading: Boolean = true,
     val notifEnabledCount: Int = 0,
     val blockedCount: Int = 0,
+    val featuredCount: Int = 0,
     val paused: Boolean = false,
     val isPausing: Boolean = false,
     val errorMessage: String? = null,
@@ -32,6 +35,7 @@ internal class SettingsHomeViewModel @Inject constructor(
     observeNotificationPrefs: ObserveNotificationPrefsUseCase,
     observeBlockedOwners: ObserveBlockedOwnersUseCase,
     observeMyProfile: ObserveMyProfileUseCase,
+    private val featuredPetsRepository: FeaturedPetsRepository,
     private val setPaused: SetPausedUseCase,
     private val sessionRepository: SessionRepository,
 ) : ViewModel() {
@@ -72,6 +76,16 @@ internal class SettingsHomeViewModel @Inject constructor(
                     )
                 }
             }
+        }
+        // Featured pets count drives the trailing CountPill on the new
+        // "Featured on login" row — kept on its own collector so a Firestore
+        // hiccup on one of the other flows doesn't blank the pin count.
+        viewModelScope.launch {
+            featuredPetsRepository.observe()
+                .catch { emit(FeaturedPetsState()) }
+                .collect { state ->
+                    _uiState.update { it.copy(featuredCount = state.featured.size) }
+                }
         }
     }
 

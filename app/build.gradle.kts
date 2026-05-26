@@ -106,6 +106,7 @@ dependencies {
     implementation(project(":core:filters:data"))
     implementation(project(":core:ownerlookup:data"))
     implementation(project(":core:petlookup:data"))
+    implementation(project(":core:featuredpets:data"))
 
     implementation(project(":feature:login:nav"))
     implementation(project(":feature:login:domain"))

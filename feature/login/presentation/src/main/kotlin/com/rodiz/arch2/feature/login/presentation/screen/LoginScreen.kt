@@ -1,6 +1,7 @@
 package com.rodiz.arch2.feature.login.presentation.screen
 
 import android.app.Activity
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -50,6 +51,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
@@ -64,8 +66,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsControllerCompat
+import coil.compose.AsyncImage
 import com.rodiz.arch2.core.designsystem.theme.BrandColors
 import com.rodiz.arch2.core.designsystem.theme.TinPetTheme
+import com.rodiz.arch2.core.featuredpets.domain.FeaturedPet
 import com.rodiz.arch2.core.ui.components.EmailFieldPill
 import com.rodiz.arch2.core.ui.components.ErrorBanner
 import com.rodiz.arch2.core.ui.components.PasswordFieldPill
@@ -85,6 +89,7 @@ fun LoginScreen(
     state: LoginUiState,
     onAction: (LoginAction) -> Unit,
     modifier: Modifier = Modifier,
+    featured: List<FeaturedPet> = emptyList(),
 ) {
     LightStatusBarIconsWhileShown()
     Column(
@@ -93,14 +98,19 @@ fun LoginScreen(
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState()),
     ) {
-        HeroAndCard(state = state, onAction = onAction)
+        HeroAndCard(state = state, onAction = onAction, featured = featured)
     }
 }
 
 @Composable
-private fun HeroAndCard(state: LoginUiState, onAction: (LoginAction) -> Unit) {
+private fun HeroAndCard(
+    state: LoginUiState,
+    onAction: (LoginAction) -> Unit,
+    featured: List<FeaturedPet>,
+) {
     Box(modifier = Modifier.fillMaxWidth()) {
         Hero(
+            featured = featured,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
@@ -120,12 +130,13 @@ private fun HeroAndCard(state: LoginUiState, onAction: (LoginAction) -> Unit) {
         ) {
             CardContent(state = state, onAction = onAction)
         }
-        // Rabbit tile sits on the boundary; last child = on top of both hero and card.
+        // Rabbit slot sits on the boundary; last child = on top of both hero and card.
         // About 60% of the tile stays above the hero/card boundary, 40% dips into the
         // card — matches the mockup. CardContent's top padding clears the dipped part.
-        Image(
-            painter = painterResource(R.drawable.pet_tile_rabbit),
-            contentDescription = null,
+        // Slot index 2 of the featured list lands here.
+        HeroPetSlot(
+            pet = featured.getOrNull(2),
+            fallbackPawRes = R.drawable.pet_tile_rabbit,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = HeroHeight - TileSize + 20.dp)
@@ -138,8 +149,43 @@ private fun HeroAndCard(state: LoginUiState, onAction: (LoginAction) -> Unit) {
     }
 }
 
+/**
+ * Single decorative-or-photo tile in the Login hero. When [pet] has a non-null
+ * avatarUrl, renders the photo via Coil; otherwise (or on load failure) shows
+ * [fallbackPawRes] so the hero composition is preserved even pre-cache or
+ * after a Coil eviction. `modifier` carries the slot's offset / size / rotate /
+ * clip / border so both the photo and the fallback paint identically.
+ */
 @Composable
-private fun Hero(modifier: Modifier = Modifier) {
+private fun HeroPetSlot(
+    pet: FeaturedPet?,
+    @DrawableRes fallbackPawRes: Int,
+    modifier: Modifier,
+) {
+    if (pet?.avatarUrl != null) {
+        AsyncImage(
+            model = pet.avatarUrl,
+            contentDescription = null, // hero merges semantics
+            contentScale = ContentScale.Crop,
+            modifier = modifier,
+            placeholder = painterResource(fallbackPawRes),
+            error = painterResource(fallbackPawRes),
+            fallback = painterResource(fallbackPawRes),
+        )
+    } else {
+        Image(
+            painter = painterResource(fallbackPawRes),
+            contentDescription = null,
+            modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun Hero(
+    featured: List<FeaturedPet>,
+    modifier: Modifier = Modifier,
+) {
     BoxWithConstraints(
         modifier = modifier
             .background(BrandColors.Coral)
@@ -171,10 +217,10 @@ private fun Hero(modifier: Modifier = Modifier) {
         val widthPx: Float = with(density) { w.toPx() }
         val heightPx: Float = with(density) { h.toPx() }
 
-        // Puppies — top-left, slight CCW tilt.
-        Image(
-            painter = painterResource(R.drawable.pet_tile_puppies),
-            contentDescription = null,
+        // Slot 0 — top-left, slight CCW tilt. Falls back to the puppies PNG.
+        HeroPetSlot(
+            pet = featured.getOrNull(0),
+            fallbackPawRes = R.drawable.pet_tile_puppies,
             modifier = Modifier
                 .offset(
                     x = with(density) { (widthPx * 0.05f).toDp() },
@@ -187,10 +233,10 @@ private fun Hero(modifier: Modifier = Modifier) {
                 .clearAndSetSemantics {},
         )
 
-        // Cat — right side, slight CW tilt.
-        Image(
-            painter = painterResource(R.drawable.pet_tile_cat),
-            contentDescription = null,
+        // Slot 1 — right side, slight CW tilt. Falls back to the cat PNG.
+        HeroPetSlot(
+            pet = featured.getOrNull(1),
+            fallbackPawRes = R.drawable.pet_tile_cat,
             modifier = Modifier
                 .offset(
                     x = with(density) { (widthPx - tilePx - widthPx * 0.06f).toDp() },
@@ -513,6 +559,27 @@ private fun LoginScreenPreviewError() {
                 emailFormExpanded = true,
             ),
             onAction = {},
+        )
+    }
+}
+
+/**
+ * Mixed-state preview: two pets pinned, third slot still uses the rabbit PNG
+ * fallback. Avatars are null so even pre-render the slots fall back to the
+ * decorative paws — proves the hero composition stays intact when Coil can't
+ * resolve URLs in the preview environment.
+ */
+@Preview(name = "Login — featured (2 pets)", showBackground = true, heightDp = 900)
+@Composable
+private fun LoginScreenPreviewFeaturedMixed() {
+    TinPetTheme {
+        LoginScreen(
+            state = LoginUiState(),
+            onAction = {},
+            featured = listOf(
+                FeaturedPet(id = "p1", name = "Rex", species = "DOG", avatarUrl = null),
+                FeaturedPet(id = "p2", name = "Mochi", species = "CAT", avatarUrl = null),
+            ),
         )
     }
 }
