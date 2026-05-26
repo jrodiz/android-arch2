@@ -439,12 +439,22 @@ private fun AvatarBlock(
             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
             modifier = Modifier.testTag("edit_profile_change_photo"),
         ) {
+            // Flip the label to "Uploading…" while the upload is in flight so the
+            // user gets explicit textual confirmation that something is happening
+            // — the spinner overlay alone reads as ambiguous on small displays.
             Text(
-                text = stringResource(R.string.edit_profile_change_photo),
+                text = stringResource(
+                    if (isUploading) R.string.edit_profile_avatar_uploading
+                    else R.string.edit_profile_change_photo,
+                ),
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.SemiBold,
                 ),
-                color = BrandColors.CoralDeep,
+                color = if (isUploading) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    BrandColors.CoralDeep
+                },
             )
         }
     }

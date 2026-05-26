@@ -18,7 +18,7 @@ import kotlin.time.Duration.Companion.seconds
  * the public download URL on success. Soft-fail: callers should keep going if the
  * upload returns null — account creation already succeeded by the time this runs.
  *
- * Wrapped in a 60s timeout so a blocked TCP socket (Samsung Sleeping-Apps
+ * Wrapped in a 20s timeout so a blocked TCP socket (Samsung Sleeping-Apps
  * firewall, captive portal, etc.) surfaces as a Result.failure with a
  * TimeoutCancellationException instead of hanging the sign-up flow forever.
  */
@@ -30,7 +30,7 @@ internal class AvatarUploader @Inject constructor(
 ) {
     suspend fun upload(uid: String, source: Uri): Result<String> = withContext(io) {
         runCatching {
-            withTimeout(60.seconds) {
+            withTimeout(20.seconds) {
                 val ref = storage.reference.child("users/$uid/avatar.jpg")
                 context.contentResolver.openInputStream(source).use { stream ->
                     requireNotNull(stream) { "Cannot open avatar source" }

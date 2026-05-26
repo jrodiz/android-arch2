@@ -2,10 +2,13 @@ package com.rodiz.arch2.feature.profile.data
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageException
 import com.rodiz.arch2.core.common.coroutine.IoDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -22,21 +25,62 @@ internal class AvatarUploader @Inject constructor(
     // Re-uses the users/{uid}/avatar.jpg path that sign-up writes to, so editing
     // the avatar overwrites the same blob instead of leaving an orphan.
     //
-    // The upload is wrapped in a 60s timeout because Firebase Storage's chunked
-    // resumable upload will silently hang indefinitely if the underlying TCP
-    // socket is blocked (Samsung Sleeping-Apps firewall, captive portal mid-
-    // session, etc.) — the SDK retries internally without surfacing an error,
-    // and the UI just spins forever. A `TimeoutCancellationException` here
-    // surfaces up to the ViewModel where it's mapped to a user-visible
-    // "Upload timed out — check your connection" snackbar.
+    // Wrapped in a 20s timeout because Firebase Storage's chunked resumable
+    // upload can silently hang indefinitely if the underlying TCP socket is
+    // blocked (Samsung Sleeping-Apps firewall, captive portal mid-session,
+    // etc.) — the SDK retries internally without surfacing an error.
+    //
+    // Every phase is Log.i'd with the `TAG` so a logcat scan immediately shows
+    // which step failed (open-stream → putStream → downloadUrl). StorageException
+    // is caught explicitly and its errorCode + httpResultCode are logged — those
+    // are the only signals that disambiguate "rules denied", "object too large",
+    // "quota exceeded", "network", etc.
     suspend fun upload(uid: String, source: Uri): String = withContext(io) {
-        withTimeout(60.seconds) {
-            val ref = storage.reference.child("users/$uid/avatar.jpg")
-            context.contentResolver.openInputStream(source).use { stream ->
-                requireNotNull(stream) { "Cannot open avatar source" }
-                ref.putStream(stream).await()
+        val started = System.currentTimeMillis()
+        Log.i(TAG, "upload: start uid=$uid source=$source")
+        try {
+            withTimeout(20.seconds) {
+                val ref = storage.reference.child("users/$uid/avatar.jpg")
+                Log.i(TAG, "upload: opening input stream for $source")
+                val mimeType = context.contentResolver.getType(source)
+                Log.i(TAG, "upload: source mimeType=$mimeType")
+                context.contentResolver.openInputStream(source).use { stream ->
+                    requireNotNull(stream) { "Cannot open avatar source" }
+                    Log.i(TAG, "upload: stream opened, starting putStream")
+                    val snapshot = ref.putStream(stream).await()
+                    Log.i(
+                        TAG,
+                        "upload: putStream complete bytes=${snapshot.bytesTransferred}/${snapshot.totalByteCount}",
+                    )
+                }
+                Log.i(TAG, "upload: requesting downloadUrl")
+                val url = ref.downloadUrl.await().toString()
+                Log.i(
+                    TAG,
+                    "upload: downloadUrl resolved in ${System.currentTimeMillis() - started}ms url=$url",
+                )
+                url
             }
-            ref.downloadUrl.await().toString()
+        } catch (e: TimeoutCancellationException) {
+            Log.e(TAG, "upload: TIMED OUT after 20s — last log line above marks the stuck step", e)
+            throw e
+        } catch (e: StorageException) {
+            // errorCode is one of StorageException.ERROR_* (e.g. ERROR_NOT_AUTHORIZED,
+            // ERROR_QUOTA_EXCEEDED, ERROR_OBJECT_NOT_FOUND, ERROR_RETRY_LIMIT_EXCEEDED).
+            // httpResultCode is the underlying HTTP status from the GCS endpoint.
+            Log.e(
+                TAG,
+                "upload: StorageException errorCode=${e.errorCode} httpResultCode=${e.httpResultCode} cause=${e.cause?.javaClass?.simpleName}: ${e.cause?.message}",
+                e,
+            )
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+            Log.e(TAG, "upload: unexpected ${e.javaClass.simpleName}: ${e.message}", e)
+            throw e
         }
+    }
+
+    private companion object {
+        const val TAG = "TinPet.AvatarUploader"
     }
 }

@@ -1,6 +1,7 @@
 package com.rodiz.arch2.feature.profile.data
 
 import android.net.Uri
+import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -53,8 +54,12 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
             // populates displayName/photoUrl on the Auth user before any owners/{uid} write
             // exists, and we want the edit screen to start from those values, not from blanks.
             // Email is always pulled from Auth (it's not stored on the owners doc).
-            val email = firebaseAuth.currentUser?.email
-            trySend(snap?.toOwnerProfile(uid, email) ?: seedFromAuth(uid))
+            val authUser = firebaseAuth.currentUser
+            val displayNameFallback = authUser?.displayName.orEmpty()
+            trySend(
+                snap?.toOwnerProfile(uid, authUser?.email, displayNameFallback)
+                    ?: seedFromAuth(uid),
+            )
         }
         awaitClose { registration.remove() }
     }.flowOn(io)
@@ -93,15 +98,25 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
         withContext(io) {
             val uid = currentUid()
             val url = avatarUploader.upload(uid, Uri.parse(localUri))
+            // Log the second phase separately so a hang on the Firestore write
+            // (auth refresh, listen rebuilds, owner doc rules) is distinguishable
+            // from a Storage upload hang in logcat.
+            Log.i(TAG, "updateAvatar: storage upload OK, writing avatarUrl to Firestore for uid=$uid")
             val now = Clock.System.now()
-            ownersCol.document(uid).set(
-                mapOf(
-                    "avatarUrl" to url,
-                    "updatedAt" to now.toTimestamp(),
-                    "createdAt" to now.toTimestamp(),
-                ),
-                SetOptions.merge(),
-            ).await()
+            try {
+                ownersCol.document(uid).set(
+                    mapOf(
+                        "avatarUrl" to url,
+                        "updatedAt" to now.toTimestamp(),
+                        "createdAt" to now.toTimestamp(),
+                    ),
+                    SetOptions.merge(),
+                ).await()
+                Log.i(TAG, "updateAvatar: Firestore write OK")
+            } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+                Log.e(TAG, "updateAvatar: Firestore write FAILED ${e.javaClass.simpleName}: ${e.message}", e)
+                throw e
+            }
         }
     }
 
@@ -140,6 +155,10 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
     private suspend fun currentUid(): String =
         sessionRepo.current()?.userId ?: error("No signed-in user")
 
+    private companion object {
+        const val TAG = "TinPet.OwnerProfileRepo"
+    }
+
     private fun seedFromAuth(uid: String): OwnerProfile {
         val user = firebaseAuth.currentUser
         val now = Clock.System.now()
@@ -156,9 +175,21 @@ internal class FirestoreOwnerProfileRepository @Inject constructor(
     }
 }
 
-private fun DocumentSnapshot.toOwnerProfile(uid: String, email: String?): OwnerProfile? {
+/**
+ * [displayNameFallback] is used for `firstName` when the Firestore doc exists
+ * but the field hasn't been written yet (e.g. a fresh user uploaded an avatar
+ * before tapping Save on their name). Previously this function returned null
+ * on a missing firstName, which silently dropped every other field the doc
+ * DID have — including a freshly-uploaded `avatarUrl` — and triggered a
+ * fallback to seedFromAuth that wiped the upload from the UI.
+ */
+private fun DocumentSnapshot.toOwnerProfile(
+    uid: String,
+    email: String?,
+    displayNameFallback: String,
+): OwnerProfile? {
     if (!exists()) return null
-    val firstName = getString("firstName") ?: return null
+    val firstName = getString("firstName") ?: displayNameFallback
     val avatarUrl = getString("avatarUrl")
     val paused = getBoolean("paused") ?: false
     val location = (get("location") as? FirestoreGeoPoint)?.let { native ->
