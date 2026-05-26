@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,7 +22,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -83,8 +81,7 @@ internal fun DeckCardView(
 
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
+            .fillMaxSize()
             .offset { IntOffset(offsetX.value.toInt(), offsetY.value.toInt()) }
             .graphicsLayer { rotationZ = (offsetX.value / cardWidthPx) * 15f }
             .pointerInput(card.pet.id.value) {
@@ -138,7 +135,7 @@ internal fun DeckCardView(
         DeckCardBody(
             card = card,
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(top = 18.dp),
         )
 
@@ -174,19 +171,22 @@ private fun DeckCardBody(
         color = MaterialTheme.colorScheme.surface,
         shadowElevation = 6.dp,
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            PhotoBlock(card = card)
+        Column(modifier = Modifier.fillMaxSize()) {
+            PhotoBlock(
+                card = card,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            )
             InfoPane(card = card)
         }
     }
 }
 
 @Composable
-private fun PhotoBlock(card: DeckCard) {
+private fun PhotoBlock(card: DeckCard, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1.05f),
+        modifier = modifier,
     ) {
         val primaryUrl = card.pet.photos.firstOrNull()?.let {
             (it.source as? PhotoSource.Remote)?.downloadUrl
