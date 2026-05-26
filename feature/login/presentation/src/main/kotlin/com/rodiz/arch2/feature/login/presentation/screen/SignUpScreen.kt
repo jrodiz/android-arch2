@@ -89,6 +89,12 @@ fun SignUpScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = Color.Transparent,
+        // Opt the Scaffold out of top status-bar inset so the coral hero can paint
+        // edge-to-edge under the status bar (the hero itself reapplies
+        // statusBarsPadding() so the back arrow + headline clear the system clock).
+        // Without this, the Column starts below the status bar and the system fills
+        // that strip with the default white window background.
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
