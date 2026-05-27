@@ -27,6 +27,7 @@ internal object MatchNavModule {
         }
         entry<MatchCelebration> { key ->
             MatchCelebrationRoute(
+                matchId = key.matchId,
                 onSayHello = {
                     // Pop the celebration off first so back from Chat lands on
                     // Deck, not on this screen. See plans/match-celebration-screen.md

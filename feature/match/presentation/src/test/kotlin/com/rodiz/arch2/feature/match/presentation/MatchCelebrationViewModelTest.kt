@@ -1,6 +1,5 @@
 package com.rodiz.arch2.feature.match.presentation
 
-import androidx.lifecycle.SavedStateHandle
 import com.rodiz.arch2.core.ownerlookup.domain.OwnerDisplay
 import com.rodiz.arch2.core.ownerlookup.domain.OwnerLookupRepository
 import com.rodiz.arch2.core.petlookup.domain.PetDisplay
@@ -157,7 +156,7 @@ class MatchCelebrationViewModelTest {
         ownerLookup: OwnerLookupRepository = FakeOwnerLookup(),
         session: SessionRepository = FakeSession(Session(userId = meUid, token = "t")),
     ): MatchCelebrationViewModel = MatchCelebrationViewModel(
-        savedStateHandle = SavedStateHandle(mapOf("matchId" to matchIdValue)),
+        matchIdValue = matchIdValue,
         sessionRepo = session,
         observeMatch = ObserveMatchUseCase(matchRepo),
         petLookup = petLookup,
