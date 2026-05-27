@@ -23,6 +23,12 @@
     <string name="deck_empty_petless_body">En TinPet las mascotas son tuyas. Toca abajo para agregar la primera.</string>
     <string name="deck_empty_petless_action">Agregar mascota</string>
 
+    <!-- Modal shown when a petless user taps Like/Pass on a deck card. -->
+    <string name="deck_requires_pet_dialog_title">Agrega una mascota primero</string>
+    <string name="deck_requires_pet_dialog_body">Para dar like necesitas tener al menos una mascota tuya. Agrega la tuya para empezar a hacer match.</string>
+    <string name="deck_requires_pet_dialog_confirm">Agregar mascota</string>
+    <string name="deck_requires_pet_dialog_dismiss">Más tarde</string>
+
     <!-- Pet details bottom-sheet (opened by tapping a deck card). -->
     <string name="deck_detail_open_to">ABIERTO A</string>
     <string name="deck_detail_about">SOBRE</string>

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.outlined.Pets
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -66,30 +67,32 @@ internal fun DeckRoute(
     onOpenFilters: () -> Unit,
     onOpenNotifications: () -> Unit,
     onOpenPetDetail: (com.rodiz.arch2.feature.pet.domain.model.PetId) -> Unit,
+    onMatchHappened: (String) -> Unit,
     viewModel: DeckViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    LaunchedEffect(state.matchMessage) {
-        state.matchMessage?.let {
-            snackbarHostState.showSnackbar(it)
+    LaunchedEffect(state.pendingMatchId) {
+        state.pendingMatchId?.let { matchId ->
+            // Clear the sentinel BEFORE navigating so a back-to-Deck doesn't
+            // re-trigger; the celebration screen owns its own back stack life.
             viewModel.clearMatch()
+            onMatchHappened(matchId)
         }
     }
-    LaunchedEffect(state.requiresPetMessage) {
-        state.requiresPetMessage?.let {
-            val result = snackbarHostState.showSnackbar(
-                message = it,
-                actionLabel = context.getString(R.string.deck_add_pet_action),
-                duration = androidx.compose.material3.SnackbarDuration.Short,
-            )
-            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+    if (state.requiresPetDialog) {
+        // Modal — was a snackbar-with-action previously, but users were
+        // dismissing the like and missing it. The explicit dialog makes
+        // it unmissable + nudges directly into the Add-a-pet flow.
+        RequiresPetDialog(
+            onAddPet = {
+                viewModel.clearRequiresPet()
                 onAddPet()
-            }
-            viewModel.clearRequiresPet()
-        }
+            },
+            onDismiss = { viewModel.clearRequiresPet() },
+        )
     }
     LaunchedEffect(state.errorMessage) {
         state.errorMessage?.let {
@@ -509,4 +512,30 @@ private fun DeckEmptyState(
             }
         }
     }
+}
+
+@Composable
+private fun RequiresPetDialog(
+    onAddPet: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.deck_requires_pet_dialog_title)) },
+        text = { Text(stringResource(R.string.deck_requires_pet_dialog_body)) },
+        confirmButton = {
+            TextButton(onClick = onAddPet) {
+                Text(
+                    text = stringResource(R.string.deck_requires_pet_dialog_confirm),
+                    color = BrandColors.CoralDeep,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.deck_requires_pet_dialog_dismiss))
+            }
+        },
+    )
 }

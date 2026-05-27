@@ -23,6 +23,12 @@
     <string name="deck_empty_petless_body">Pets on TinPet are owned by you. Tap below to add your first one.</string>
     <string name="deck_empty_petless_action">Add a pet</string>
 
+    <!-- Modal shown when a petless user taps Like/Pass on a deck card. -->
+    <string name="deck_requires_pet_dialog_title">Add a pet first</string>
+    <string name="deck_requires_pet_dialog_body">Likes need a pet of your own. Add yours to start matching.</string>
+    <string name="deck_requires_pet_dialog_confirm">Add a pet</string>
+    <string name="deck_requires_pet_dialog_dismiss">Maybe later</string>
+
     <!-- Pet details bottom-sheet (opened by tapping a deck card). -->
     <string name="deck_detail_open_to">OPEN TO</string>
     <string name="deck_detail_about">ABOUT</string>

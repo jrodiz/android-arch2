@@ -5,6 +5,7 @@ import com.rodiz.arch2.core.navigation.EntryProviderInstaller
 import com.rodiz.arch2.core.navigation.Navigator
 import com.rodiz.arch2.feature.deck.nav.DeckHome
 import com.rodiz.arch2.feature.deck.nav.DeckPetDetail
+import com.rodiz.arch2.feature.match.nav.MatchCelebration
 import com.rodiz.arch2.feature.pet.nav.AddPet
 import com.rodiz.arch2.feature.settings.nav.SettingsFilters
 import com.rodiz.arch2.feature.settings.nav.SettingsNotifications
@@ -26,6 +27,7 @@ internal object DeckNavModule {
                 onOpenFilters = { navigator.goTo(SettingsFilters) },
                 onOpenNotifications = { navigator.goTo(SettingsNotifications) },
                 onOpenPetDetail = { petId -> navigator.goTo(DeckPetDetail(petId.value)) },
+                onMatchHappened = { matchId -> navigator.goTo(MatchCelebration(matchId)) },
             )
         }
         entry<DeckPetDetail> { key ->

@@ -8,4 +8,12 @@
     <string name="match_search_cd">Buscar en matches</string>
     <string name="match_coming_soon">Próximamente</string>
     <string name="match_row_default_preview">Salúdalo</string>
+
+    <!-- Match celebration — full-screen modal after a like causes a mutual match. -->
+    <string name="match_celebration_headline">¡Hiciste match!</string>
+    <string name="match_celebration_subtitle_format">%1$s y %2$s quieren ser amigos 🐾</string>
+    <string name="match_celebration_fallback_my_pet">Tu mascota</string>
+    <string name="match_celebration_fallback_their_pet">Su mascota</string>
+    <string name="match_celebration_say_hello">Saluda</string>
+    <string name="match_celebration_keep_swiping">Seguir explorando</string>
 </resources>

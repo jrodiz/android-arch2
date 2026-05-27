@@ -86,7 +86,9 @@ class DeckViewModelTest {
 
         val state = vm.uiState.value
         assertEquals(listOf("p2"), state.cards.map { it.pet.id.value }, "top card removed optimistically")
-        assertEquals("It's a match!", state.matchMessage)
+        // The matchId from SwipeResult is handed up to the Route via pendingMatchId
+        // so it can navigate to the celebration screen.
+        assertEquals("m1", state.pendingMatchId)
         assertEquals(PetId("p1") to SwipeAction.LIKE, deck.lastSwipe)
     }
 
@@ -100,7 +102,9 @@ class DeckViewModelTest {
         vm.passTop()
         advanceUntilIdle()
 
-        assertEquals("Add a pet to start matching", vm.uiState.value.requiresPetMessage)
+        // RequiresPet flips the dialog flag; the screen renders the modal copy
+        // via stringResource so we don't assert on text here.
+        assertEquals(true, vm.uiState.value.requiresPetDialog)
     }
 
     @Test
@@ -214,8 +218,8 @@ class DeckViewModelTest {
         vm.clearRequiresPet()
         vm.clearError()
         val cleared = vm.uiState.value
-        assertNull(cleared.matchMessage)
-        assertNull(cleared.requiresPetMessage)
+        assertNull(cleared.pendingMatchId)
+        assertEquals(false, cleared.requiresPetDialog)
         assertNull(cleared.errorMessage)
     }
 

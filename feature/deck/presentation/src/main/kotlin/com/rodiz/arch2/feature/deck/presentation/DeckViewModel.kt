@@ -39,8 +39,20 @@ internal data class DeckUiState(
     val maxDistanceKm: Int = 25,
     val intentsCount: Int = Intent.entries.size,
     val speciesCount: Int = SpeciesCategory.entries.size,
-    val matchMessage: String? = null,
-    val requiresPetMessage: String? = null,
+    /**
+     * Non-null at the moment a like causes a mutual match — the matchId is
+     * handed up to the Route, which navigates to the celebration screen.
+     * Cleared by the Route via [DeckViewModel.clearMatch] once it has acted
+     * on the value so re-entering the Deck doesn't re-trigger.
+     */
+    val pendingMatchId: String? = null,
+    /**
+     * True when the user tried to like a pet without having any pets of their
+     * own registered. The screen renders this as a modal AlertDialog with
+     * "Add a pet" + "Maybe later" actions — was a snackbar previously but
+     * users were missing it, so it's now an explicit gate they have to ack.
+     */
+    val requiresPetDialog: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -129,8 +141,8 @@ internal class DeckViewModel @Inject constructor(
         }
     }
 
-    fun clearMatch() = _uiState.update { it.copy(matchMessage = null) }
-    fun clearRequiresPet() = _uiState.update { it.copy(requiresPetMessage = null) }
+    fun clearMatch() = _uiState.update { it.copy(pendingMatchId = null) }
+    fun clearRequiresPet() = _uiState.update { it.copy(requiresPetDialog = false) }
     fun clearError() = _uiState.update { it.copy(errorMessage = null) }
 
     private fun swipe(petId: PetId, action: SwipeAction) {
@@ -146,10 +158,10 @@ internal class DeckViewModel @Inject constructor(
             when (result) {
                 SwipeResult.Pending -> Unit
                 SwipeResult.RequiresPet -> _uiState.update {
-                    it.copy(requiresPetMessage = "Add a pet to start matching")
+                    it.copy(requiresPetDialog = true)
                 }
                 is SwipeResult.Match -> _uiState.update {
-                    it.copy(matchMessage = "It's a match!")
+                    it.copy(pendingMatchId = result.matchId)
                 }
             }
         }
