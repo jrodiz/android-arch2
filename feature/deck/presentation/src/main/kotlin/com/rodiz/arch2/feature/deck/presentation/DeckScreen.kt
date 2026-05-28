@@ -100,6 +100,17 @@ internal fun DeckRoute(
             viewModel.clearError()
         }
     }
+    LaunchedEffect(state.reviewedPassesCount) {
+        state.reviewedPassesCount?.let { count ->
+            val msg = context.resources.getQuantityString(
+                R.plurals.deck_review_restored_count,
+                count,
+                count,
+            )
+            snackbarHostState.showSnackbar(msg)
+            viewModel.clearReviewMessage()
+        }
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -141,11 +152,11 @@ internal fun DeckRoute(
                         )
                     }
                     state.state == DeckState.EXHAUSTED -> {
-                        DeckEmptyState(
-                            title = stringResource(R.string.deck_empty_no_more_title),
-                            body = stringResource(R.string.deck_empty_no_more_body),
-                            actionLabel = null,
-                            onAction = null,
+                        DeckExhaustedState(
+                            maxDistanceKm = state.maxDistanceKm,
+                            onWidenDistance = onOpenFilters,
+                            onReviewPasses = viewModel::reviewPasses,
+                            onAddAnotherPet = onAddPet,
                         )
                     }
                     else -> {

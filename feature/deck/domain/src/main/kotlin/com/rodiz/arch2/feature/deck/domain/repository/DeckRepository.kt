@@ -17,4 +17,11 @@ interface DeckRepository {
 
     /** Undo the most recent swipe within a short grace window. Returns the un-swiped pet, or null. */
     suspend fun undoLastSwipe(): Pet?
+
+    /**
+     * Bulk-delete every pass the current user made since local midnight. Returns the count of
+     * deleted docs so callers can surface a "Restored N pets" confirmation. Powers the
+     * "Review who you passed" action on the empty-deck state.
+     */
+    suspend fun clearTodayPasses(): Int
 }

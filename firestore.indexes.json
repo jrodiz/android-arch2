@@ -40,6 +40,14 @@
         { "fieldPath": "toOwnerId", "order": "ASCENDING" },
         { "fieldPath": "passedAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "passes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

@@ -10,6 +10,7 @@ import com.rodiz.arch2.feature.deck.domain.model.SwipeAction
 import com.rodiz.arch2.feature.deck.domain.model.SwipeResult
 import com.rodiz.arch2.feature.deck.domain.repository.DeckRepository
 import com.rodiz.arch2.feature.deck.domain.usecase.ObserveDeckUseCase
+import com.rodiz.arch2.feature.deck.domain.usecase.ReviewPassedPetsUseCase
 import com.rodiz.arch2.feature.deck.domain.usecase.SubmitSwipeUseCase
 import com.rodiz.arch2.feature.deck.domain.usecase.UndoLastSwipeUseCase
 import com.rodiz.arch2.feature.pet.domain.model.Intent
@@ -223,6 +224,61 @@ class DeckViewModelTest {
         assertNull(cleared.errorMessage)
     }
 
+    @Test
+    fun `reviewPasses success sets count and lets restored pets pass the swipe filter`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo(DeckSnapshot(cards = listOf(card("p1")), state = DeckState.READY))
+            deck.nextClearTodayCount = 14
+            val vm = newViewModel(deckRepo = deck)
+            advanceUntilIdle()
+            // Pre-pass a card so recentlySwiped has an entry to clear.
+            vm.passTop()
+            advanceUntilIdle()
+
+            vm.reviewPasses()
+            advanceUntilIdle()
+
+            assertEquals(14, vm.uiState.value.reviewedPassesCount)
+            assertEquals(1, deck.clearTodayCalls)
+            // New emission containing the previously-passed pet p1 — it should pass the
+            // recentlySwiped filter (which reviewPasses just cleared) and reach uiState.
+            // Adding p2 forces StateFlow to actually re-emit (dedup-safe).
+            deck.snapshots.value = DeckSnapshot(
+                cards = listOf(card("p1"), card("p2")),
+                state = DeckState.READY,
+            )
+            advanceUntilIdle()
+            assertEquals(listOf("p1", "p2"), vm.uiState.value.cards.map { it.pet.id.value })
+        }
+
+    @Test
+    fun `reviewPasses failure surfaces errorMessage and leaves count null`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo()
+            deck.clearTodayError = RuntimeException("boom")
+            val vm = newViewModel(deckRepo = deck)
+            advanceUntilIdle()
+
+            vm.reviewPasses()
+            advanceUntilIdle()
+
+            assertEquals("boom", vm.uiState.value.errorMessage)
+            assertNull(vm.uiState.value.reviewedPassesCount)
+        }
+
+    @Test
+    fun `clearReviewMessage clears the count`() = runTest(testDispatcher) {
+        val deck = FakeDeckRepo().apply { nextClearTodayCount = 3 }
+        val vm = newViewModel(deckRepo = deck)
+        advanceUntilIdle()
+        vm.reviewPasses()
+        advanceUntilIdle()
+        assertEquals(3, vm.uiState.value.reviewedPassesCount)
+
+        vm.clearReviewMessage()
+        assertNull(vm.uiState.value.reviewedPassesCount)
+    }
+
     // ---- helpers ----
 
     private fun newViewModel(
@@ -235,6 +291,7 @@ class DeckViewModelTest {
         filterPrefsRepo = filterRepo,
         submitSwipe = SubmitSwipeUseCase(deckRepo),
         undoLastSwipe = UndoLastSwipeUseCase(deckRepo),
+        reviewPassedPets = ReviewPassedPetsUseCase(deckRepo),
     )
 
     private fun card(id: String): DeckCard = DeckCard(pet = pet(id))
@@ -263,6 +320,9 @@ class DeckViewModelTest {
         var swipeError: Throwable? = null
         var nextUndo: Pet? = null
         var lastSwipe: Pair<PetId, SwipeAction>? = null
+        var nextClearTodayCount: Int = 0
+        var clearTodayError: Throwable? = null
+        var clearTodayCalls: Int = 0
 
         override fun observeDeck(filters: FilterPrefs): Flow<DeckSnapshot> = snapshots.asStateFlow()
 
@@ -273,6 +333,12 @@ class DeckViewModelTest {
         }
 
         override suspend fun undoLastSwipe(): Pet? = nextUndo
+
+        override suspend fun clearTodayPasses(): Int {
+            clearTodayCalls += 1
+            clearTodayError?.let { throw it }
+            return nextClearTodayCount
+        }
     }
 
     private class FakePetRepo(initial: List<Pet> = emptyList()) : PetRepository {

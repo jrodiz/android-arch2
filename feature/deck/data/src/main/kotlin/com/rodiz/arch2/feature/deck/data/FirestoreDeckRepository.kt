@@ -1,6 +1,7 @@
 package com.rodiz.arch2.feature.deck.data
 
 import android.util.Log
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -31,6 +32,9 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
@@ -257,5 +261,31 @@ internal class FirestoreDeckRepository @Inject constructor(
         sessionSwiped.remove(last.petId.value)
         lastSwipe = null
         null // The deck snapshot will re-include the pet on next observation tick.
+    }
+
+    override suspend fun clearTodayPasses(): Int = withContext(io) {
+        val me = sessionRepo.current()?.userId ?: return@withContext 0
+        // Local-midnight "today" — matches the wall-clock day the user sees, not UTC.
+        val tz = TimeZone.currentSystemDefault()
+        val startOfDayMillis = Clock.System.now()
+            .toLocalDateTime(tz)
+            .date
+            .atStartOfDayIn(tz)
+            .toEpochMilliseconds()
+        val snap = passesCol
+            .whereEqualTo("ownerId", me)
+            .whereGreaterThanOrEqualTo("createdAt", Timestamp(startOfDayMillis / 1000, 0))
+            .get()
+            .await()
+        if (snap.isEmpty) return@withContext 0
+        val batch = firestore.batch()
+        snap.documents.forEach { batch.delete(it.reference) }
+        batch.commit().await()
+        // Drop the in-memory session filter for the deleted pets so the deck snapshot
+        // re-includes them on the next emission.
+        snap.documents.forEach { d ->
+            d.getString("toPetId")?.let { sessionSwiped.remove(it) }
+        }
+        snap.size()
     }
 }

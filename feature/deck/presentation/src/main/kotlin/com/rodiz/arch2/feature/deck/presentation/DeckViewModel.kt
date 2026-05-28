@@ -8,6 +8,7 @@ import com.rodiz.arch2.feature.deck.domain.model.DeckState
 import com.rodiz.arch2.feature.deck.domain.model.SwipeAction
 import com.rodiz.arch2.feature.deck.domain.model.SwipeResult
 import com.rodiz.arch2.feature.deck.domain.usecase.ObserveDeckUseCase
+import com.rodiz.arch2.feature.deck.domain.usecase.ReviewPassedPetsUseCase
 import com.rodiz.arch2.feature.deck.domain.usecase.SubmitSwipeUseCase
 import com.rodiz.arch2.feature.deck.domain.usecase.UndoLastSwipeUseCase
 import com.rodiz.arch2.feature.pet.domain.model.Intent
@@ -53,6 +54,12 @@ internal data class DeckUiState(
      * users were missing it, so it's now an explicit gate they have to ack.
      */
     val requiresPetDialog: Boolean = false,
+    /**
+     * Non-null right after the user taps "Review who you passed" on the empty
+     * deck state. The Route shows a snackbar with the count, then calls
+     * [DeckViewModel.clearReviewMessage] so re-renders don't re-fire.
+     */
+    val reviewedPassesCount: Int? = null,
     val errorMessage: String? = null,
 )
 
@@ -63,6 +70,7 @@ internal class DeckViewModel @Inject constructor(
     filterPrefsRepo: FilterPrefsRepository,
     private val submitSwipe: SubmitSwipeUseCase,
     private val undoLastSwipe: UndoLastSwipeUseCase,
+    private val reviewPassedPets: ReviewPassedPetsUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DeckUiState())
@@ -143,12 +151,58 @@ internal class DeckViewModel @Inject constructor(
 
     fun clearMatch() = _uiState.update { it.copy(pendingMatchId = null) }
     fun clearRequiresPet() = _uiState.update { it.copy(requiresPetDialog = false) }
+    fun clearReviewMessage() = _uiState.update { it.copy(reviewedPassesCount = null) }
     fun clearError() = _uiState.update { it.copy(errorMessage = null) }
 
+    /**
+     * Restores every pet the user passed since local midnight. Returns the count to
+     * the UI via [DeckUiState.reviewedPassesCount] so the screen can confirm with a
+     * snackbar; also drops the in-memory swipe filter so the restored pets reappear
+     * in the deck immediately.
+     */
+    fun reviewPasses() {
+        viewModelScope.launch {
+            val count = runCatching { reviewPassedPets() }
+                .getOrElse { e ->
+                    _uiState.update {
+                        it.copy(errorMessage = e.message ?: "Couldn't restore passes")
+                    }
+                    return@launch
+                }
+            recentlySwiped.clear()
+            // Tip the state back to LOADING so the empty-state screen yields to
+            // the spinner while the next snapshot lands with the restored pets.
+            // The collector in init will flip to READY/EXHAUSTED on the next tick.
+            _uiState.update {
+                it.copy(
+                    reviewedPassesCount = count,
+                    state = if (count > 0 && it.state == DeckState.EXHAUSTED) {
+                        DeckState.LOADING
+                    } else {
+                        it.state
+                    },
+                )
+            }
+        }
+    }
+
     private fun swipe(petId: PetId, action: SwipeAction) {
-        // Optimistic remove of the top card.
+        // Optimistic remove of the top card. If that empties the deck, flip the
+        // state to EXHAUSTED right now — the data layer's `observeAllActivePets`
+        // doesn't react to pass writes, so we won't get a second snapshot to
+        // re-coerce the state via the collector in init.
         recentlySwiped.add(petId.value)
-        _uiState.update { it.copy(cards = it.cards.drop(1)) }
+        _uiState.update {
+            val nextCards = it.cards.drop(1)
+            it.copy(
+                cards = nextCards,
+                state = if (nextCards.isEmpty() && it.state == DeckState.READY) {
+                    DeckState.EXHAUSTED
+                } else {
+                    it.state
+                },
+            )
+        }
         viewModelScope.launch {
             val result = runCatching { submitSwipe(petId, action) }
                 .getOrElse { e ->
