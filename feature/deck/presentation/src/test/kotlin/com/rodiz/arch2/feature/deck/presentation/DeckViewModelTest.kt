@@ -175,6 +175,48 @@ class DeckViewModelTest {
     }
 
     @Test
+    fun `like with no pet shows RequiresPet dialog and keeps the card on the deck`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo(
+                DeckSnapshot(cards = listOf(card("p1"), card("p2")), state = DeckState.READY),
+            )
+            deck.nextSwipeResult = SwipeResult.RequiresPet
+            val vm = newViewModel(deckRepo = deck)
+            advanceUntilIdle()
+
+            vm.likeTop()
+            advanceUntilIdle()
+
+            val state = vm.uiState.value
+            assertTrue(state.requiresPetDialog, "rejected like must surface the add-a-pet dialog")
+            // The like was never recorded (no pet) — the card must be restored, not consumed,
+            // so the user can like it again after adding a pet.
+            assertEquals(listOf("p1", "p2"), state.cards.map { it.pet.id.value })
+        }
+
+    @Test
+    fun `reviewPasses re-subscribes the deck so restored pets reappear without a new snapshot`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo(DeckSnapshot(cards = listOf(card("p1")), state = DeckState.READY))
+            deck.nextSwipeResult = SwipeResult.Pending
+            deck.nextClearTodayCount = 1
+            val vm = newViewModel(deckRepo = deck)
+            advanceUntilIdle()
+            vm.passTop()
+            advanceUntilIdle()
+            assertTrue(vm.uiState.value.cards.isEmpty(), "p1 is filtered out after the pass")
+
+            // No manual snapshot push here: reviewPasses must itself re-run observeDeck so the
+            // same snapshot (still holding p1, whose pass we just cleared) flows back in. Without
+            // the refresh trigger the deck would be stuck on its LOADING spinner.
+            vm.reviewPasses()
+            advanceUntilIdle()
+
+            assertEquals(listOf("p1"), vm.uiState.value.cards.map { it.pet.id.value })
+            assertEquals(DeckState.READY, vm.uiState.value.state)
+        }
+
+    @Test
     fun `filter prefs flow into meta strip counts`() = runTest(testDispatcher) {
         val prefs = FakeFilterPrefsRepo(
             FilterPrefs(

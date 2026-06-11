@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -80,9 +81,15 @@ internal class DeckViewModel @Inject constructor(
     // so the UI doesn't briefly show a card that's about to disappear.
     private val recentlySwiped = mutableSetOf<String>()
 
+    // Manual re-subscribe signal for the deck flow. The deck snapshot is driven by
+    // `observeAllActivePets`, which does NOT re-emit when pass docs change — so after
+    // "Review who you passed" deletes today's passes we must re-run `observeDeck` to
+    // surface the restored pets (otherwise the deck is stuck on its LOADING spinner).
+    private val refreshTrigger = MutableStateFlow(0)
+
     init {
         viewModelScope.launch {
-            filterPrefsRepo.observePrefs()
+            combine(filterPrefsRepo.observePrefs(), refreshTrigger) { prefs, _ -> prefs }
                 .flatMapLatest { prefs -> observeDeck(prefs) }
                 .catch { e -> _uiState.update { it.copy(errorMessage = e.message) } }
                 .collect { snapshot ->
@@ -172,7 +179,6 @@ internal class DeckViewModel @Inject constructor(
             recentlySwiped.clear()
             // Tip the state back to LOADING so the empty-state screen yields to
             // the spinner while the next snapshot lands with the restored pets.
-            // The collector in init will flip to READY/EXHAUSTED on the next tick.
             _uiState.update {
                 it.copy(
                     reviewedPassesCount = count,
@@ -183,6 +189,11 @@ internal class DeckViewModel @Inject constructor(
                     },
                 )
             }
+            // Force a re-subscribe of `observeDeck`; without this the LOADING state
+            // above would never resolve, because deleting pass docs doesn't trigger
+            // a new `observeAllActivePets` emission. The fresh query re-includes the
+            // pets whose passes we just cleared.
+            if (count > 0) refreshTrigger.update { it + 1 }
         }
     }
 
@@ -191,6 +202,7 @@ internal class DeckViewModel @Inject constructor(
         // state to EXHAUSTED right now — the data layer's `observeAllActivePets`
         // doesn't react to pass writes, so we won't get a second snapshot to
         // re-coerce the state via the collector in init.
+        val removedCard = _uiState.value.cards.firstOrNull()
         recentlySwiped.add(petId.value)
         _uiState.update {
             val nextCards = it.cards.drop(1)
@@ -211,8 +223,23 @@ internal class DeckViewModel @Inject constructor(
                 }
             when (result) {
                 SwipeResult.Pending -> Unit
-                SwipeResult.RequiresPet -> _uiState.update {
-                    it.copy(requiresPetDialog = true)
+                SwipeResult.RequiresPet -> {
+                    // The like was rejected because the user has no pet yet, and it was
+                    // never recorded server-side. Put the card back instead of silently
+                    // consuming it — the user can like it again after adding a pet.
+                    recentlySwiped.remove(petId.value)
+                    _uiState.update {
+                        val restored = removedCard?.let { c -> listOf(c) + it.cards } ?: it.cards
+                        it.copy(
+                            requiresPetDialog = true,
+                            cards = restored,
+                            state = if (restored.isNotEmpty() && it.state == DeckState.EXHAUSTED) {
+                                DeckState.READY
+                            } else {
+                                it.state
+                            },
+                        )
+                    }
                 }
                 is SwipeResult.Match -> _uiState.update {
                     it.copy(pendingMatchId = result.matchId)
