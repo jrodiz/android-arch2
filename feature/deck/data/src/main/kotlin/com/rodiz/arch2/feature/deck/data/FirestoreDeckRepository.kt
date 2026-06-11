@@ -26,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
@@ -260,7 +261,11 @@ internal class FirestoreDeckRepository @Inject constructor(
         }
         sessionSwiped.remove(last.petId.value)
         lastSwipe = null
-        null // The deck snapshot will re-include the pet on next observation tick.
+        // Return the un-swiped pet so the ViewModel can re-prepend it on top of the
+        // deck immediately. We can't rely on the deck snapshot to re-include it:
+        // `observeAllActivePets` reacts to pet changes, not to pass/like deletions,
+        // so deleting the swipe doc above produces no new emission (see `swipe()`).
+        petRepo.observePet(last.petId).first()
     }
 
     override suspend fun clearTodayPasses(): Int = withContext(io) {
