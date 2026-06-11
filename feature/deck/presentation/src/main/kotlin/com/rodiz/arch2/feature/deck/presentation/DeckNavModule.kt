@@ -34,6 +34,14 @@ internal object DeckNavModule {
             DeckPetDetailRoute(
                 petIdValue = key.petId,
                 onBack = { navigator.goBack() },
+                // Pop the detail, then show the celebration — so "Keep swiping" / back
+                // from the celebration returns to the deck (or Likes), not the detail.
+                // This route is shared by the deck and the Likes-You tab, so wiring it
+                // here fixes the celebration for both like-back paths.
+                onMatchHappened = { matchId ->
+                    navigator.goBack()
+                    navigator.goTo(MatchCelebration(matchId))
+                },
             )
         }
     }

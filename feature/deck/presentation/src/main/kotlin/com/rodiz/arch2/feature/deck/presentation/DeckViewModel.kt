@@ -114,11 +114,10 @@ internal class DeckViewModel @Inject constructor(
         viewModelScope.launch {
             detailResultBus.outcomes.collect { (petId, result) ->
                 when (result) {
-                    SwipeResult.Pending -> advancePast(petId)
-                    is SwipeResult.Match -> {
-                        advancePast(petId)
-                        _uiState.update { it.copy(pendingMatchId = result.matchId) }
-                    }
+                    // On a match we only drop the card from the deck — the detail route
+                    // owns the celebration navigation (so it also fires from Likes-You,
+                    // and the deck-detail path doesn't double-navigate).
+                    SwipeResult.Pending, is SwipeResult.Match -> advancePast(petId)
                     SwipeResult.RequiresPet ->
                         _uiState.update { it.copy(requiresPetDialog = true) }
                 }

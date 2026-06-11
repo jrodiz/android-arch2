@@ -251,7 +251,7 @@ class DeckViewModelTest {
         }
 
     @Test
-    fun `detail match result advances the deck and arms the celebration`() =
+    fun `detail match result advances the deck but leaves celebration to the detail route`() =
         runTest(testDispatcher) {
             val deck = FakeDeckRepo(DeckSnapshot(cards = listOf(card("p1")), state = DeckState.READY))
             val bus = DeckDetailResultBus()
@@ -262,7 +262,9 @@ class DeckViewModelTest {
             advanceUntilIdle()
 
             val state = vm.uiState.value
-            assertEquals("m42", state.pendingMatchId)
+            // The detail route navigates to the celebration itself (so it works from
+            // Likes-You too); the bus only drops the matched card from the deck.
+            assertNull(state.pendingMatchId)
             assertTrue(state.cards.none { it.pet.id.value == "p1" }, "matched pet leaves the deck")
         }
 
