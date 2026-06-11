@@ -72,6 +72,7 @@ internal class DeckViewModel @Inject constructor(
     private val submitSwipe: SubmitSwipeUseCase,
     private val undoLastSwipe: UndoLastSwipeUseCase,
     private val reviewPassedPets: ReviewPassedPetsUseCase,
+    detailResultBus: DeckDetailResultBus,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DeckUiState())
@@ -105,6 +106,23 @@ internal class DeckViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+        // React to swipes performed on the DeckPetDetail screen (a separate ViewModel on
+        // top of the back stack). The deck snapshot isn't reactive to those writes, so the
+        // detail hands us the result here: advance past the pet on a pass / accepted like,
+        // surface the add-a-pet dialog on a rejected like, and fire the match celebration.
+        viewModelScope.launch {
+            detailResultBus.outcomes.collect { (petId, result) ->
+                when (result) {
+                    SwipeResult.Pending -> advancePast(petId)
+                    is SwipeResult.Match -> {
+                        advancePast(petId)
+                        _uiState.update { it.copy(pendingMatchId = result.matchId) }
+                    }
+                    SwipeResult.RequiresPet ->
+                        _uiState.update { it.copy(requiresPetDialog = true) }
+                }
+            }
         }
         // Mirror the scalar filter values into UiState so the header meta strip
         // (radius / intents / species count) reflects what the user has configured.
@@ -194,6 +212,27 @@ internal class DeckViewModel @Inject constructor(
             // a new `observeAllActivePets` emission. The fresh query re-includes the
             // pets whose passes we just cleared.
             if (count > 0) refreshTrigger.update { it + 1 }
+        }
+    }
+
+    /**
+     * Drop a pet from the visible deck after it was acted on elsewhere (the detail screen).
+     * Mirrors the optimistic removal in [swipe]; [recentlySwiped] keeps it from re-appearing
+     * if a later snapshot still includes it.
+     */
+    private fun advancePast(petId: PetId) {
+        if (petId.value in recentlySwiped) return
+        recentlySwiped.add(petId.value)
+        _uiState.update {
+            val next = it.cards.filterNot { card -> card.pet.id.value == petId.value }
+            it.copy(
+                cards = next,
+                state = if (next.isEmpty() && it.state == DeckState.READY) {
+                    DeckState.EXHAUSTED
+                } else {
+                    it.state
+                },
+            )
         }
     }
 

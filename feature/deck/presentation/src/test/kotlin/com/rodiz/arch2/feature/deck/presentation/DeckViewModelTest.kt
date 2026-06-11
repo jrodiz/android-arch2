@@ -217,6 +217,56 @@ class DeckViewModelTest {
         }
 
     @Test
+    fun `detail pass result advances the deck past that pet`() = runTest(testDispatcher) {
+        val deck = FakeDeckRepo(
+            DeckSnapshot(cards = listOf(card("p1"), card("p2")), state = DeckState.READY),
+        )
+        val bus = DeckDetailResultBus()
+        val vm = newViewModel(deckRepo = deck, detailResultBus = bus)
+        advanceUntilIdle()
+
+        // Simulate a pass performed on the DeckPetDetail screen for the top card.
+        bus.publish(PetId("p1"), SwipeResult.Pending)
+        advanceUntilIdle()
+
+        assertEquals(listOf("p2"), vm.uiState.value.cards.map { it.pet.id.value })
+    }
+
+    @Test
+    fun `detail requires-pet result shows the dialog without dropping the card`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo(
+                DeckSnapshot(cards = listOf(card("p1"), card("p2")), state = DeckState.READY),
+            )
+            val bus = DeckDetailResultBus()
+            val vm = newViewModel(deckRepo = deck, detailResultBus = bus)
+            advanceUntilIdle()
+
+            bus.publish(PetId("p1"), SwipeResult.RequiresPet)
+            advanceUntilIdle()
+
+            val state = vm.uiState.value
+            assertTrue(state.requiresPetDialog, "rejected like from detail must surface the dialog")
+            assertEquals(listOf("p1", "p2"), state.cards.map { it.pet.id.value })
+        }
+
+    @Test
+    fun `detail match result advances the deck and arms the celebration`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo(DeckSnapshot(cards = listOf(card("p1")), state = DeckState.READY))
+            val bus = DeckDetailResultBus()
+            val vm = newViewModel(deckRepo = deck, detailResultBus = bus)
+            advanceUntilIdle()
+
+            bus.publish(PetId("p1"), SwipeResult.Match("m42"))
+            advanceUntilIdle()
+
+            val state = vm.uiState.value
+            assertEquals("m42", state.pendingMatchId)
+            assertTrue(state.cards.none { it.pet.id.value == "p1" }, "matched pet leaves the deck")
+        }
+
+    @Test
     fun `filter prefs flow into meta strip counts`() = runTest(testDispatcher) {
         val prefs = FakeFilterPrefsRepo(
             FilterPrefs(
@@ -327,6 +377,7 @@ class DeckViewModelTest {
         deckRepo: DeckRepository = FakeDeckRepo(),
         petRepo: PetRepository = FakePetRepo(),
         filterRepo: FilterPrefsRepository = FakeFilterPrefsRepo(),
+        detailResultBus: DeckDetailResultBus = DeckDetailResultBus(),
     ): DeckViewModel = DeckViewModel(
         observeDeck = ObserveDeckUseCase(deckRepo),
         observeMyPets = ObserveMyPetsUseCase(petRepo),
@@ -334,6 +385,7 @@ class DeckViewModelTest {
         submitSwipe = SubmitSwipeUseCase(deckRepo),
         undoLastSwipe = UndoLastSwipeUseCase(deckRepo),
         reviewPassedPets = ReviewPassedPetsUseCase(deckRepo),
+        detailResultBus = detailResultBus,
     )
 
     private fun card(id: String): DeckCard = DeckCard(pet = pet(id))

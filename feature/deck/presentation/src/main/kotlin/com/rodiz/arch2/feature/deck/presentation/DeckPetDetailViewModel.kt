@@ -36,16 +36,18 @@ internal data class DeckPetDetailUiState(
  * Powers the suitor-side pet detail bottom-sheet (see `plans/deck-pet-details.md`).
  *
  * Reuses [SubmitSwipeUseCase] from `:feature:deck:domain` so liking / passing from the
- * detail produces the same downstream effects (match creation, deck advance) as liking
- * from the card itself. The Deck observes the swipe stream independently, so we don't
- * have to bridge state between the two ViewModels — emitting [DeckPetDetailEvent.Dismiss]
- * tells the route to pop and the deck takes it from there.
+ * detail produces the same downstream effects (match creation) as liking from the card
+ * itself. The deck snapshot is NOT reactive to swipe writes, so we hand the swipe result
+ * to the retained [DeckViewModel] through [DeckDetailResultBus] before popping — that's
+ * what makes the deck advance past the pet, surface the "add a pet" dialog, or fire the
+ * match celebration after a swipe performed here.
  */
 internal class DeckPetDetailViewModel @AssistedInject constructor(
     @Assisted petIdValue: String,
     observePet: ObservePetUseCase,
     ownerLookup: OwnerLookupRepository,
     private val submitSwipe: SubmitSwipeUseCase,
+    private val resultBus: DeckDetailResultBus,
 ) : ViewModel() {
 
     private val petId: PetId = PetId(petIdValue)
@@ -93,9 +95,11 @@ internal class DeckPetDetailViewModel @AssistedInject constructor(
 
     private fun swipe(action: SwipeAction) {
         viewModelScope.launch {
-            // Best-effort: surface errors only on the deck. The detail just dismisses;
-            // the deck's existing snackbars handle "swipe failed" + match toasts.
+            // Hand the outcome to the deck so it can advance past this pet, show the
+            // add-a-pet dialog (rejected like), or fire the match celebration. On error
+            // we just dismiss; the deck's snackbars own the "swipe failed" feedback.
             runCatching { submitSwipe(petId, action) }
+                .onSuccess { result -> resultBus.publish(petId, result) }
             _events.tryEmit(DeckPetDetailEvent.Dismiss)
         }
     }
