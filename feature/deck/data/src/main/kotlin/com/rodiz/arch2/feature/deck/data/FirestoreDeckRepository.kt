@@ -71,8 +71,13 @@ internal class FirestoreDeckRepository @Inject constructor(
             observePausedOwnerIds(),
             observeBlockHideSet(uid),
             observeOwnerLocations(),
-            ownerLookup.observeAll(),
-        ) { pets, paused, blocked, locations, owners ->
+            // Pair owner display with the set of pets I've already liked/passed — keeps the
+            // outer combine at 5 typed sources.
+            combine(ownerLookup.observeAll(), observeMyActedPetIds(uid)) { owners, acted ->
+                owners to acted
+            },
+        ) { pets, paused, blocked, locations, ownersAndActed ->
+            val (owners, acted) = ownersAndActed
             val hideOwners = paused + blocked
             val myLoc = locations[uid]
             val maxKm = filters.maxDistanceKm.toDouble()
@@ -80,11 +85,9 @@ internal class FirestoreDeckRepository @Inject constructor(
                 loggedOnce = true
                 Log.d(
                     "TinPet.Deck",
-                    "observeDeck uid=$uid pets=${pets.size} " +
-                        "paused=${paused.size} blocked=${blocked.size} " +
-                        "locations=${locations.size} owners=${owners.size} " +
-                        "myLoc=${myLoc != null} maxKm=$maxKm " +
-                        "sampleOwnerIds=${pets.take(3).map { it.ownerId }}",
+                    "observeDeck uid=$uid pets=${pets.size} paused=${paused.size} " +
+                        "blocked=${blocked.size} acted=${acted.size} " +
+                        "locations=${locations.size} owners=${owners.size} maxKm=$maxKm",
                 )
             }
             val cards = pets
@@ -92,6 +95,7 @@ internal class FirestoreDeckRepository @Inject constructor(
                 .filter { it.ownerId !in hideOwners }
                 .filter { it.enabled }
                 .filter { it.id.value !in sessionSwiped }
+                .filter { it.id.value !in acted }
                 .filter { it.species in filters.species }
                 .filter { it.intents.any { intent -> intent in filters.intents } }
                 .filter { pet -> withinDistance(myLoc, locations[pet.ownerId], maxKm) }
@@ -185,6 +189,26 @@ internal class FirestoreDeckRepository @Inject constructor(
                     .toSet()
                 trySend(ids)
             }
+        awaitClose { registration.remove() }
+    }
+
+    // Pets I've already liked or passed (server-side) — excluded from my deck so they
+    // don't reappear across sessions (the in-memory `sessionSwiped` only covers the
+    // current process). Passes are reversible via "Review who you passed", which deletes
+    // the pass docs and lets the snapshot re-include the pet on the next emission.
+    private fun observeMyActedPetIds(uid: String): Flow<Set<String>> = combine(
+        observeActedToPetIds(likesCol.whereEqualTo("fromOwnerId", uid)),
+        observeActedToPetIds(passesCol.whereEqualTo("ownerId", uid)),
+    ) { liked, passed -> liked + passed }
+
+    private fun observeActedToPetIds(query: Query): Flow<Set<String>> = callbackFlow {
+        val registration = query.addSnapshotListener { snap, err ->
+            if (err != null) {
+                close(err)
+                return@addSnapshotListener
+            }
+            trySend(snap?.documents.orEmpty().mapNotNull { it.getString("toPetId") }.toSet())
+        }
         awaitClose { registration.remove() }
     }
 
