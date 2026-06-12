@@ -183,6 +183,10 @@ internal fun ChatScreen(
                 modifier = Modifier.fillMaxSize(),
                 messages = state.messages,
                 currentUid = state.currentUid,
+                // Prefer the match participant (always present once the match loads) over
+                // the owner-lookup display, which can be null when an owner has no profile
+                // resolved yet — otherwise the read receipt never appears. [D-008]
+                otherUid = state.match?.otherOwnerId(state.currentUid) ?: state.other?.id,
             )
         }
     }
@@ -462,6 +466,7 @@ private fun MessageList(
     modifier: Modifier,
     messages: List<Message>,
     currentUid: String,
+    otherUid: String?,
 ) {
     val listState = rememberLazyListState()
     LaunchedEffect(messages.size) {
@@ -485,7 +490,20 @@ private fun MessageList(
             if (todayStartIndex >= 0 && index == todayStartIndex) {
                 DateSeparator(label = stringResource(R.string.chat_date_today))
             }
-            MessageRow(message = msg, isMine = msg.fromOwnerId == currentUid, tz = tz)
+            val isMine = msg.fromOwnerId == currentUid
+            // Read receipt under the *latest* outgoing message only (standard chat UX —
+            // avoids a "Read" tag under every bubble). readBy is updated server-side when
+            // the other participant opens the chat; isReadBy reflects that. [D-008]
+            val showReadReceipt = isMine &&
+                index == messages.lastIndex &&
+                otherUid != null &&
+                msg.isReadBy(otherUid)
+            MessageRow(
+                message = msg,
+                isMine = isMine,
+                tz = tz,
+                showReadReceipt = showReadReceipt,
+            )
         }
     }
 }
@@ -505,7 +523,12 @@ private fun DateSeparator(label: String) {
 }
 
 @Composable
-private fun MessageRow(message: Message, isMine: Boolean, tz: TimeZone) {
+private fun MessageRow(
+    message: Message,
+    isMine: Boolean,
+    tz: TimeZone,
+    showReadReceipt: Boolean = false,
+) {
     // Brand-coral for outgoing messages — readable on the cream background (AA Large
     // for body text, much better than the prior pure-white at ~1:1) while keeping
     // the brand differentiation between mine (coral, right-aligned) and theirs
@@ -534,6 +557,14 @@ private fun MessageRow(message: Message, isMine: Boolean, tz: TimeZone) {
             color = timestampColor,
             style = MaterialTheme.typography.labelSmall,
         )
+        if (showReadReceipt) {
+            Spacer(Modifier.size(2.dp))
+            Text(
+                text = stringResource(R.string.chat_read_receipt),
+                color = BrandColors.CoralDeep.copy(alpha = 0.75f),
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+            )
+        }
     }
 }
 
