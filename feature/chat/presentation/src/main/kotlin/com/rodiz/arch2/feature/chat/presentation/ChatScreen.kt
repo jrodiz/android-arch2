@@ -490,21 +490,49 @@ private fun MessageList(
             if (todayStartIndex >= 0 && index == todayStartIndex) {
                 DateSeparator(label = stringResource(R.string.chat_date_today))
             }
-            val isMine = msg.fromOwnerId == currentUid
-            // Read receipt under the *latest* outgoing message only (standard chat UX —
-            // avoids a "Read" tag under every bubble). readBy is updated server-side when
-            // the other participant opens the chat; isReadBy reflects that. [D-008]
-            val showReadReceipt = isMine &&
-                index == messages.lastIndex &&
-                otherUid != null &&
-                msg.isReadBy(otherUid)
-            MessageRow(
-                message = msg,
-                isMine = isMine,
-                tz = tz,
-                showReadReceipt = showReadReceipt,
-            )
+            if (msg.fromOwnerId == SYSTEM_SENDER) {
+                // Server-synthesized note (e.g. a purged pet). Render centered + muted so it
+                // reads as a system event, not a message from the other person. [D-009]
+                SystemNote(text = msg.text)
+            } else {
+                val isMine = msg.fromOwnerId == currentUid
+                // Read receipt under the *latest* outgoing message only (standard chat UX —
+                // avoids a "Read" tag under every bubble). readBy is updated server-side when
+                // the other participant opens the chat; isReadBy reflects that. [D-008]
+                val showReadReceipt = isMine &&
+                    index == messages.lastIndex &&
+                    otherUid != null &&
+                    msg.isReadBy(otherUid)
+                MessageRow(
+                    message = msg,
+                    isMine = isMine,
+                    tz = tz,
+                    showReadReceipt = showReadReceipt,
+                )
+            }
         }
+    }
+}
+
+/**
+ * Sentinel sender id for server-synthesized notes (see functions `onPetUpdate`). Messages
+ * with this `fromOwnerId` are rendered as a centered system note, not a chat bubble. [D-009]
+ */
+private const val SYSTEM_SENDER = "system"
+
+@Composable
+private fun SystemNote(text: String) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(max = MessageMaxWidth),
+        )
     }
 }
 
