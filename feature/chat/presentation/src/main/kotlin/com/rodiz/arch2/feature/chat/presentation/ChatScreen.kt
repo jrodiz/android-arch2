@@ -89,6 +89,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.toLocalDateTime
+import java.time.format.TextStyle
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -814,11 +816,13 @@ private fun formatMatchDay(createdAt: Instant): String {
     }
 }
 
+// Locale-aware so the match banner reads in the app language (e.g. "jueves" in es-MX). [D-013]
 private fun DayOfWeek.titlecased(): String =
-    name.lowercase().replaceFirstChar { it.titlecase() }
+    getDisplayName(TextStyle.FULL, Locale.getDefault())
+        .replaceFirstChar { it.titlecase(Locale.getDefault()) }
 
 private fun LocalDate.monthAbbrev(): String =
-    month.name.take(3).lowercase().replaceFirstChar { it.titlecase() }
+    month.getDisplayName(TextStyle.SHORT, Locale.getDefault())
 
 /** "HH:mm" in the device's local time. */
 private fun formatTime(instant: Instant, tz: TimeZone): String {

@@ -59,6 +59,8 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.time.format.TextStyle
+import java.util.Locale
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -413,29 +415,10 @@ private fun formatInboxTimestamp(instant: Instant): String {
     return "${thenLdt.month.shortLabel()} ${thenLdt.dayOfMonth}"
 }
 
-private fun DayOfWeek.shortLabel(): String = when (this) {
-    DayOfWeek.MONDAY -> "Mon"
-    DayOfWeek.TUESDAY -> "Tue"
-    DayOfWeek.WEDNESDAY -> "Wed"
-    DayOfWeek.THURSDAY -> "Thu"
-    DayOfWeek.FRIDAY -> "Fri"
-    DayOfWeek.SATURDAY -> "Sat"
-    DayOfWeek.SUNDAY -> "Sun"
-    else -> name.take(3)
-}
+// Locale-aware short labels — `kotlinx.datetime.DayOfWeek` / `Month` are JVM typealiases for
+// `java.time`, so `getDisplayName` localizes them (e.g. "Thu" → "jue." in es-MX). [D-013]
+private fun DayOfWeek.shortLabel(): String =
+    getDisplayName(TextStyle.SHORT, Locale.getDefault())
 
-private fun Month.shortLabel(): String = when (this) {
-    Month.JANUARY -> "Jan"
-    Month.FEBRUARY -> "Feb"
-    Month.MARCH -> "Mar"
-    Month.APRIL -> "Apr"
-    Month.MAY -> "May"
-    Month.JUNE -> "Jun"
-    Month.JULY -> "Jul"
-    Month.AUGUST -> "Aug"
-    Month.SEPTEMBER -> "Sep"
-    Month.OCTOBER -> "Oct"
-    Month.NOVEMBER -> "Nov"
-    Month.DECEMBER -> "Dec"
-    else -> name.take(3)
-}
+private fun Month.shortLabel(): String =
+    getDisplayName(TextStyle.SHORT, Locale.getDefault())
