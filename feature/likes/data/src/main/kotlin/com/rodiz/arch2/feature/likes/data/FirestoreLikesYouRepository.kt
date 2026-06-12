@@ -24,9 +24,12 @@ import com.rodiz.arch2.feature.pet.domain.model.PhotoId
 import com.rodiz.arch2.feature.pet.domain.model.PhotoSource
 import com.rodiz.arch2.feature.pet.domain.model.Species
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -52,14 +55,17 @@ internal class FirestoreLikesYouRepository @Inject constructor(
     private val ownersCol get() = firestore.collection("owners")
     private val matchesCol get() = firestore.collection("matches")
 
-    override fun observeLikesYou(): Flow<List<IncomingLike>> = callbackFlow {
-        val uid = sessionRepo.current()?.userId
-        if (uid == null) {
-            trySend(emptyList())
-            close()
-            return@callbackFlow
+    // Re-subscribe on every session change so an in-app account switch (sign out → sign in a
+    // different user, no restart) re-keys to the new user's incoming likes instead of leaking
+    // the previous user's. [D-010]
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun observeLikesYou(): Flow<List<IncomingLike>> =
+        sessionRepo.observe().flatMapLatest { session ->
+            val uid = session?.userId
+            if (uid == null) flowOf(emptyList()) else likesForUid(uid)
         }
 
+    private fun likesForUid(uid: String): Flow<List<IncomingLike>> = callbackFlow {
         // Two inputs drive this list: the incoming-like docs, and the owners I've matched
         // with (whose like must drop out once we match — otherwise it lingers in both the
         // Likes-you grid and the badge, and the empty state is unreachable). A match forms

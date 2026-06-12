@@ -12,10 +12,13 @@ import com.rodiz.arch2.feature.settings.domain.model.AccountDeletion
 import com.rodiz.arch2.feature.settings.domain.usecase.CancelAccountDeletionUseCase
 import com.rodiz.arch2.feature.settings.domain.usecase.ObservePendingDeletionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,6 +33,7 @@ data class ProfileUiState(
     val errorMessage: String? = null,
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
@@ -42,9 +46,15 @@ class ProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
+    // All three sources read the signed-in uid at the data layer, so they're re-subscribed
+    // on every session change — otherwise an in-app account switch leaves this screen showing
+    // the previous user's profile/pets and querying their accountDeletions doc. [D-010]
     init {
         viewModelScope.launch {
-            observeMyProfile()
+            sessionRepository.observe()
+                .flatMapLatest { session ->
+                    if (session == null) flowOf<OwnerProfile?>(null) else observeMyProfile()
+                }
                 .catch { /* header collapses to placeholder; not fatal */ }
                 .collect { profile ->
                     _uiState.update { it.copy(profile = profile, isLoading = false) }
@@ -52,7 +62,10 @@ class ProfileViewModel @Inject constructor(
         }
         viewModelScope.launch {
             // Active pets only — the rail and the "X pets" subtitle ignore ARCHIVED.
-            observeMyPets(filter = setOf(PetState.ACTIVE))
+            sessionRepository.observe()
+                .flatMapLatest { session ->
+                    if (session == null) flowOf(emptyList()) else observeMyPets(filter = setOf(PetState.ACTIVE))
+                }
                 .catch {
                     // Pet rail collapses gracefully on error — Profile is still useful
                     // even if we can't show the user's pets.
@@ -63,7 +76,10 @@ class ProfileViewModel @Inject constructor(
                 }
         }
         viewModelScope.launch {
-            observePendingDeletion()
+            sessionRepository.observe()
+                .flatMapLatest { session ->
+                    if (session == null) flowOf<AccountDeletion?>(null) else observePendingDeletion()
+                }
                 .catch { /* swallow — banner just stays hidden */ }
                 .collect { deletion ->
                     _uiState.update { it.copy(pendingDeletion = deletion) }
