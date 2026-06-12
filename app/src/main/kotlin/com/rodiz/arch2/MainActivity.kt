@@ -120,7 +120,16 @@ class MainActivity : FragmentActivity() {
             "notify" -> NotificationRationale
             else -> null
         }
-        destination?.let { navigator.replaceAll(it) }
+        when (destination) {
+            null -> Unit
+            // A chat is a detail screen — seed the inbox beneath it so Back returns to
+            // Matches instead of exiting the app on a cold deep-link launch. [D-011]
+            is ChatRoute -> {
+                navigator.replaceAll(MatchesHome)
+                navigator.goTo(destination)
+            }
+            else -> navigator.replaceAll(destination)
+        }
     }
 }
 
