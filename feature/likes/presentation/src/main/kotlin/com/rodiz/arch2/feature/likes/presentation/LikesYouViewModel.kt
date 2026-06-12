@@ -103,6 +103,17 @@ internal class LikesYouViewModel @Inject constructor(
 
     fun passExpanded() {
         val key = _uiState.value.expandedKey ?: return
+        pass(key)
+        _uiState.update { it.copy(expandedKey = null) }
+    }
+
+    /**
+     * Decline an incoming like straight from the grid card. Writes a `passedLikes` doc so the
+     * tile stays gone (the data layer filters on it), plus an optimistic local hide. This is
+     * the only way to decline a like — tapping a tile opens the shared pet detail whose "Pass"
+     * is a *deck* pass and never touched the incoming like. [D-007]
+     */
+    fun pass(key: LikeKey) {
         hideOptimistic(key)
         viewModelScope.launch {
             runCatching { passLike(key) }
@@ -110,7 +121,6 @@ internal class LikesYouViewModel @Inject constructor(
                     _uiState.update { it.copy(errorMessage = e.message ?: "Couldn't pass") }
                 }
         }
-        _uiState.update { it.copy(expandedKey = null) }
     }
 
     private fun hideOptimistic(key: LikeKey) {

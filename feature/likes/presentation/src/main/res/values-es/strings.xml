@@ -15,6 +15,7 @@
     <string name="likes_intent_adoption">Adopción</string>
 
     <string name="likes_card_new">NUEVO</string>
+    <string name="likes_decline_cd">Rechazar este like</string>
     <string name="likes_card_age_format">%1$s, %2$d</string>
 
     <string name="likes_empty_headline">Aún no hay nadie</string>

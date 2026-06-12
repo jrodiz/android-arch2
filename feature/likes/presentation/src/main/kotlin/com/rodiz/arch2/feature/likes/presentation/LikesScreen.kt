@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Pets
@@ -92,6 +93,7 @@ internal fun LikesYouRoute(
             viewModel.markSeen(like.key)
             onOpenPetDetail(like.anchorPet.id)
         },
+        onDecline = { like -> viewModel.pass(like.key) },
         onGoToDeck = onGoToDeck,
         snackbarHostState = snackbar,
     )
@@ -102,6 +104,7 @@ private fun LikesScreen(
     state: LikesYouUiState,
     onFilterSelected: (LikesFilter) -> Unit,
     onCardTap: (IncomingLike) -> Unit,
+    onDecline: (IncomingLike) -> Unit,
     onGoToDeck: () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
@@ -153,6 +156,7 @@ private fun LikesScreen(
                         likes = filteredLikes,
                         seenKeys = state.seenKeys,
                         onCardTap = onCardTap,
+                        onDecline = onDecline,
                     )
                 }
             }
@@ -295,6 +299,7 @@ private fun LikesGrid(
     likes: List<IncomingLike>,
     seenKeys: Set<String>,
     onCardTap: (IncomingLike) -> Unit,
+    onDecline: (IncomingLike) -> Unit,
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -308,6 +313,7 @@ private fun LikesGrid(
                 like = like,
                 isUnseen = like.key.value !in seenKeys,
                 onClick = { onCardTap(like) },
+                onDecline = { onDecline(like) },
             )
         }
     }
@@ -318,6 +324,7 @@ private fun LikeCard(
     like: IncomingLike,
     isUnseen: Boolean,
     onClick: () -> Unit,
+    onDecline: () -> Unit,
 ) {
     val nowMs = remember { System.currentTimeMillis() }
     val likedAtMs = like.likedAt.toEpochMilliseconds()
@@ -374,7 +381,7 @@ private fun LikeCard(
                     ),
             )
 
-            // Top row: relative time (left) + NEW pill (right).
+            // Top row: relative time (left) + NEW pill + decline ✕ (right).
             Row(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -384,7 +391,11 @@ private fun LikeCard(
             ) {
                 RelativeTimePill(label = timeLabel)
                 Spacer(Modifier.weight(1f))
-                if (isUnseen) NewPill()
+                if (isUnseen) {
+                    NewPill()
+                    Spacer(Modifier.width(6.dp))
+                }
+                DeclineButton(onClick = onDecline)
             }
 
             // Intent chip (bottom-left, just above the text overlay).
@@ -447,6 +458,24 @@ private fun RelativeTimePill(label: String) {
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
             color = Color.White,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+        )
+    }
+}
+
+@Composable
+private fun DeclineButton(onClick: () -> Unit) {
+    Surface(
+        shape = CircleShape,
+        color = Color.Black.copy(alpha = 0.45f),
+        modifier = Modifier
+            .size(28.dp)
+            .clickable(onClick = onClick),
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Close,
+            contentDescription = stringResource(R.string.likes_decline_cd),
+            tint = Color.White,
+            modifier = Modifier.padding(6.dp),
         )
     }
 }
