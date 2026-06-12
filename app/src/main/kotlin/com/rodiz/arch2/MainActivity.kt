@@ -1,6 +1,7 @@
 package com.rodiz.arch2
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -109,7 +110,13 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun handleDeepLink(intent: Intent?) {
-        val uri = intent?.data ?: return
+        // Two entry points: an explicit VIEW intent (adb / web link) carries the URI in
+        // intent.data; a tapped FCM notification carries it as the "deepLink" string extra
+        // (the server puts it in the message `data` map, which FCM auto-render delivers as
+        // intent extras — never as intent.data). Honour both. [D-012]
+        val uri = intent?.data
+            ?: intent?.getStringExtra("deepLink")?.let { runCatching { Uri.parse(it) }.getOrNull() }
+            ?: return
         if (uri.scheme != "tinpet") return
         val destination: Any? = when (uri.host) {
             "chat" -> uri.lastPathSegment?.let { ChatRoute(it) }
