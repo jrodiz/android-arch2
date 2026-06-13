@@ -23,6 +23,12 @@
     <string name="deck_empty_petless_body">En TinPet las mascotas son tuyas. Toca abajo para agregar la primera.</string>
     <string name="deck_empty_petless_action">Agregar mascota</string>
 
+    <!-- Modal shown when a petless user taps Like/Pass on a deck card. -->
+    <string name="deck_requires_pet_dialog_title">Agrega una mascota primero</string>
+    <string name="deck_requires_pet_dialog_body">Para dar like necesitas tener al menos una mascota tuya. Agrega la tuya para empezar a hacer match.</string>
+    <string name="deck_requires_pet_dialog_confirm">Agregar mascota</string>
+    <string name="deck_requires_pet_dialog_dismiss">Más tarde</string>
+
     <!-- Pet details bottom-sheet (opened by tapping a deck card). -->
     <string name="deck_detail_open_to">ABIERTO A</string>
     <string name="deck_detail_about">SOBRE</string>
@@ -48,5 +54,22 @@
     <plurals name="deck_intents_count">
         <item quantity="one">1 intención</item>
         <item quantity="other">%1$d intenciones</item>
+    </plurals>
+
+    <!-- Empty-deck "That's everyone for now" state. -->
+    <string name="deck_exhausted_headline">Eso es todo por ahora</string>
+    <string name="deck_exhausted_subtitle_format">Has visto a todas las mascotas dentro de %1$d km. Cada día se unen nuevas — te avisaremos cuando aparezca un match.</string>
+    <string name="deck_exhausted_widen_title">Amplía tu distancia</string>
+    <string name="deck_exhausted_widen_body_format">Más mascotas dentro de %1$d km</string>
+    <string name="deck_exhausted_widen_body_max">En todo el mapa</string>
+    <string name="deck_exhausted_widen_cta">Ampliar</string>
+    <string name="deck_exhausted_review_title">Revisa a quién pasaste</string>
+    <string name="deck_exhausted_review_body">Échale otro vistazo a las mascotas que pasaste hoy</string>
+    <string name="deck_exhausted_add_pet_title">Agrega otra mascota</string>
+    <string name="deck_exhausted_add_pet_body">Cada mascota tiene su propio mazo nuevo</string>
+
+    <plurals name="deck_review_restored_count">
+        <item quantity="one">Restauraste 1 mascota</item>
+        <item quantity="other">Restauraste %1$d mascotas</item>
     </plurals>
 </resources>

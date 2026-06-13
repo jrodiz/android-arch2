@@ -24,14 +24,19 @@ import com.rodiz.arch2.feature.pet.domain.model.PhotoId
 import com.rodiz.arch2.feature.pet.domain.model.PhotoSource
 import com.rodiz.arch2.feature.pet.domain.model.Species
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
@@ -48,15 +53,63 @@ internal class FirestoreLikesYouRepository @Inject constructor(
     private val passedLikesCol get() = firestore.collection("passedLikes")
     private val petsCol get() = firestore.collection("pets")
     private val ownersCol get() = firestore.collection("owners")
+    private val matchesCol get() = firestore.collection("matches")
 
-    override fun observeLikesYou(): Flow<List<IncomingLike>> = callbackFlow {
-        val uid = sessionRepo.current()?.userId
-        if (uid == null) {
-            trySend(emptyList())
-            close()
-            return@callbackFlow
+    // Re-subscribe on every session change so an in-app account switch (sign out → sign in a
+    // different user, no restart) re-keys to the new user's incoming likes instead of leaking
+    // the previous user's. [D-010]
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun observeLikesYou(): Flow<List<IncomingLike>> =
+        sessionRepo.observe().flatMapLatest { session ->
+            val uid = session?.userId
+            if (uid == null) flowOf(emptyList()) else likesForUid(uid)
         }
-        val registration = likesCol
+
+    private fun likesForUid(uid: String): Flow<List<IncomingLike>> = callbackFlow {
+        // Two inputs drive this list: the incoming-like docs, and the owners I've matched
+        // with (whose like must drop out once we match — otherwise it lingers in both the
+        // Likes-you grid and the badge, and the empty state is unreachable). A match forms
+        // on the *reciprocal* like, which never touches my toOwnerId==uid query, so the
+        // likes listener alone can't see it — we watch matches too and recompute on either
+        // change. [D-006]
+        val latestDocs = AtomicReference<List<DocumentSnapshot>>(emptyList())
+        val matchedOwners = AtomicReference<Set<String>>(emptySet())
+        val likesArrived = AtomicReference(false)
+        // Monotonic token so a slower, older resolve can't overwrite a newer emission.
+        val version = AtomicLong(0)
+
+        fun recompute() {
+            // Wait for the first real likes snapshot before emitting, so a matches-first
+            // callback can't push a spurious empty list ahead of the actual data.
+            if (!likesArrived.get()) return
+            val token = version.incrementAndGet()
+            launch {
+                val docs = latestDocs.get()
+                val matched = matchedOwners.get()
+                val passedSet = loadPassedSet(uid)
+                val myLoc = loadOwnerLocation(uid)
+                val raws = docs.mapNotNull { it.toRawLikeOrNull() }
+                    .filterNot { passedKey(uid, it) in passedSet }
+                    .filterNot { it.fromOwnerId in matched }
+                val resolved = raws.mapNotNull { raw ->
+                    val anchor = resolveAnchorPet(raw.fromOwnerId) ?: return@mapNotNull null
+                    val theirLoc = loadOwnerLocation(raw.fromOwnerId)
+                    val bucket = bucketBetween(myLoc, theirLoc)
+                    IncomingLike(
+                        key = LikeKey(raw.key),
+                        fromOwnerId = raw.fromOwnerId,
+                        toPetId = PetId(raw.toPetId),
+                        anchorPet = anchor,
+                        likedAt = raw.createdAt,
+                        distanceBucket = bucket,
+                    )
+                }
+                // Drop this result if a newer recompute has started while we resolved.
+                if (token == version.get()) send(resolved)
+            }
+        }
+
+        val likesReg = likesCol
             .whereEqualTo("toOwnerId", uid)
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .limit(200)
@@ -65,35 +118,29 @@ internal class FirestoreLikesYouRepository @Inject constructor(
                     close(err)
                     return@addSnapshotListener
                 }
-                val docs = snap?.documents.orEmpty()
-                if (docs.isEmpty()) {
-                    trySend(emptyList())
-                    return@addSnapshotListener
-                }
-                // Resolve passed-set + anchor pets async; using callbackFlow's producer scope so
-                // we don't block the snapshot callback thread (the listener runs on main by default).
-                launch {
-                    val passedSet = loadPassedSet(uid)
-                    val myLoc = loadOwnerLocation(uid)
-                    val raws = docs.mapNotNull { it.toRawLikeOrNull() }
-                        .filterNot { passedKey(uid, it) in passedSet }
-                    val resolved = raws.mapNotNull { raw ->
-                        val anchor = resolveAnchorPet(raw.fromOwnerId) ?: return@mapNotNull null
-                        val theirLoc = loadOwnerLocation(raw.fromOwnerId)
-                        val bucket = bucketBetween(myLoc, theirLoc)
-                        IncomingLike(
-                            key = LikeKey(raw.key),
-                            fromOwnerId = raw.fromOwnerId,
-                            toPetId = PetId(raw.toPetId),
-                            anchorPet = anchor,
-                            likedAt = raw.createdAt,
-                            distanceBucket = bucket,
-                        )
-                    }
-                    send(resolved)
-                }
+                latestDocs.set(snap?.documents.orEmpty())
+                likesArrived.set(true)
+                recompute()
             }
-        awaitClose { registration.remove() }
+        // Best-effort: a matches-listener error keeps the last-known matched set rather than
+        // tearing down the whole likes flow.
+        val matchesReg = matchesCol
+            .whereArrayContains("participants", uid)
+            .addSnapshotListener { snap, err ->
+                if (err != null) return@addSnapshotListener
+                matchedOwners.set(
+                    snap?.documents.orEmpty()
+                        .flatMap { (it.get("participants") as? List<*>).orEmpty() }
+                        .filterIsInstance<String>()
+                        .filterNot { it == uid }
+                        .toSet(),
+                )
+                recompute()
+            }
+        awaitClose {
+            likesReg.remove()
+            matchesReg.remove()
+        }
     }.flowOn(io)
 
     private suspend fun loadPassedSet(uid: String): Set<String> =

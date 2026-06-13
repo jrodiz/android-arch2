@@ -6,10 +6,13 @@ import com.rodiz.arch2.core.session.domain.SessionRepository
 import com.rodiz.arch2.feature.match.domain.model.InboxSnapshot
 import com.rodiz.arch2.feature.match.domain.usecase.ObserveInboxUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,6 +29,7 @@ internal data class InboxUiState(
     val errorMessage: String? = null,
 )
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 internal class InboxViewModel @Inject constructor(
     observeInbox: ObserveInboxUseCase,
@@ -37,14 +41,17 @@ internal class InboxViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val uid = sessionRepo.current()?.userId
-            if (uid == null) {
-                // No signed-in user — flip ready so the empty state renders instead
-                // of hanging forever on the loading spinner.
-                _uiState.update { it.copy(isReady = true) }
-                return@launch
-            }
-            observeInbox(uid)
+            // Observe the session reactively so an in-app account switch (sign out →
+            // sign in as a different user, no process restart) re-keys the inbox to the
+            // new uid. A one-shot `current()` read left this VM bound to the previous
+            // user — leaking their conversations + PERMISSION_DENIED on their docs. [D-010]
+            sessionRepo.observe()
+                .flatMapLatest { session ->
+                    val uid = session?.userId
+                    // No signed-in user → emit an empty snapshot (also clears any stale
+                    // data from the previous session instead of leaving it on screen).
+                    if (uid == null) flowOf(InboxSnapshot(emptyList(), emptyList())) else observeInbox(uid)
+                }
                 .catch { e ->
                     _uiState.update { it.copy(isReady = true, errorMessage = e.message) }
                 }

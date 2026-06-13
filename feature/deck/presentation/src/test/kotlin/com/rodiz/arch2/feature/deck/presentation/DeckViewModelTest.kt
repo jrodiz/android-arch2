@@ -10,6 +10,7 @@ import com.rodiz.arch2.feature.deck.domain.model.SwipeAction
 import com.rodiz.arch2.feature.deck.domain.model.SwipeResult
 import com.rodiz.arch2.feature.deck.domain.repository.DeckRepository
 import com.rodiz.arch2.feature.deck.domain.usecase.ObserveDeckUseCase
+import com.rodiz.arch2.feature.deck.domain.usecase.ReviewPassedPetsUseCase
 import com.rodiz.arch2.feature.deck.domain.usecase.SubmitSwipeUseCase
 import com.rodiz.arch2.feature.deck.domain.usecase.UndoLastSwipeUseCase
 import com.rodiz.arch2.feature.pet.domain.model.Intent
@@ -86,7 +87,9 @@ class DeckViewModelTest {
 
         val state = vm.uiState.value
         assertEquals(listOf("p2"), state.cards.map { it.pet.id.value }, "top card removed optimistically")
-        assertEquals("It's a match!", state.matchMessage)
+        // The matchId from SwipeResult is handed up to the Route via pendingMatchId
+        // so it can navigate to the celebration screen.
+        assertEquals("m1", state.pendingMatchId)
         assertEquals(PetId("p1") to SwipeAction.LIKE, deck.lastSwipe)
     }
 
@@ -100,7 +103,9 @@ class DeckViewModelTest {
         vm.passTop()
         advanceUntilIdle()
 
-        assertEquals("Add a pet to start matching", vm.uiState.value.requiresPetMessage)
+        // RequiresPet flips the dialog flag; the screen renders the modal copy
+        // via stringResource so we don't assert on text here.
+        assertEquals(true, vm.uiState.value.requiresPetDialog)
     }
 
     @Test
@@ -170,6 +175,100 @@ class DeckViewModelTest {
     }
 
     @Test
+    fun `like with no pet shows RequiresPet dialog and keeps the card on the deck`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo(
+                DeckSnapshot(cards = listOf(card("p1"), card("p2")), state = DeckState.READY),
+            )
+            deck.nextSwipeResult = SwipeResult.RequiresPet
+            val vm = newViewModel(deckRepo = deck)
+            advanceUntilIdle()
+
+            vm.likeTop()
+            advanceUntilIdle()
+
+            val state = vm.uiState.value
+            assertTrue(state.requiresPetDialog, "rejected like must surface the add-a-pet dialog")
+            // The like was never recorded (no pet) — the card must be restored, not consumed,
+            // so the user can like it again after adding a pet.
+            assertEquals(listOf("p1", "p2"), state.cards.map { it.pet.id.value })
+        }
+
+    @Test
+    fun `reviewPasses re-subscribes the deck so restored pets reappear without a new snapshot`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo(DeckSnapshot(cards = listOf(card("p1")), state = DeckState.READY))
+            deck.nextSwipeResult = SwipeResult.Pending
+            deck.nextClearTodayCount = 1
+            val vm = newViewModel(deckRepo = deck)
+            advanceUntilIdle()
+            vm.passTop()
+            advanceUntilIdle()
+            assertTrue(vm.uiState.value.cards.isEmpty(), "p1 is filtered out after the pass")
+
+            // No manual snapshot push here: reviewPasses must itself re-run observeDeck so the
+            // same snapshot (still holding p1, whose pass we just cleared) flows back in. Without
+            // the refresh trigger the deck would be stuck on its LOADING spinner.
+            vm.reviewPasses()
+            advanceUntilIdle()
+
+            assertEquals(listOf("p1"), vm.uiState.value.cards.map { it.pet.id.value })
+            assertEquals(DeckState.READY, vm.uiState.value.state)
+        }
+
+    @Test
+    fun `detail pass result advances the deck past that pet`() = runTest(testDispatcher) {
+        val deck = FakeDeckRepo(
+            DeckSnapshot(cards = listOf(card("p1"), card("p2")), state = DeckState.READY),
+        )
+        val bus = DeckDetailResultBus()
+        val vm = newViewModel(deckRepo = deck, detailResultBus = bus)
+        advanceUntilIdle()
+
+        // Simulate a pass performed on the DeckPetDetail screen for the top card.
+        bus.publish(PetId("p1"), SwipeResult.Pending)
+        advanceUntilIdle()
+
+        assertEquals(listOf("p2"), vm.uiState.value.cards.map { it.pet.id.value })
+    }
+
+    @Test
+    fun `detail requires-pet result shows the dialog without dropping the card`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo(
+                DeckSnapshot(cards = listOf(card("p1"), card("p2")), state = DeckState.READY),
+            )
+            val bus = DeckDetailResultBus()
+            val vm = newViewModel(deckRepo = deck, detailResultBus = bus)
+            advanceUntilIdle()
+
+            bus.publish(PetId("p1"), SwipeResult.RequiresPet)
+            advanceUntilIdle()
+
+            val state = vm.uiState.value
+            assertTrue(state.requiresPetDialog, "rejected like from detail must surface the dialog")
+            assertEquals(listOf("p1", "p2"), state.cards.map { it.pet.id.value })
+        }
+
+    @Test
+    fun `detail match result advances the deck but leaves celebration to the detail route`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo(DeckSnapshot(cards = listOf(card("p1")), state = DeckState.READY))
+            val bus = DeckDetailResultBus()
+            val vm = newViewModel(deckRepo = deck, detailResultBus = bus)
+            advanceUntilIdle()
+
+            bus.publish(PetId("p1"), SwipeResult.Match("m42"))
+            advanceUntilIdle()
+
+            val state = vm.uiState.value
+            // The detail route navigates to the celebration itself (so it works from
+            // Likes-You too); the bus only drops the matched card from the deck.
+            assertNull(state.pendingMatchId)
+            assertTrue(state.cards.none { it.pet.id.value == "p1" }, "matched pet leaves the deck")
+        }
+
+    @Test
     fun `filter prefs flow into meta strip counts`() = runTest(testDispatcher) {
         val prefs = FakeFilterPrefsRepo(
             FilterPrefs(
@@ -214,9 +313,64 @@ class DeckViewModelTest {
         vm.clearRequiresPet()
         vm.clearError()
         val cleared = vm.uiState.value
-        assertNull(cleared.matchMessage)
-        assertNull(cleared.requiresPetMessage)
+        assertNull(cleared.pendingMatchId)
+        assertEquals(false, cleared.requiresPetDialog)
         assertNull(cleared.errorMessage)
+    }
+
+    @Test
+    fun `reviewPasses success sets count and lets restored pets pass the swipe filter`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo(DeckSnapshot(cards = listOf(card("p1")), state = DeckState.READY))
+            deck.nextClearTodayCount = 14
+            val vm = newViewModel(deckRepo = deck)
+            advanceUntilIdle()
+            // Pre-pass a card so recentlySwiped has an entry to clear.
+            vm.passTop()
+            advanceUntilIdle()
+
+            vm.reviewPasses()
+            advanceUntilIdle()
+
+            assertEquals(14, vm.uiState.value.reviewedPassesCount)
+            assertEquals(1, deck.clearTodayCalls)
+            // New emission containing the previously-passed pet p1 — it should pass the
+            // recentlySwiped filter (which reviewPasses just cleared) and reach uiState.
+            // Adding p2 forces StateFlow to actually re-emit (dedup-safe).
+            deck.snapshots.value = DeckSnapshot(
+                cards = listOf(card("p1"), card("p2")),
+                state = DeckState.READY,
+            )
+            advanceUntilIdle()
+            assertEquals(listOf("p1", "p2"), vm.uiState.value.cards.map { it.pet.id.value })
+        }
+
+    @Test
+    fun `reviewPasses failure surfaces errorMessage and leaves count null`() =
+        runTest(testDispatcher) {
+            val deck = FakeDeckRepo()
+            deck.clearTodayError = RuntimeException("boom")
+            val vm = newViewModel(deckRepo = deck)
+            advanceUntilIdle()
+
+            vm.reviewPasses()
+            advanceUntilIdle()
+
+            assertEquals("boom", vm.uiState.value.errorMessage)
+            assertNull(vm.uiState.value.reviewedPassesCount)
+        }
+
+    @Test
+    fun `clearReviewMessage clears the count`() = runTest(testDispatcher) {
+        val deck = FakeDeckRepo().apply { nextClearTodayCount = 3 }
+        val vm = newViewModel(deckRepo = deck)
+        advanceUntilIdle()
+        vm.reviewPasses()
+        advanceUntilIdle()
+        assertEquals(3, vm.uiState.value.reviewedPassesCount)
+
+        vm.clearReviewMessage()
+        assertNull(vm.uiState.value.reviewedPassesCount)
     }
 
     // ---- helpers ----
@@ -225,12 +379,15 @@ class DeckViewModelTest {
         deckRepo: DeckRepository = FakeDeckRepo(),
         petRepo: PetRepository = FakePetRepo(),
         filterRepo: FilterPrefsRepository = FakeFilterPrefsRepo(),
+        detailResultBus: DeckDetailResultBus = DeckDetailResultBus(),
     ): DeckViewModel = DeckViewModel(
         observeDeck = ObserveDeckUseCase(deckRepo),
         observeMyPets = ObserveMyPetsUseCase(petRepo),
         filterPrefsRepo = filterRepo,
         submitSwipe = SubmitSwipeUseCase(deckRepo),
         undoLastSwipe = UndoLastSwipeUseCase(deckRepo),
+        reviewPassedPets = ReviewPassedPetsUseCase(deckRepo),
+        detailResultBus = detailResultBus,
     )
 
     private fun card(id: String): DeckCard = DeckCard(pet = pet(id))
@@ -259,6 +416,9 @@ class DeckViewModelTest {
         var swipeError: Throwable? = null
         var nextUndo: Pet? = null
         var lastSwipe: Pair<PetId, SwipeAction>? = null
+        var nextClearTodayCount: Int = 0
+        var clearTodayError: Throwable? = null
+        var clearTodayCalls: Int = 0
 
         override fun observeDeck(filters: FilterPrefs): Flow<DeckSnapshot> = snapshots.asStateFlow()
 
@@ -269,6 +429,12 @@ class DeckViewModelTest {
         }
 
         override suspend fun undoLastSwipe(): Pet? = nextUndo
+
+        override suspend fun clearTodayPasses(): Int {
+            clearTodayCalls += 1
+            clearTodayError?.let { throw it }
+            return nextClearTodayCount
+        }
     }
 
     private class FakePetRepo(initial: List<Pet> = emptyList()) : PetRepository {

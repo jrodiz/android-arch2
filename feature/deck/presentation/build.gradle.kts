@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":feature:pet:nav"))
     implementation(project(":feature:pet:domain"))
     implementation(project(":feature:settings:nav"))
+    implementation(project(":feature:match:nav")) // MatchCelebration target post-like
     implementation(project(":core:filters:domain"))
     implementation(project(":core:navigation"))
     implementation(project(":core:designsystem"))

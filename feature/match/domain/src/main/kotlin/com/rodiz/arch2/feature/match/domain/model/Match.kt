@@ -26,6 +26,10 @@ data class Match(
 ) {
     fun otherOwnerId(me: String): String = if (ownerAId == me) ownerBId else ownerAId
     fun otherPetId(me: String): String? = if (ownerAId == me) petBId else petAId
+
+    /** My side's pet id — symmetric mirror of [otherPetId]. Same null story. */
+    fun myPetId(me: String): String? = if (ownerAId == me) petAId else petBId
+
     val hasMessages: Boolean get() = lastMessageAt != null
 }
 

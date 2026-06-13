@@ -23,6 +23,12 @@
     <string name="deck_empty_petless_body">Pets on TinPet are owned by you. Tap below to add your first one.</string>
     <string name="deck_empty_petless_action">Add a pet</string>
 
+    <!-- Modal shown when a petless user taps Like/Pass on a deck card. -->
+    <string name="deck_requires_pet_dialog_title">Add a pet first</string>
+    <string name="deck_requires_pet_dialog_body">Likes need a pet of your own. Add yours to start matching.</string>
+    <string name="deck_requires_pet_dialog_confirm">Add a pet</string>
+    <string name="deck_requires_pet_dialog_dismiss">Maybe later</string>
+
     <!-- Pet details bottom-sheet (opened by tapping a deck card). -->
     <string name="deck_detail_open_to">OPEN TO</string>
     <string name="deck_detail_about">ABOUT</string>
@@ -48,5 +54,22 @@
     <plurals name="deck_intents_count">
         <item quantity="one">1 intent</item>
         <item quantity="other">%1$d intents</item>
+    </plurals>
+
+    <!-- Empty-deck "That's everyone for now" state. -->
+    <string name="deck_exhausted_headline">That\'s everyone for now</string>
+    <string name="deck_exhausted_subtitle_format">You\'ve seen every pet within %1$d km. New pets join every day — we\'ll ping you when there\'s a new match.</string>
+    <string name="deck_exhausted_widen_title">Widen your distance</string>
+    <string name="deck_exhausted_widen_body_format">More pets within %1$d km</string>
+    <string name="deck_exhausted_widen_body_max">Across the whole map</string>
+    <string name="deck_exhausted_widen_cta">Expand</string>
+    <string name="deck_exhausted_review_title">Review who you passed</string>
+    <string name="deck_exhausted_review_body">Take another look at the pets you skipped today</string>
+    <string name="deck_exhausted_add_pet_title">Add another pet</string>
+    <string name="deck_exhausted_add_pet_body">Each pet gets its own fresh deck</string>
+
+    <plurals name="deck_review_restored_count">
+        <item quantity="one">Restored 1 pet</item>
+        <item quantity="other">Restored %1$d pets</item>
     </plurals>
 </resources>

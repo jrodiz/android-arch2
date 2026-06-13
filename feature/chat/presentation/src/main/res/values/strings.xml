@@ -9,6 +9,7 @@
     <string name="chat_banner_title_template">You matched %1$s</string>
     <string name="chat_banner_subtitle">Say hi · share a playdate idea</string>
     <string name="chat_date_today">Today</string>
+    <string name="chat_read_receipt">Read</string>
     <string name="chat_composer_placeholder_default">Message…</string>
     <string name="chat_composer_placeholder_template">Message %1$s…</string>
     <string name="chat_send_cd">Send</string>

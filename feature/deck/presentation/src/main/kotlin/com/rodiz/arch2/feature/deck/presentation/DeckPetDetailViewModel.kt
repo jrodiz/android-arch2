@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.rodiz.arch2.core.ownerlookup.domain.OwnerDisplay
 import com.rodiz.arch2.core.ownerlookup.domain.OwnerLookupRepository
 import com.rodiz.arch2.feature.deck.domain.model.SwipeAction
+import com.rodiz.arch2.feature.deck.domain.model.SwipeResult
 import com.rodiz.arch2.feature.deck.domain.usecase.SubmitSwipeUseCase
 import com.rodiz.arch2.feature.pet.domain.model.Pet
 import com.rodiz.arch2.feature.pet.domain.model.PetId
@@ -36,16 +37,18 @@ internal data class DeckPetDetailUiState(
  * Powers the suitor-side pet detail bottom-sheet (see `plans/deck-pet-details.md`).
  *
  * Reuses [SubmitSwipeUseCase] from `:feature:deck:domain` so liking / passing from the
- * detail produces the same downstream effects (match creation, deck advance) as liking
- * from the card itself. The Deck observes the swipe stream independently, so we don't
- * have to bridge state between the two ViewModels — emitting [DeckPetDetailEvent.Dismiss]
- * tells the route to pop and the deck takes it from there.
+ * detail produces the same downstream effects (match creation) as liking from the card
+ * itself. The deck snapshot is NOT reactive to swipe writes, so we hand the swipe result
+ * to the retained [DeckViewModel] through [DeckDetailResultBus] before popping — that's
+ * what makes the deck advance past the pet, surface the "add a pet" dialog, or fire the
+ * match celebration after a swipe performed here.
  */
 internal class DeckPetDetailViewModel @AssistedInject constructor(
     @Assisted petIdValue: String,
     observePet: ObservePetUseCase,
     ownerLookup: OwnerLookupRepository,
     private val submitSwipe: SubmitSwipeUseCase,
+    private val resultBus: DeckDetailResultBus,
 ) : ViewModel() {
 
     private val petId: PetId = PetId(petIdValue)
@@ -93,15 +96,27 @@ internal class DeckPetDetailViewModel @AssistedInject constructor(
 
     private fun swipe(action: SwipeAction) {
         viewModelScope.launch {
-            // Best-effort: surface errors only on the deck. The detail just dismisses;
-            // the deck's existing snackbars handle "swipe failed" + match toasts.
-            runCatching { submitSwipe(petId, action) }
-            _events.tryEmit(DeckPetDetailEvent.Dismiss)
+            // Hand the outcome to the deck so it can advance past this pet or show the
+            // add-a-pet dialog (rejected like). On error we just dismiss; the deck's
+            // snackbars own the "swipe failed" feedback.
+            val result = runCatching { submitSwipe(petId, action) }.getOrNull()
+            if (result != null) resultBus.publish(petId, result)
+            // A match navigates this route straight to the celebration (which pops the
+            // detail first). This is what makes the celebration fire from the Likes-You
+            // detail too, not just the deck — both reuse this same route. Anything else
+            // just dismisses back to wherever the detail was opened from.
+            val event = (result as? SwipeResult.Match)
+                ?.let { DeckPetDetailEvent.MatchOccurred(it.matchId) }
+                ?: DeckPetDetailEvent.Dismiss
+            _events.tryEmit(event)
         }
     }
 }
 
 internal sealed interface DeckPetDetailEvent {
-    /** Tells the route to pop back to the deck. */
+    /** Tells the route to pop back to wherever the detail was opened from. */
     data object Dismiss : DeckPetDetailEvent
+
+    /** A like from this detail produced a match — pop the detail and show the celebration. */
+    data class MatchOccurred(val matchId: String) : DeckPetDetailEvent
 }

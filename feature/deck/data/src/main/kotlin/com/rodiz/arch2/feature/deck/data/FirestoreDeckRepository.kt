@@ -1,6 +1,7 @@
 package com.rodiz.arch2.feature.deck.data
 
 import android.util.Log
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -25,12 +26,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.firestore.GeoPoint as FirestoreGeoPoint
@@ -66,8 +71,13 @@ internal class FirestoreDeckRepository @Inject constructor(
             observePausedOwnerIds(),
             observeBlockHideSet(uid),
             observeOwnerLocations(),
-            ownerLookup.observeAll(),
-        ) { pets, paused, blocked, locations, owners ->
+            // Pair owner display with the set of pets I've already liked/passed — keeps the
+            // outer combine at 5 typed sources.
+            combine(ownerLookup.observeAll(), observeMyActedPetIds(uid)) { owners, acted ->
+                owners to acted
+            },
+        ) { pets, paused, blocked, locations, ownersAndActed ->
+            val (owners, acted) = ownersAndActed
             val hideOwners = paused + blocked
             val myLoc = locations[uid]
             val maxKm = filters.maxDistanceKm.toDouble()
@@ -75,11 +85,9 @@ internal class FirestoreDeckRepository @Inject constructor(
                 loggedOnce = true
                 Log.d(
                     "TinPet.Deck",
-                    "observeDeck uid=$uid pets=${pets.size} " +
-                        "paused=${paused.size} blocked=${blocked.size} " +
-                        "locations=${locations.size} owners=${owners.size} " +
-                        "myLoc=${myLoc != null} maxKm=$maxKm " +
-                        "sampleOwnerIds=${pets.take(3).map { it.ownerId }}",
+                    "observeDeck uid=$uid pets=${pets.size} paused=${paused.size} " +
+                        "blocked=${blocked.size} acted=${acted.size} " +
+                        "locations=${locations.size} owners=${owners.size} maxKm=$maxKm",
                 )
             }
             val cards = pets
@@ -87,6 +95,7 @@ internal class FirestoreDeckRepository @Inject constructor(
                 .filter { it.ownerId !in hideOwners }
                 .filter { it.enabled }
                 .filter { it.id.value !in sessionSwiped }
+                .filter { it.id.value !in acted }
                 .filter { it.species in filters.species }
                 .filter { it.intents.any { intent -> intent in filters.intents } }
                 .filter { pet -> withinDistance(myLoc, locations[pet.ownerId], maxKm) }
@@ -183,6 +192,26 @@ internal class FirestoreDeckRepository @Inject constructor(
         awaitClose { registration.remove() }
     }
 
+    // Pets I've already liked or passed (server-side) — excluded from my deck so they
+    // don't reappear across sessions (the in-memory `sessionSwiped` only covers the
+    // current process). Passes are reversible via "Review who you passed", which deletes
+    // the pass docs and lets the snapshot re-include the pet on the next emission.
+    private fun observeMyActedPetIds(uid: String): Flow<Set<String>> = combine(
+        observeActedToPetIds(likesCol.whereEqualTo("fromOwnerId", uid)),
+        observeActedToPetIds(passesCol.whereEqualTo("ownerId", uid)),
+    ) { liked, passed -> liked + passed }
+
+    private fun observeActedToPetIds(query: Query): Flow<Set<String>> = callbackFlow {
+        val registration = query.addSnapshotListener { snap, err ->
+            if (err != null) {
+                close(err)
+                return@addSnapshotListener
+            }
+            trySend(snap?.documents.orEmpty().mapNotNull { it.getString("toPetId") }.toSet())
+        }
+        awaitClose { registration.remove() }
+    }
+
     override suspend fun submitSwipe(petId: PetId, action: SwipeAction): SwipeResult = withContext(io) {
         val me = sessionRepo.current()?.userId ?: error("No signed-in user")
         val key = "${me}_${petId.value}"
@@ -256,6 +285,36 @@ internal class FirestoreDeckRepository @Inject constructor(
         }
         sessionSwiped.remove(last.petId.value)
         lastSwipe = null
-        null // The deck snapshot will re-include the pet on next observation tick.
+        // Return the un-swiped pet so the ViewModel can re-prepend it on top of the
+        // deck immediately. We can't rely on the deck snapshot to re-include it:
+        // `observeAllActivePets` reacts to pet changes, not to pass/like deletions,
+        // so deleting the swipe doc above produces no new emission (see `swipe()`).
+        petRepo.observePet(last.petId).first()
+    }
+
+    override suspend fun clearTodayPasses(): Int = withContext(io) {
+        val me = sessionRepo.current()?.userId ?: return@withContext 0
+        // Local-midnight "today" — matches the wall-clock day the user sees, not UTC.
+        val tz = TimeZone.currentSystemDefault()
+        val startOfDayMillis = Clock.System.now()
+            .toLocalDateTime(tz)
+            .date
+            .atStartOfDayIn(tz)
+            .toEpochMilliseconds()
+        val snap = passesCol
+            .whereEqualTo("ownerId", me)
+            .whereGreaterThanOrEqualTo("createdAt", Timestamp(startOfDayMillis / 1000, 0))
+            .get()
+            .await()
+        if (snap.isEmpty) return@withContext 0
+        val batch = firestore.batch()
+        snap.documents.forEach { batch.delete(it.reference) }
+        batch.commit().await()
+        // Drop the in-memory session filter for the deleted pets so the deck snapshot
+        // re-includes them on the next emission.
+        snap.documents.forEach { d ->
+            d.getString("toPetId")?.let { sessionSwiped.remove(it) }
+        }
+        snap.size()
     }
 }

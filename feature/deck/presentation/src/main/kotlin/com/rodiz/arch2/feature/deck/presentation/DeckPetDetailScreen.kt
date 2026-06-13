@@ -87,6 +87,7 @@ internal class DeckPetDetailFactoryHolder @Inject constructor(
 internal fun DeckPetDetailRoute(
     petIdValue: String,
     onBack: () -> Unit,
+    onMatchHappened: (String) -> Unit = {},
     holder: DeckPetDetailFactoryHolder = hiltViewModel(),
 ) {
     val viewModel = remember(petIdValue) { holder.factory.create(petIdValue) }
@@ -96,6 +97,7 @@ internal fun DeckPetDetailRoute(
         viewModel.events.collect { event ->
             when (event) {
                 DeckPetDetailEvent.Dismiss -> onBack()
+                is DeckPetDetailEvent.MatchOccurred -> onMatchHappened(event.matchId)
             }
         }
     }

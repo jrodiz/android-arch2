@@ -20,4 +20,7 @@ dependencies {
     // Used by the LikeCard's relative-time helper to read `IncomingLike.likedAt` (a
     // `kotlinx.datetime.Instant` exposed by `:feature:likes:domain`).
     implementation(libs.kotlinx.datetime)
+
+    testImplementation(project(":core:testing"))
+    testImplementation(libs.kotlinx.datetime)
 }

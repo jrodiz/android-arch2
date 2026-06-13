@@ -62,10 +62,16 @@ service cloud.firestore {
     }
 
     // Deck passes — private per user; prevents re-showing already-passed pets.
+    // Update is allowed (in addition to create) so a re-pass after a rewind+
+    // re-swipe of the same pet refreshes the createdAt timestamp via set()
+    // rather than being rejected as a duplicate write.
     match /passes/{passId} {
       allow read:   if request.auth != null
                     && resource.data.ownerId == request.auth.uid;
       allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid;
+      allow update: if request.auth != null
+                    && resource.data.ownerId == request.auth.uid
                     && request.resource.data.ownerId == request.auth.uid;
       allow delete: if request.auth != null
                     && resource.data.ownerId == request.auth.uid;

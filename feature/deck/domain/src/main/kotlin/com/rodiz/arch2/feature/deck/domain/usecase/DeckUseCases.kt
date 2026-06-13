@@ -29,3 +29,9 @@ class UndoLastSwipeUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(): Pet? = repo.undoLastSwipe()
 }
+
+class ReviewPassedPetsUseCase @Inject constructor(
+    private val repo: DeckRepository,
+) {
+    suspend operator fun invoke(): Int = repo.clearTodayPasses()
+}
