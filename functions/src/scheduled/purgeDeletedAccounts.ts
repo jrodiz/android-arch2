@@ -77,10 +77,24 @@ async function purgeUserData(uid: string): Promise<void> {
   const tokens = await db.collection("fcmTokens").where("ownerId", "==", uid).get();
   await deleteDocs(tokens.docs.map((d) => d.ref));
 
-  // 6. Users profile doc (if present).
+  // 6. Blocks I initiated, and blocks that target me.
+  const blocksMine = await db.collection("blocks").where("ownerId", "==", uid).get();
+  const blocksAgainst = await db.collection("blocks").where("blockedOwnerId", "==", uid).get();
+  await deleteDocs([...blocksMine.docs, ...blocksAgainst.docs].map((d) => d.ref));
+
+  // 7. Data-export request doc + the exported JSON it wrote to Storage.
+  await bucket
+    .deleteFiles({ prefix: `data-exports/${uid}/` })
+    .catch((e) => logger.warn(`storage cleanup failed for data-exports/${uid}: ${e}`));
+  await db.collection("dataExports").doc(uid).delete().catch(() => undefined);
+
+  // 8. Profile docs. `owners/{uid}` is the canonical profile — location, geohash,
+  //    bio, pause state, notification prefs — and was previously left behind, leaking
+  //    PII past account deletion; `users/{uid}` is the legacy mirror. Both must go. [D-015]
+  await db.collection("owners").doc(uid).delete().catch(() => undefined);
   await db.collection("users").doc(uid).delete().catch(() => undefined);
 
-  // 7. Auth user — last step.
+  // 9. Auth user — last step.
   await getAuth().deleteUser(uid).catch((e) => {
     logger.warn(`auth.deleteUser(${uid}) failed: ${e}`);
   });
